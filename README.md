@@ -1,13 +1,13 @@
 # 2024-AILearningTool
 
-## Project brief
+## Project Brief
 "Create a web app Watson chatbot that the students (users) can access via a QR code from their
 mobile device. The QR code could be printed out and left at strategic areas around the university for
 new students to see.
-The chat bot would provide Information that a university student wished they knew when they first
+The chatbot would provide information that a university student wished they knew when they first
 arrived at your university. The content of the chatbot could be targeted to serve the students of a
-particular course - or It could be usable by every university student at your university.
-Content can Include
+particular course - or it could be usable by every university student at your university.
+Content can include:
 - what is IBM SkillsBuild
 - what courses are available on SkillsBuild
 - what free technologies are available on SkillsBuild
