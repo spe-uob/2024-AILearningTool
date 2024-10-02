@@ -1,4 +1,10 @@
 # 2024-AILearningTool
+## Table of Contents
+- [Project Overview](#project-overview)
+- [Project Brief](#project-brief)
+- [Stakeholders](#stakeholders)
+- [User Stories](#user-stories)
+- [Requirements](#requirements)
 
 ## Project Brief
 "Create a web app Watson chatbot that the students (users) can access via a QR code from their
