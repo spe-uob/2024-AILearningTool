@@ -1,6 +1,5 @@
 # 2024-AILearningTool
 ## Table of Contents
-- [Project Overview](#project-overview)
 - [Project Brief](#project-brief)
 - [Stakeholders](#stakeholders)
 - [User Stories](#user-stories)
