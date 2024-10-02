@@ -28,7 +28,7 @@ SkillsBuild resources."
 
 ### IBM SkillsBuild Team:
 - Monitor user interactions with the chatbot
-- Analyze which courses and content are most popular or effective
+- Analyze which chatbot responses are most helpful or effective based on user ratings.
 - Manage chatbot content, updates, and integrations with the platform
 - Escalate complex queries from the chatbot to human support
 
@@ -41,7 +41,7 @@ SkillsBuild resources."
 ## User stories
 
 ### Student A:
-As a University of Bristol student, I want the chatbot to be able to give me advice if I am struggling with university life, so that I am able to focus on my studies.
+As a University of Bristol student, I want the chatbot to be able to give me advice if I am struggling with university life so that I am able to focus on my studies.
 
 ### Student B:
 As a Computer Science student, I want to find good online courses with extracurricular knowledge, so that I could expand my skills and get some reputable certifications that will benefit my career.
@@ -50,7 +50,7 @@ As a Computer Science student, I want to find good online courses with extracurr
 As a student, I want to receive personalized course recommendations and ask the chatbot questions about the SkillsBuild platform, so that I can easily find relevant courses and quickly resolve any issues or confusion I encounter. 
 
 ### Student D:
-As a college student, I would like someone to help me with my questions. I need chatbot to help me understand IBM Skillsbuild better and find a course that suits me better!
+As a college student, I would like someone to help me with my questions. I need a chatbot to help me understand IBM Skillsbuild better and find a course that suits me better!
 
 ### Student E:
 As a university student, I want the AI chatbot to explain course concepts and foundational knowledge so that I can better understand and adapt to the new academic environment.
@@ -59,14 +59,17 @@ As a university student, I want the AI chatbot to explain course concepts and fo
 ### Minimum functionality:
 	1. Web-based UI - webpage capable of receiving inputs and returning outputs from Watsonx AI.
 	2. Chatbot that can hold conversation and guide the user correctly. 
-	3. Chatbot needs to provide a list recommended courses for Computer Science students based on their interests.
-	4. Chatbot needs to be able to answer questions about IBM Skillsbuild platform.
+	3. Chatbot needs to provide a list of recommended courses for Computer Science students based on their interests.
+	4. Chatbot needs to be able to answer questions about the IBM Skillsbuild platform.
 	5. Chatbot needs to be able to provide advice for new university students.
 ### Final product functionality:
 	1. Web-based UI needs to have a responsive design and use some CSS design framework.
-	2. Chatbot needs to provide a list recommended courses for students based on their course interests (not just computer science).
-	3. Conversation should be initialised by clicking one of the buttons with predefined inputs - this will help to keep a relevant conversation topic.
-	4. AI needs a strong knowledge base - should be trained accordingly.
+	2. Chatbot needs to provide a list of recommended courses for students based on their course interests (not just computer science).
+	3. Conversation should be initialized by clicking one of the buttons with predefined inputs - this will help to keep a relevant conversation topic.
+	4. AI needs a strong knowledge base - and should be trained accordingly.
 	5. Link to the chatbot needs to be advertised by putting QR codes around the campus.
-Extra functionality will be decided later, after the beta-testing.
+### Extra functionality (TBD after the beta-testing):
+	1. Users will be able to rate chatbot responses, allowing analysis of which responses are most helpful or effective.
+ 	2. Users will be able to contact SkillsBuild support directly through the chatbot for assistance with more complex issues.
+	
 	
