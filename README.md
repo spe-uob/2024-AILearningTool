@@ -62,12 +62,13 @@ As a university student, I want the AI chatbot to explain course concepts and fo
 	3. Chatbot needs to provide a list of recommended courses for Computer Science students based on their interests.
 	4. Chatbot needs to be able to answer questions about the IBM Skillsbuild platform.
 	5. Chatbot needs to be able to provide advice for new university students.
+	6. Web-based UI needs to ask users for their consent to storing "cookies" with anonymous identifiers on their device, as well as provide the functionality to withdraw the consent.
 ### Final product functionality:
 	1. Web-based UI needs to have a responsive design and use some CSS design framework.
 	2. Chatbot needs to provide a list of recommended courses for students based on their course interests (not just computer science).
 	3. Conversation should be initialized by clicking one of the buttons with predefined inputs - this will help to keep a relevant conversation topic.
-	4. AI needs a strong knowledge base - and should be trained accordingly.
-	5. Link to the chatbot needs to be advertised by putting QR codes around the campus.
+	4. Web application should be able to save the conversation history unless the user has opted-out of cookies.
+	5. Link to the chatbot should to be advertised by putting QR codes around the campus.
 ### Extra functionality (TBD after the beta-testing):
 	1. Users will be able to rate chatbot responses, allowing analysis of which responses are most helpful or effective.
  	2. Users will be able to contact SkillsBuild support directly through the chatbot for assistance with more complex issues.
