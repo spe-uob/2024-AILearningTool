@@ -56,21 +56,22 @@ As a college student, I would like someone to help me with my questions. I need 
 As a university student, I want the AI chatbot to explain course concepts and foundational knowledge so that I can better understand and adapt to the new academic environment.
 
 ## List of requirements
-### Minimum functionality:
+### Must-have:
 	1. Web-based UI - webpage capable of receiving inputs and returning outputs from Watsonx AI.
 	2. Chatbot that can hold conversation and guide the user correctly. 
 	3. Chatbot needs to provide a list of recommended courses for Computer Science students based on their interests.
 	4. Chatbot needs to be able to answer questions about the IBM Skillsbuild platform.
 	5. Chatbot needs to be able to provide advice for new university students.
 	6. Web-based UI needs to ask users for their consent to storing "cookies" with anonymous identifiers on their device, as well as provide the functionality to withdraw the consent.
-### Final product functionality:
+### Should-have
 	1. Web-based UI needs to have a responsive design and use some CSS design framework.
 	2. Chatbot needs to provide a list of recommended courses for students based on their course interests (not just computer science).
 	3. Conversation should be initialized by clicking one of the buttons with predefined inputs - this will help to keep a relevant conversation topic.
 	4. Web application should be able to save the conversation history unless the user has opted-out of cookies.
 	5. Link to the chatbot should to be advertised by putting QR codes around the campus.
-### Extra functionality (TBD after the beta-testing):
+### Could-have:
 	1. Users will be able to rate chatbot responses, allowing analysis of which responses are most helpful or effective.
  	2. Users will be able to contact SkillsBuild support directly through the chatbot for assistance with more complex issues.
-	
+### Won't-have:
+	1. Chatbot will not assist with academic questions (eg. solving homework)
 	
