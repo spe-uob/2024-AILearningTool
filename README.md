@@ -3,7 +3,11 @@
 - [Project Brief](#project-brief)
 - [Stakeholders](#stakeholders)
 - [User Stories](#user-stories)
-- [Requirements](#requirements)
+- [Requirements](#list-of-requirements)
+- [Project Structure](#project-structure)
+- [Tech Stack](#tech-stack)
+- [User Instructions](#user-instructions)
+- [Developer Instructions](#developer-instructions)
 
 ## Project Brief
 "Create a web app Watson chatbot that the students (users) can access via a QR code from their
@@ -75,3 +79,64 @@ As a university student, I want the AI chatbot to explain course concepts and fo
 ### Won't-have:
 	1. Chatbot will not assist with academic questions (eg. solving homework)
 	
+## Project Structure:
+Below is an overview of the key components of the system:
+
+- docs: Contains all project-related documentation. Notable files include:
+  - ETHICS.md
+- LICENSE: Includes the project's MIT license file.
+
+## Tech Stack:
+
+## User Instructions:
+1. **Open the Web App**:  
+   Using any device with internet access (smartphone, tablet, laptop, etc.), open a web browser and navigate to the provided link [insert URL here].
+
+2. **Cookie Consent**:  
+   Upon opening the website, you will be prompted to accept or decline optional cookies. These cookies help improve your experience by storing preferences and conversation history. You can choose:
+   - **Accept Cookies**: The chatbot will remember your preferences and chat history for future sessions.
+   - **Decline Cookies**: The chatbot will function without storing your preferences or chat history.
+
+3. **Start Chatting with the Chatbot**:  
+   Once you are in, you can start typing your questions into the chatbox. You can ask about the following topics:
+   - **What is IBM SkillsBuild?**
+   - **What courses are available on SkillsBuild?**
+   - **What free technologies are available on SkillsBuild?**
+   - **General advice or questions related to university life.**
+
+4. **Providing Additional Information**:  
+   For certain questions (like available courses or university-related advice), the chatbot may ask for a little more information. This could include:
+   - Your area of interest
+   - Courses you are currently enrolled in  
+   The chatbot only asks what’s necessary to give you the best answer.
+
+5. **Follow-Up Questions**:  
+   Feel free to ask any follow-up questions after the chatbot provides its initial response. The chatbot can also share useful resources, such as links to courses or articles.
+
+6. **Adjust Preferences (Optional)**:  
+   If you agreed to optional cookies, you can later modify your cookie consent and other settings in the web app’s preferences section. This is completely optional.
+
+7. **Returning to the Chat**:  
+   If you accepted the optional cookies, your conversation history will be saved for 30 days. You can return to the web app at any time within that period to continue where you left off or ask follow-up questions based on previous conversations.
+
+## Developer Instructions:
+To get started with developing or contributing to this project, follow the steps below:
+
+1. **Clone the Repository**:
+   First, ensure you have Git installed on your machine. Then, open your terminal or command prompt and run the following command to clone the repository:
+   ```git clone https://github.com/spe-uob/2024-AILearningTool.git```
+
+2. **Navigate to the Project Directory**:
+   After cloning, navigate to the project directory:
+   ```cd 2024-AILearningTool```
+
+3. **Install Java 21**:
+   The project is built using Java 21, so make sure you have Java 21 installed on your machine. You can download the latest Java Development Kit (JDK) 21 from [here](https://www.oracle.com/uk/java/technologies/downloads/#java21).
+
+4. **Install Maven**:
+   This project uses Maven as the build automation tool. If you don't have Maven installed, download the latest stable release [here](https://maven.apache.org/download.cgi).
+
+6. **Open the Project in Your IDE**:
+   Open the cloned repository in your preferred Integrated Development Environment (IDE) (we recommend IntelliJ) for further development.
+
+
