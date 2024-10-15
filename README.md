@@ -90,7 +90,9 @@ Below is an overview of the key components of the system:
 ### Frontend
 The frontend is a JavaScript Vue 3-based web application. It makes requests to the backend using HTTP requests.
 ### Backend
-The backend is based on Spring Boot (open-source Java framework) that will store data using a MariaDB database.
+The backend is based on Spring Boot (open-source Java framework).
+Data will be stored in a MariaDB database.
+User prompts for the chatbot will be sent using API requests from the Spring Boot backend to the IBM Watsonx language model.
 ![Architecture diagram, showing the technologies used in the project.](/docs/architecture_diagram.png)
 
 ## User Instructions:
