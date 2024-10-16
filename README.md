@@ -8,6 +8,7 @@
 - [Tech Stack](#tech-stack)
 - [User Instructions](#user-instructions)
 - [Developer Instructions](#developer-instructions)
+- [Team Members](#team-members)
 
 ## Project Brief
 "Create a web app Watson chatbot that the students (users) can access via a QR code from their
@@ -153,4 +154,9 @@ To get started with developing or contributing to this project, follow the steps
 6. **Open the Project in Your IDE**:
    Open the cloned repository in your preferred Integrated Development Environment (IDE) (we recommend IntelliJ) for further development.
 
-
+## Team Members:
+Vlad Kirlovics (fi23561) \
+Gerard Chaba (tl23383) \
+Mohammed Elzobair (yi23484) \
+Weifan Liu (au22116) \
+Zixuan Zhu (kh23199) 
