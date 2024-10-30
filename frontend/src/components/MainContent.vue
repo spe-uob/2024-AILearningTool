@@ -2,24 +2,31 @@
   <main>
     <div class="chat-area">
       <p>Welcome to Watsonx AI!</p>
-        <p>Select two topics below:</p>
-      <button @click="startTopic('First Time Coming to University')">First Time Coming to University</button>
-      <button @click="startTopic('Academic Inquiry')">Academic Inquiry</button>
+      <p v-if="!topicSelected">Select one of the topics below:</p>
 
-      <!-- Display messages with smart wrapping -->
-      <div v-for="msg in processedMessages" :key="msg.id" class="message">
-        {{ msg.content }}
+      <!-- Buttons for selecting topics, only visible when no topic is selected -->
+      <div v-if="!topicSelected">
+        <button @click="startTopic('First Time Coming to University')">First Time Coming to University</button>
+        <button @click="startTopic('Academic Inquiry')">Academic Inquiry</button>
       </div>
 
-      <!-- Input area for new messages -->
-      <textarea
-          v-model="userInput"
-          @input="handleInput"
-      ></textarea>
+      <!-- Chatbox, visible only when a topic is selected -->
+      <div v-if="chatboxVisible">
+        <!-- Display messages with smart wrapping -->
+        <div v-for="msg in processedMessages" :key="msg.id" class="message">
+          {{ msg.content }}
+        </div>
 
+        <!-- Input area for new messages -->
+        <textarea
+            v-model="userInput"
+            @input="handleInput"
+            placeholder="Type your message..."
+        ></textarea>
 
-      <!-- Send message button-->
-      <button @click="sendMessage">Send</button>
+        <!-- Send message button-->
+        <button @click="sendMessage">Send</button>
+      </div>
     </div>
   </main>
 </template>
@@ -30,6 +37,8 @@ export default {
     return {
       userInput: '',
       messages: [],
+      chatboxVisible: false,  // Tracks if the chatbox should be displayed
+      topicSelected: false,   // Tracks if a topic has been selected
     };
   },
   computed: {
@@ -44,35 +53,38 @@ export default {
   },
   methods: {
     wrapText(text, maxLength) {
-      // The function intelligently wraps text by finding the nearest space
       let result = '';
       let currentLine = '';
-      const words = text.split(' '); // Split text into words by space
+      const words = text.split(' ');
 
       words.forEach((word) => {
         if ((currentLine + word).length > maxLength) {
-          result += currentLine.trim() + '\n'; // Add current line to result with a new line
-          currentLine = word + ' '; // Start a new line with the current word
+          result += currentLine.trim() + '\n';
+          currentLine = word + ' ';
         } else {
-          currentLine += word + ' '; // Add word to the current line
+          currentLine += word + ' ';
         }
       });
 
-      // Add any remaining text to the result
       result += currentLine.trim();
       return result;
     },
     sendMessage() {
       if (this.userInput.trim()) {
         this.messages.push({ id: Date.now(), content: this.userInput });
-        this.userInput = '';  // Clear input field after sending message
+        this.userInput = '';
       }
     },
     handleInput() {
       // Any specific logic for handling input
     },
     startTopic(topic) {
-      this.messages.push({ id: Date.now(), content: `Selected topic: ${topic}` });
+      // Only enable chatbox and hide buttons if a specific topic is selected
+      if (topic === 'First Time Coming to University' || topic === 'Academic Inquiry') {
+        this.chatboxVisible = true;
+        this.topicSelected = true;
+        this.messages.push({ id: Date.now(), content: `Selected topic: ${topic}` });
+      }
     },
   },
 };
@@ -92,7 +104,7 @@ main {
 
 .message {
   margin: 10px 0;
-  white-space: pre-wrap; /* Ensures that new lines are respected */
+  white-space: pre-wrap;
 }
 
 textarea {
