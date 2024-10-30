@@ -104,7 +104,25 @@ main {
 
 .message {
   margin: 10px 0;
-  white-space: pre-wrap;
+  padding: 10px;
+  background-color: #e0f7fa;
+  border-radius: 15px;
+  border: 1px solid #b2ebf2;
+  max-width: 60%;
+  white-space: pre-wrap; /* Ensures that new lines are respected */
+  word-wrap: break-word;
+}
+
+.message:nth-child(odd) {
+  align-self: flex-start;
+  background-color: #e3f2fd;
+  border-color: #bbdefb;
+}
+
+.message:nth-child(even) {
+  align-self: flex-end;
+  background-color: #c8e6c9;
+  border-color: #a5d6a7;
 }
 
 textarea {
@@ -139,3 +157,4 @@ button:disabled {
   background-color: #ccc;
 }
 </style>
+
