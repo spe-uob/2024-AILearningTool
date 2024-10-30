@@ -7,6 +7,7 @@
 - [Project Structure](#project-structure)
 - [Tech Stack](#tech-stack)
 - [User Instructions](#user-instructions)
+- [Chatbot Interaction Flow](#chatbot-interaction-flow)
 - [Developer Instructions](#developer-instructions)
 - [Team Members](#team-members)
 
@@ -93,7 +94,8 @@ The frontend is a JavaScript Vue 3-based web application. It makes requests to t
 ### Backend
 The backend is based on Spring Boot (open-source Java framework).
 Data will be stored in a MariaDB database.
-User prompts for the chatbot will be sent using API requests from the Spring Boot backend to the IBM Watsonx language model.\
+User prompts for the chatbot will be sent using API requests from the Spring Boot backend to the IBM Watsonx language model.
+
 ![Architecture diagram, showing the technologies used in the project.](/docs/architecture_diagram.png)
 
 ## User Instructions:
@@ -133,6 +135,12 @@ User prompts for the chatbot will be sent using API requests from the Spring Boo
 7. **Returning to the Chat**:  
 
    If you accepted the optional cookies, your conversation history will be saved for 30 days. You can return to the web app at any time within that period to continue where you left off or ask follow-up questions based on previous conversations.
+
+## Chatbot Interaction Flow:
+
+This flowchart outlines the interaction pathways within the chatbot, guiding users through key topics such as SkillsBuild courses, university life questions, and IBM SkillsBuild platform information. Each pathway details the chatbot's prompts, and user responses, providing an overview of the chatbot’s functionality.
+
+![watson_flow](/docs/watson_flow.png)
 
 ## Developer Instructions:
 To get started with developing or contributing to this project, follow the steps below:
