@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 @DisplayName("Receiving IBM Bearer tokens.")
 public class IBMAuthenticatorTest {
     @Test
-    // Checking whether a single request works.
+    @DisplayName("Checking whether a single request works")
     public void singleRequestTest() {
         IBMAuthenticator testAuthenticator = new IBMAuthenticator();
         testAuthenticator.start();

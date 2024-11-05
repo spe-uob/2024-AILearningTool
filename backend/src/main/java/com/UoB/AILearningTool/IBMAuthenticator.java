@@ -62,7 +62,7 @@ public class IBMAuthenticator extends Thread {
             }
         } catch (Exception e) {
             this.bearerToken = null;
-            this.statusCode = 400;
+            this.statusCode = 500;
             log.error("Exception {}\nHTTP status code: {}", e, this.statusCode.toString());
         }
     }
