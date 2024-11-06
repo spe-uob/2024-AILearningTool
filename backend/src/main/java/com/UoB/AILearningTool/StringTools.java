@@ -16,9 +16,10 @@ public class StringTools {
 
     // Prepares "input" JSON key value string for Watsonx API request
     public static String messageHistoryPrepare(String input) {
+        input = input + "\n<|assistant|>\n";
         String x = "{\"input\": \"" + input.replace("\n", "\\n")
                 .replace("\'", "'\''")
-                .replace("\"", "\\\"") + "\\n<|assistant|>\\n\",";
+                .replace("\"", "\\\"") + "\",";
 
         System.out.println(x);
         return x;
