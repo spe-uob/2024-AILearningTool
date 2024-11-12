@@ -14,6 +14,11 @@
       <div v-if="chatboxVisible">
         <!-- Display messages with smart wrapping -->
         <div v-for="msg in processedMessages" :key="msg.id" class="message">
+          <!-- Display sender name and avatar -->
+          <div class="message-header">
+            <img :src="msg.avatarUrl" alt="Avatar" class="avatar">
+            <span class="sender-name">{{ msg.senderName }}</span>
+          </div>
           {{ msg.content }}
         </div>
 
@@ -71,7 +76,12 @@ export default {
     },
     sendMessage() {
       if (this.userInput.trim()) {
-        this.messages.push({ id: Date.now(), content: this.userInput });
+        this.messages.push({
+          id: Date.now(),
+          content: this.userInput,
+          senderName: 'User', // Add sender's name
+          avatarUrl: 'https://via.placeholder.com/40' // Placeholder avatar URL
+        });
         this.userInput = '';
       }
     },
@@ -83,7 +93,7 @@ export default {
       if (topic === 'First Time Coming to University' || topic === 'Academic Inquiry') {
         this.chatboxVisible = true;
         this.topicSelected = true;
-        this.messages.push({ id: Date.now(), content: `Selected topic: ${topic}` });
+        this.messages.push({ id: Date.now(), content: `Selected topic: ${topic}`, senderName: 'System', avatarUrl: 'https://via.placeholder.com/40' });
       }
     },
   },
@@ -125,6 +135,23 @@ main {
   border-color: #a5d6a7;
 }
 
+.message-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.sender-name {
+  font-weight: bold;
+}
+
 textarea {
   width: 100%;
   height: 100px;
@@ -157,4 +184,5 @@ button:disabled {
   background-color: #ccc;
 }
 </style>
+
 
