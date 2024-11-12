@@ -16,7 +16,7 @@ export default {
   methods: {
     async handleConsent(isAccepted) {
       try {
-        const response = await axios.post('api', {
+        const response = await axios.get('https://ailearningtool.ddns.net:8080', {
           consent: isAccepted
         });
 
