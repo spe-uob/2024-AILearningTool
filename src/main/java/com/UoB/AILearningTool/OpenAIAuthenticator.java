@@ -15,7 +15,7 @@ public class OpenAIAuthenticator {
 
     // Constructor that initializes the API key
     public OpenAIAuthenticator() {
-        this.apiKey = "your-openai-api-key-here";  // Replace with actual OpenAI API key
+        this.apiKey = "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"; 
         log.info("OpenAI API key set.");
     }
 
