@@ -167,5 +167,5 @@ Vlad Kirlovics (fi23561) \
 Gerard Chaba (tl23383) \
 Mohammed Elzobair (yi23484) \
 Weifan Liu (au22116) \
-Zixuan Zhu (kh23199) 
+Zixuan Zhu (kh23199) \
 Siyuan Zhang (gr23994)
