@@ -1,7 +1,7 @@
 // src/api/api.js
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = 'https://ailearningtool.ddns.net:8080';
 
 
 const api = axios.create({
