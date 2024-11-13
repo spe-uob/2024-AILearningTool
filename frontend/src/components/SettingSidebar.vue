@@ -56,7 +56,7 @@ export default {
       }
     },
     goToCookiePage() {
-      // 跳转到 /cookie 页面以查看或修改 Cookie 设置
+      // Jump to the /cookie page to view or modify cookie settings
       this.$router.push("/");
     },
   },
