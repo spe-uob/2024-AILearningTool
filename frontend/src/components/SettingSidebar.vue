@@ -14,15 +14,16 @@
           </li>
           <li>
             <h4>2) Language</h4>
-            <button @click="changeLanguage">English</button>
-            <button @click="changeLanguage">Chinese</button>
-          </li>
-          <li>
-            <h4>3) Cookie</h4>
-            <button @click="deleteCookies">Delete All User Information</button>
+            <div class="language-buttons">
+              <button @click="changeLanguage('en')">English</button>
+              <button @click="changeLanguage('zh')">Chinese</button>
+            </div>
           </li>
         </ul>
-        <button @click="closeSettings" class="close-btn">Close</button>
+        <div class="action-buttons">
+          <button @click="goToCookiePage">Go to Cookie Settings</button>
+          <button class="close-btn" @click="closeSettings">Close</button>
+        </div>
       </div>
     </div>
   </aside>
@@ -38,20 +39,25 @@ export default {
   methods: {
     openSettings() {
       this.isSettingsOpen = true;
-      this.$emit('toggleSettings', true); // Notify parent that settings are open
+      this.$emit("toggleSettings", true); // Notify parent that settings are open
     },
     closeSettings() {
       this.isSettingsOpen = false;
-      this.$emit('toggleSettings', false); // Notify parent that settings are closed
+      this.$emit("toggleSettings", false); // Notify parent that settings are closed
     },
     toggleTheme() {
-      alert('Day/Night Mode toggled');
+      alert("Day/Night Mode toggled");
     },
-    changeLanguage() {
-      alert('Language change triggered');
+    changeLanguage(language) {
+      if (language === "en") {
+        alert("Language changed to English");
+      } else if (language === "zh") {
+        alert("Language changed to Chinese");
+      }
     },
-    deleteCookies() {
-      alert('All user information deleted');
+    goToCookiePage() {
+      // 跳转到 /cookie 页面以查看或修改 Cookie 设置
+      this.$router.push("/");
     },
   },
 };
@@ -82,7 +88,7 @@ aside {
   background-color: white;
   padding: 20px;
   border-radius: 8px;
-  width: 300px;
+  width: 350px;
   max-width: 90%;
 }
 
@@ -92,16 +98,38 @@ ul {
 }
 
 li {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+}
+
+.language-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .close-btn {
-  margin-top: 20px;
-  padding: 10px;
   background-color: #f44336;
   color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+}
+
+.close-btn:hover {
+  background-color: #d32f2f;
+}
+
+button:hover {
+  background-color: #e0e0e0;
 }
 </style>
