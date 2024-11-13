@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Cookie from '@/DisplayInterface/Cookie.vue';
+import Cookie from '@/Display interface/Cookie.vue';
 
 const routes = [
   {
@@ -10,7 +10,7 @@ const routes = [
   {
     path: '/main',
     name: 'Main',
-    component: () => import('@/DisplayInterface/MainView.vue'),
+    component: () => import('@/Display interface/MainView.vue'),
   },
 ];
 
