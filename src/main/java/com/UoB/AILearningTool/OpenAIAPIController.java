@@ -22,6 +22,7 @@ public class OpenAIAPIController {
         String dataPayload = StringTools.watsonxToOpenAI(messageHistory);
 
         WatsonxResponse AIResponse;
+        // Create HTTP request for OpenAI with API key in header and message history in request body.
         HttpRequest request = HttpRequest
                 .newBuilder(URI.create("https://api.openai.com/v1/chat/completions"))
                 .headers("Content-Type", "application/json",
@@ -29,11 +30,13 @@ public class OpenAIAPIController {
                 .POST(HttpRequest.BodyPublishers.ofString(dataPayload))
                 .build();
 
+        // Try sending an HTTPS request to OpenAI API.
         try {
             HttpResponse<String> response = HttpClient.newBuilder()
                     .build()
                     .send(request, HttpResponse.BodyHandlers.ofString());
             Integer statusCode = response.statusCode();
+            // If OpenAI API returned status 200, return the status code and the message.
             if (statusCode == 200) {
                 String message = new JSONObject(response.body())
                         .getJSONArray("choices")
@@ -44,6 +47,7 @@ public class OpenAIAPIController {
 
                 AIResponse = new WatsonxResponse(statusCode, message);
             } else {
+                // If OpenAI API request returned a status code other than 200, return error 500 and error message.
                 log.warn("Non-200 OpenAI response received.");
                 String message = new JSONObject(response.body())
                         .getJSONArray("error")
