@@ -8,36 +8,48 @@
       </p>
     </div>
     <div class="button-group">
-      <button @click="sendCookieConsent(true)">Accept All Cookies</button>
-      <button @click="sendCookieConsent(false)">Reject All Cookies</button>
+      <button @click="acceptCookies">Accept All Cookies</button>
+      <button @click="rejectCookies">Reject All Cookies</button>
     </div>
   </div>
 </template>
 
 <script>
 import { useRouter } from 'vue-router';
-import axios from 'axios';
+import { signupWithConsent, revokeConsent } from '@/api/CookieAPI';
 
 export default {
   name: 'Cookie',
   setup() {
     const router = useRouter();
 
-    const sendCookieConsent = async (consent) => {
+    const acceptCookies = async () => {
       try {
-        // 使用查询参数发送 true 或 false
-        const response = await axios.get('https://ailearningtool.ddns.net:8080/signup');
-        console.log('Server response:', response.data);
+        const response = await signupWithConsent();
+        console.log('User signed up with consent:', response);
+        localStorage.setItem('userConsent', 'accepted');
       } catch (error) {
-        console.error('Failed to send cookie consent:', error);
-        alert('failed');
+        console.error('Failed to sign up with consent:', error);
+        alert('Failed to accept cookies');
       } finally {
-        // 无论成功或失败都跳转到主界面
-        router.push('/main');
+        await router.push('/main');
       }
     };
 
-    return { sendCookieConsent };
+    const rejectCookies = async () => {
+      try {
+        const response = await revokeConsent();
+        console.log('User consent revoked:', response);
+        localStorage.setItem('userConsent', 'rejected');
+      } catch (error) {
+        console.error('Failed to revoke consent:', error);
+        alert('Failed to reject cookies');
+      } finally {
+        await router.push('/main');
+      }
+    };
+
+    return { acceptCookies, rejectCookies };
   },
 };
 </script>
