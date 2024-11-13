@@ -8,48 +8,47 @@
       </p>
     </div>
     <div class="button-group">
-      <button @click="acceptCookies">Accept All Cookies</button>
-      <button @click="rejectCookies">Reject All Cookies</button>
+      <button @click="sendCookieConsent('True')">Accept All Cookies</button>
+      <button @click="sendCookieConsent('False')">Reject Optional Cookies</button>
     </div>
   </div>
 </template>
 
 <script>
 import { useRouter } from 'vue-router';
-import { signupWithConsent, revokeConsent } from '@/api/CookieAPI';
+import axios from 'axios';
 
 export default {
   name: 'Cookie',
   setup() {
     const router = useRouter();
 
-    const acceptCookies = async () => {
+    const sendCookieConsent = async (consent) => {
       try {
-        const response = await signupWithConsent();
-        console.log('User signed up with consent:', response);
-        localStorage.setItem('userConsent', 'accepted');
+        // 发送 consent 参数到服务器
+        const response = await axios.get('https://ailearningtool.ddns.net:8080/signup', {
+          params: {
+            consent, // 用户选择的参数
+          },
+        });
+
+        // 从服务器响应中接收 userId
+        const userId = response.data.userId;
+        console.log('Received userId:', userId);
+
+        // 存储 userId（可选：保存到 Cookie 或 LocalStorage）
+        localStorage.setItem('userId', userId);
+
+        // 跳转到主界面
+        router.push('/main');
       } catch (error) {
-        console.error('Failed to sign up with consent:', error);
-        alert('Failed to accept cookies');
-      } finally {
-        await router.push('/main');
+        console.error('Failed to send cookie consent:', error);
+        alert('An error occurred. Redirecting...');
+        router.push('/main'); // 无论成功或失败都跳转
       }
     };
 
-    const rejectCookies = async () => {
-      try {
-        const response = await revokeConsent();
-        console.log('User consent revoked:', response);
-        localStorage.setItem('userConsent', 'rejected');
-      } catch (error) {
-        console.error('Failed to revoke consent:', error);
-        alert('Failed to reject cookies');
-      } finally {
-        await router.push('/main');
-      }
-    };
-
-    return { acceptCookies, rejectCookies };
+    return { sendCookieConsent };
   },
 };
 </script>
