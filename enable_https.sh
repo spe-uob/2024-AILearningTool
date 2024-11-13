@@ -1,13 +1,19 @@
 #!/bin/bash
 
-# Define the target file and keystore file
-PROPERTIES_FILE="application.properties"
+# The script will change Spring Boot application parameters to deploy with HTTPS encryption.
+
+# Define the application properties file and keystore file
+PROPERTIES_FILE="src/main/resources/application.properties"
 KEYSTORE_FILE="keystore.p12"
 
 # Verify if keystore.p12 exists in the current directory
 if [[ ! -f "$KEYSTORE_FILE" ]]; then
   echo "Error: $KEYSTORE_FILE not found in the current directory."
   exit 1
+else
+  sudo cp "$KEYSTORE_FILE" "src/main/resources/$KEYSTORE_FILE"
+  sudo chmod 777 "src/main/resources/$KEYSTORE_FILE"
+  echo "keystore file has been successfully copied."
 fi
 
 # Overwrite the application.properties file with the new content
