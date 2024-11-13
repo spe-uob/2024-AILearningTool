@@ -1,20 +1,23 @@
 import { createApp } from 'vue';
 import App from './App.vue';
-import { createRouter, createWebHistory } from 'vue-router';
-
-import Cookie from './Display interface/Cookie.vue';
-import MainView from './Display interface/MainView.vue'; // 包含主界面所有部分
-
-const routes = [
-    { path: '/', component: Cookie }, // 初始路径加载 Cookie 页面
-    { path: '/main', component: MainView }, // 主界面
-];
-
-const router = createRouter({
-    history: createWebHistory(),
-    routes,
-});
+import router from './router';
+import { fetchUserConversation } from './api/CookieAPI';
 
 const app = createApp(App);
-app.use(router);
-app.mount('#app');
+
+const userConsent = localStorage.getItem('userConsent');
+const userId = 'unique-user-id'; // User ID, which can be obtained from the login system
+
+if (userConsent === 'accepted') {
+    // User accepts cookies, loads dialogue logs
+    fetchUserConversation(userId)
+        .then(response => {
+            console.log('User conversation:', response.data);
+            // Storing dialogue content to the application's global state or other components
+        })
+        .catch(error => {
+            console.error('Failed to load conversation:', error);
+        });
+}
+
+app.use(router).mount('#app');
