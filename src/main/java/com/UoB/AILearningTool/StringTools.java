@@ -79,10 +79,4 @@ public class StringTools {
         dataPayload.put("messages", messageArray);
         return dataPayload.toString();
     }
-
-//    TODO: Conversion from OpenAI JSON response to Watsonx message history format.
-//    public static String openAIToWatsonx(String messageHistory) {
-//
-//    }
-
 }
