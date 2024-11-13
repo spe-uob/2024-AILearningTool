@@ -12,7 +12,9 @@ import java.io.IOException;
 public class SpringController {
     private final Logger log = LoggerFactory.getLogger(SpringController.class);
     private final DatabaseController DBC = new DatabaseController();
-    private final WatsonxAPIController WXC = new WatsonxAPIController();
+    //    TODO: Replace with OpenAIAPIController with WatsonxAPIController when API quota issue will be resolved.
+    //    private final WatsonxAPIController WXC = new WatsonxAPIController();
+    private final OpenAIAPIController WXC = new OpenAIAPIController();
 
     // Assign a unique user ID for the user.
     @GetMapping("/signup")
@@ -98,7 +100,10 @@ public class SpringController {
             // to Watsonx API.
             boolean success = chat.addUserMessage(userID, newMessage);
             if (success) {
-                wresponse = WXC.sendUserMessage(StringTools.messageHistoryPrepare(inputString));
+                inputString = chat.getMessageHistory(DBC.getUser(userID));
+//                TODO: Revert wresponse when issue with Watsonx API quota will be resolved.
+//                wresponse = WXC.sendUserMessage(StringTools.messageHistoryPrepare(inputString));
+                wresponse = WXC.sendUserMessage(inputString);
                 response.setStatus(wresponse.statusCode);
             }
             try {
@@ -125,7 +130,9 @@ public class SpringController {
         response.setContentType("text/plain");
 
         if (user != null) {
-            wresponse = WXC.sendUserMessage(StringTools.messageHistoryPrepare(inputString));
+//            TODO: Revert wresponse when issue with Watsonx API quota will be resolved.
+            wresponse = WXC.sendUserMessage(inputString);
+//            wresponse = WXC.sendUserMessage(StringTools.messageHistoryPrepare(inputString));
             response.setStatus(wresponse.statusCode);
             try {
                 response.getWriter().write(wresponse.responseText);
