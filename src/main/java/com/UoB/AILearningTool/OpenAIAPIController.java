@@ -13,27 +13,15 @@ public class OpenAIAPIController {
     private final Logger log = LoggerFactory.getLogger(OpenAIAPIController.class);
     private final OpenAIAuthenticator authenticator;
 
-    final static String technicalDataPayload = """
-    {
-        "model": "gpt-4",
-        "messages": [
-            {"role": "system", "content": "You are an assistant."}
-        ],
-        "temperature": 0.7,
-        "max_tokens": 900
-    }
-    """;
-
     public OpenAIAPIController() {
         this.authenticator = new OpenAIAuthenticator();
-        this.authenticator.requestNewToken();
     }
 
     // Sends a message to OpenAI's ChatGPT API.
-    public OpenAIResponse sendUserMessage(String preparedMessageHistory) {
-        String dataPayload = preparedMessageHistory + technicalDataPayload;
+    public WatsonxResponse sendUserMessage(String messageHistory) {
+        String dataPayload = StringTools.watsonxToOpenAI(messageHistory);
 
-        OpenAIResponse AIResponse;
+        WatsonxResponse AIResponse;
         HttpRequest request = HttpRequest
                 .newBuilder(URI.create("https://api.openai.com/v1/chat/completions"))
                 .headers("Content-Type", "application/json",
@@ -54,17 +42,17 @@ public class OpenAIAPIController {
                         .getString("content");
                 log.info("200 OpenAI response received.");
 
-                AIResponse = new OpenAIResponse(statusCode, message);
+                AIResponse = new WatsonxResponse(statusCode, message);
             } else {
                 log.warn("Non-200 OpenAI response received.");
                 String message = new JSONObject(response.body())
                         .getJSONArray("error")
                         .getJSONObject(0)
                         .getString("message");
-                AIResponse = new OpenAIResponse(500, message);
+                AIResponse = new WatsonxResponse(500, message);
             }
         } catch (Exception e) {
-            AIResponse = new OpenAIResponse(500, null);
+            AIResponse = new WatsonxResponse(500, null);
             log.error("Exception {}\nHTTP status code: {}", e, 500);
         }
         return AIResponse;
