@@ -94,6 +94,7 @@ Below is an overview of the key components of the system:
   - [src](/frontend/src): Includes the front-end code.
 - [src](/src): Contains all of the back-end code (in Java) and documents:
   - [main](/src/main): Includes the back-end code.
+  - [static](/src/main/resources/static): Includes all static documents, including index.html of the front-end.
   - [test/java/com/UoB/AILearningTool](/src/test/java/com/UoB/AILearningTool): Includes all of the unit tests. 
 - [LICENSE](/LICENSE): Includes the project's MIT license file.
 - [mvnw](/mvnw) and [pom.xml](/pom.xml): Documents for Maven.
@@ -179,11 +180,11 @@ To get started with developing or contributing to this project, follow the steps
 
 ## Team Members:
 
-| Name              | GitHub                                                      | Email                 |
-|-------------------|-------------------------------------------------------------|-----------------------|                             
-| Vlad Kirilovics   | [vladislav-k1](https://github.com/vladislav-k1)             | fi23561@bristol.ac.uk |
-| Gerard Chaba      | [GerardChabaBristol](https://github.com/GerardChabaBristol) | tl23383@bristol.ac.uk |  
-| Mohammed Elzobair | [yi23484](https://github.com/yi23484)	                  | yi23484@bristol.ac.uk | 
-| Weifan Liu 	    | [Liuwf4319](https://github.com/Liuwf4319)		          | au22116@bristol.ac.uk |
-| Zixuan Zhu 	    | [RainBOY-ZZX](https://github.com/RainBOY-ZZX)	          | kh23199@bristol.ac.uk | 
-| Siyuan Zhang 	    | [Siyuan106](https://github.com/Siyuan106)		          | gr23994@bristol.ac.uk |
+| Name              | GitHub                                                      						| Email                 |
+|-------------------|-----------------------------------------------------------------------------------------------------------|-----------------------|                           
+| Vlad Kirilovics   | [vladislav-k1](https://github.com/vladislav-k1) and [kirilovich-vlad](https://github.com/kirilovich-vlad) | fi23561@bristol.ac.uk |
+| Gerard Chaba      | [GerardChabaBristol](https://github.com/GerardChabaBristol) 						| tl23383@bristol.ac.uk |  
+| Mohammed Elzobair | [yi23484](https://github.com/yi23484)	                  						| yi23484@bristol.ac.uk | 
+| Weifan Liu 	    | [Liuwf4319](https://github.com/Liuwf4319)		          						| au22116@bristol.ac.uk |
+| Zixuan Zhu 	    | [RainBOY-ZZX](https://github.com/RainBOY-ZZX)	          						| kh23199@bristol.ac.uk | 
+| Siyuan Zhang 	    | [Siyuan106](https://github.com/Siyuan106)		          						| gr23994@bristol.ac.uk |
