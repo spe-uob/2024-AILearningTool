@@ -12,7 +12,7 @@ function setConsentCookie() {
 
 // Sends signup GET request
 function signUp() {
-    fetch("https://ailearningtool.ddns.net:8080/signup",
+    fetch("http://localhost:8080/signup",
         {
             method: "GET",
             credentials: "include",
@@ -92,7 +92,7 @@ function processChatHistory(messageHistory) {
 
 // Create a new chat and requests its history
 function createChat(firstChoice) {
-    fetch("https://ailearningtool.ddns.net:8080/createChat?" + new URLSearchParams({
+    fetch("http://localhost:8080/createChat?" + new URLSearchParams({
         "initialMessage": firstChoice
     }),
         {
@@ -111,7 +111,7 @@ function createChat(firstChoice) {
 
 // Makes a request for chat history
 function getChatHistory() {
-    fetch("https://ailearningtool.ddns.net:8080/getChatHistory?" + new URLSearchParams({
+    fetch("http://localhost:8080/getChatHistory?" + new URLSearchParams({
         "chatID": localStorage.getItem("chatID")
     }),
         {
@@ -132,7 +132,7 @@ function getChatHistory() {
 // Sends a message to existing chat
 function sendMessage() {
     addMessageToUI(document.getElementById("promptInput").value);
-    fetch("https://ailearningtool.ddns.net:8080/sendMessage?" + new URLSearchParams({
+    fetch("http://localhost:8080/sendMessage?" + new URLSearchParams({
         "chatID": localStorage.getItem("chatID"),
         "newMessage": document.getElementById("promptInput").value
     }),
@@ -150,7 +150,7 @@ function sendMessage() {
 }
 
 function revokeConsent() {
-  fetch("https://ailearningtool.ddns.net:8080/revokeConsent",
+  fetch("http://localhost:8080/revokeConsent",
       {
         method: "GET",
         credentials: "include",
