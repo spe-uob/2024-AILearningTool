@@ -88,7 +88,7 @@ Below is an overview of the key components of the system:
 - [docs](/docs): Contains all project-related documentation. Notable files include:
   - [ETHICS.md](/docs/ETHICS.md): Includes the date of the ethics pre-approval request.
   - All diagrams/flowcharts.
-- [frontend](/frontend): Contains all of the front-end code (in Vue 3 and Yarn) and documents:
+- [frontend](/frontend): Contains all of the front-end code (in Vue 3 and Yarn) and documents (not used in the MVP stage):
   - [api](/frontend/api): Includes the cookies API.
   - [public](/frontend/public): Includes some front-end documents.
   - [src](/frontend/src): Includes the front-end code.
@@ -175,8 +175,12 @@ To get started with developing or contributing to this project, follow the steps
    - Vue 3 installation guide [here](https://v3.ru.vuejs.org/guide/installation.html)
    - Yarn installation guide [here](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)
 
-7. **Open the Project in Your IDE**:
+6. **Open the Project in Your IDE**:
    Open the cloned repository in your preferred Integrated Development Environment (IDE) (we recommend IntelliJ) for further development.
+
+7. **Test and Run the Server**:
+   - To run the unit tests, use the command ```mvn test```
+   - To start the server, use the command ```mvn spring-boot:run```
 
 ## Team Members:
 
