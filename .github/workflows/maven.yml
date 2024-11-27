@@ -29,7 +29,7 @@ jobs:
         cache: maven
     # Build the project
     - name: Build with Maven
-      run: mvn -B clean compile
+      run: mvn -B clean compile --file pom.xml
     # Run tests
-    - name: Test with Maven
+    - name: Test with Maven --file pom.xml
       run: mvn -B test
