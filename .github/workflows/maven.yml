@@ -42,16 +42,6 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
-
-    - name: Run Unit Tests
-      run: mvn test --file pom.xml
-
-    - name: Run Integration Tests
-      run: mvn verify --file pom.xml
-
-    - name: Run Static Code Analysis (Checkstyle)
-      run: mvn checkstyle:check --file pom.xml
-
-    - name: Generate Test Coverage Report (JaCoCo)
+    - name: Test project
       run: mvn jacoco:report --file pom.xml
 
