@@ -43,7 +43,7 @@
         <mxCell id="c53XrRWpCATAmcm16bnj-24" value="&lt;div style=&quot;font-size: 15px;&quot;&gt;Java-based Backend&lt;br style=&quot;font-size: 15px;&quot;&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#E6E6E6;fontSize=15;" parent="1" vertex="1">
           <mxGeometry x="440" y="320" width="160" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="sve3FE1zwaEsIyAFE5Qh-1" value="&lt;div style=&quot;font-size: 24px;&quot;&gt;IBM Watsonx&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fontSize=24;fillColor=#E6E6E6;" vertex="1" parent="1">
+        <mxCell id="sve3FE1zwaEsIyAFE5Qh-1" value="&lt;div style=&quot;font-size: 24px;&quot;&gt;OpenAI&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fontSize=24;fillColor=#E6E6E6;" vertex="1" parent="1">
           <mxGeometry x="560" y="480" width="160" height="80" as="geometry" />
         </mxCell>
         <mxCell id="sve3FE1zwaEsIyAFE5Qh-2" value="AI language model API" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#E6E6E6;fontSize=15;" vertex="1" parent="1">
