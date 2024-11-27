@@ -107,7 +107,7 @@ The backend is based on Spring Boot (open-source Java framework).
 Data will be stored in a MariaDB database.
 User prompts for the chatbot will be sent using API requests from the Spring Boot backend to the OpenAI language model.
 
-![architecture_diagram](https://github.com/user-attachments/assets/5ea032c0-c7c0-47ab-bd95-0f8f630927ef)
+![architecture_diagram](/docs/architecture_diagram2.png)
 
 ## User Instructions:
 
