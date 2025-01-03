@@ -1,102 +1,113 @@
 <template>
-  <div class="cookie-container">
-    <h1>Cookie Settings</h1>
+  <div id="cookiePopUp" class="cookie-popup">
     <div class="cookie-content">
-      <p>
-        Please review our cookie settings before continuing to the application.
-        You can choose to accept or reject cookies.
-      </p>
-    </div>
-    <div class="button-group">
-      <button @click="sendCookieConsent('True')">Accept All Cookies</button>
-      <button @click="sendCookieConsent('False')">Reject Optional Cookies</button>
+      <p>We use cookies to optimize your experience. Do you agree to optional cookies?</p>
+      <button class="reject-button" @click="handleConsent(false)">Refuse partial cookies</button>
+      <button class="accept-button" @click="handleConsent(true)">Allow all cookies</button>
     </div>
   </div>
 </template>
 
 <script>
-import { useRouter } from 'vue-router';
-import axios from 'axios';
-
 export default {
-  name: 'Cookie',
-  setup() {
-    const router = useRouter();
+  methods: {
+    handleConsent(isConsent) {
+      this.setConsentCookie(isConsent);
+      this.signUp();
+    },
+    setConsentCookie(isConsent) {
+      const consentValue = isConsent ? "true" : "false";
+      const d = new Date();
+      d.setTime(d.getTime() + 30 * 24 * 60 * 60 * 1000);
+      const expires = "expires=" + d.toUTCString();
+      document.cookie = `optionalConsent=${consentValue};${expires};path=/`;
+    },
+    signUp() {
+      fetch("http://localhost:8080/signup", {
+        method: "GET",
+        credentials: "include",
+      })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Non-200 response, back-end API call failed");
+            } else {
+              document.getElementById("cookiePopUp").style.display = "none";
+              this.redirectToMain();
+            }
+          })
+          .catch((error) => {
+            console.error("Registration failure:", error);
+          });
+    },
 
-    const sendCookieConsent = async (consent) => {
-      try {
-        // 发送 consent 参数到服务器
-        const response = await axios.get('https://ailearningtool.ddns.net:8080/signup', {
-          params: {
-            consent, // 用户选择的参数
-          },
-        });
-
-        // 从服务器响应中接收 userId
-        const userId = response.data.userId;
-        console.log('Received userId:', userId);
-
-        // 存储 userId（可选：保存到 Cookie 或 LocalStorage）
-        localStorage.setItem('userId', userId);
-
-        // 跳转到主界面
-        router.push('/main');
-      } catch (error) {
-        console.error('Failed to send cookie consent:', error);
-        alert('An error occurred. Redirecting...');
-        router.push('/main'); // 无论成功或失败都跳转
-      }
-    };
-
-    return { sendCookieConsent };
+    redirectToMain() {
+    this.$router.push("/main");
+    },
   },
 };
 </script>
 
 <style scoped>
-.cookie-container {
+.cookie-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  height: 100vh;
-  padding: 20px;
-  background-color: #f0f0f0;
-  text-align: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
 }
 
 .cookie-content {
-  margin: 20px 0;
-  max-width: 600px;
-  font-size: 16px;
-  line-height: 1.5;
-  color: #333;
+  position: relative;
+  width: 80%;
+  max-width: 500px;
+  background-color: #fff;
+  padding: 40px 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.button-group {
-  display: flex;
-  gap: 20px;
-  margin-top: 20px;
+.cookie-content p {
+  font-size: 20px; /* 增大字体 */
+  margin: 0 0 40px; /* 增加文本与按钮之间的间距 */
 }
 
-button {
-  padding: 10px 20px;
-  background-color: #4caf50;
+.reject-button {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background-color: #dc3545;
   color: white;
   border: none;
+  padding: 12px 24px;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
 }
 
-button:hover {
-  background-color: #45a049;
+.reject-button:hover {
+  background-color: #c82333;
 }
 
-button:last-child {
-  background-color: #f44336;
+.accept-button {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
 }
 
-button:last-child:hover {
-  background-color: #e53935;
+.accept-button:hover {
+  background-color: #218838;
 }
 </style>
