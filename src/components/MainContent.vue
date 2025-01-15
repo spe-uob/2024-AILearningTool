@@ -39,13 +39,13 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      userInput: '', // 用户输入内容
-      messages: [], // 聊天记录
-      topicSelected: false, // 是否选择了话题
-      currentTopic: '', // 当前选择的话题
-      userId: localStorage.getItem('userId') || '', // 从 LocalStorage 获取用户ID
-      chatId: localStorage.getItem('chatId') || '', // 从 LocalStorage 获取对话ID
-      aiServerUrl: 'https://ailearningtool.ddns.net:8080/sendMessage', // AI 服务器地址
+      userInput: '', // User input content
+      messages: [], // chat log
+      topicSelected: false, // Whether or not the topic is chosen
+      currentTopic: '', // Currently Selected Topics
+      userId: localStorage.getItem('userId') || '', // Get user ID from LocalStorage
+      chatId: localStorage.getItem('chatId') || '', // Get the dialog ID from LocalStorage
+      aiServerUrl: 'https://ailearningtool.ddns.net:8080/sendMessage', // AI server address
     };
   },
   computed: {
@@ -77,32 +77,32 @@ export default {
     async sendMessage() {
       if (!this.userInput.trim()) return;
 
-      // 将用户输入添加到聊天记录
+      // Adding User Input to the Chat Log
       this.messages.push({
         id: Date.now(),
         sender: 'You',
         content: this.userInput,
       });
 
-      const userMessage = this.userInput; // 缓存用户输入
-      this.userInput = ''; // 清空输入框
+      const userMessage = this.userInput; // Cache user input
+      this.userInput = ''; // Empty the input box
 
       try {
-        // 向 AI 服务器发送消息
+        // Send a message to the AI server
         const response = await axios.get(this.aiServerUrl, {
           params: {
-            userId: this.userId, // 当前用户ID
-            message: userMessage, // 用户输入的文本
-            chatId: this.chatId, // 当前对话ID
+            userId: this.userId, // Current User ID
+            message: userMessage, // User-entered text
+            chatId: this.chatId, // Current dialogue ID
 
           },
         });
 
-        // 将 AI 回复添加到聊天记录
+        // Adding AI replies to chats
         this.messages.push({
           id: Date.now() + 1,
           sender: 'AI',
-          content: response.data.responseText, // 假设返回字段为 `responseText`
+          content: response.data.responseText, // Assuming the return field is `responseText`.
         });
       } catch (error) {
         console.error('Error communicating with AI server:', error);
@@ -114,18 +114,18 @@ export default {
       }
     },
     startTopic(topic) {
-      // 设置当前话题
+      // Setting the current topic
       this.topicSelected = true;
       this.currentTopic = topic;
 
-      // 添加系统提示到聊天记录
+      // Add system alerts to chat logs
       this.messages.push({
         id: Date.now(),
         sender: 'system',
         content: `You have selected the topic: ${topic}`,
       });
 
-      // 模拟设置 ChatID（如需动态生成，请从后端获取并保存）
+      // Simulate the ChatID (if you want to generate it dynamically, get it from the backend and save it)）
       this.chatId = `chat_${Date.now()}`;
       localStorage.setItem('chatId', this.chatId);
     },
