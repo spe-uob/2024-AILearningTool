@@ -7,7 +7,7 @@
     <div v-if="!isCollapsed" class="history-content">
       <h3>Conversation History</h3>
       <ul>
-        <!-- 动态生成聊天记录按钮 -->
+        <!-- Dynamically generated chat log button -->
         <li v-for="conversation in conversations" :key="conversation.chatId">
           <button @click="loadConversation(conversation.chatId)">
             {{ conversation.chatId }}
@@ -36,20 +36,20 @@ export default {
       this.isCollapsed = !this.isCollapsed;
     },
 
-    // 创建新对话并动态添加到会话列表
+    // Create new conversations and dynamically add them to the session list
     async createNewConversation() {
       try {
         const response = await axios.get('https://ailearningtool.ddns.net:8080/createChat', {
           params: {
-            userId: localStorage.getItem('userId'), // 从 LocalStorage 获取 userId
-            initialMessage: "", // 空的初始内容
+            userId: localStorage.getItem('userId'), // Get userId from LocalStorage
+            initialMessage: "", // Empty initial content
           },
         });
 
-        const chatId = response.data.chatId; // 假设返回字段为 chatId
+        const chatId = response.data.chatId; // Assuming the return field is chatId
         console.log('Created chat with ID:', chatId);
 
-        // 动态添加到会话列表
+        // Dynamically added to the session list
         this.conversations.push({ chatId });
       } catch (error) {
         console.error('Failed to create a new conversation:', error);
@@ -57,20 +57,20 @@ export default {
       }
     },
 
-    // 加载指定会话内容
+    // Load the contents of the specified session
     async loadConversation(chatId) {
       try {
         const response = await axios.get('https://ailearningtool.ddns.net:8080/getChatHistory', {
           params: {
-            userId: localStorage.getItem('userId'), // 从 LocalStorage 获取 userId
-            chatId, // 当前选择的 chatId
+            userId: localStorage.getItem('userId'), // Get userId from LocalStorage
+            chatId, // The currently selected chatId
           },
         });
 
-        const chatHistory = response.data.history; // 假设返回字段为 history
+        const chatHistory = response.data.history; // Assuming the return field is history
         console.log('Chat History:', chatHistory);
 
-        // 将聊天内容传递到父组件（需要父组件监听此事件）
+        // Pass the chat content to the parent component (requires the parent component to listen to this event)
         this.$emit('loadConversation', chatHistory);
       } catch (error) {
         console.error('Failed to load conversation:', error);
