@@ -18,7 +18,7 @@ export default {
   name: 'MainView',
   data() {
     return {
-      isSettingsOpen: false, // 控制重要部分是否禁用
+      isSettingsOpen: false, // Controls whether important parts are disabled
     };
   },
   methods: {
