@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <!-- 路由视图 -->
+    <!-- routing view -->
     <router-view />
   </div>
 </template>
@@ -12,7 +12,7 @@ export default {
 </script>
 
 <style>
-/* 添加全局样式 */
+/* Adding Global Styles */
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
