@@ -1,0 +1,27 @@
+# Deploy the Docker image to GHCR.
+name: CD Deployment
+
+on:
+  push:
+    branches:
+      - dev
+      - build-system-overhaul
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Use a GitHub personal access token (PAT) to log in to the container registry.
+      - name: Authenticate with GitHub Container Registry
+        run: echo "${{ secrets.CONTAINER_REGISTRY_PAT }}" | docker login ghcr.io -u GerardChabaBristol --password-stdin
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ghcr.io/spe-uob/2024-AILearningTool:latest
