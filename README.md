@@ -7,6 +7,7 @@
 - [Project Structure](#project-structure)
 - [Tech Stack](#tech-stack)
 - [User Instructions](#user-instructions)
+- [Chatbot Interaction Flow](#chatbot-interaction-flow)
 - [Developer Instructions](#developer-instructions)
 - [Team Members](#team-members)
 
@@ -83,17 +84,29 @@ As a university student, I want the AI chatbot to explain course concepts and fo
 ## Project Structure:
 Below is an overview of the key components of the system:
 
-- docs: Contains all project-related documentation. Notable files include:
-  - ETHICS.md
-- LICENSE: Includes the project's MIT license file.
+- [workflows](/.github/workflows): Contains Maven Continuous Integration.
+- [docs](/docs): Contains all project-related documentation. Notable files include:
+  - [ETHICS.md](/docs/ETHICS.md): Includes the date of the ethics pre-approval request.
+  - All diagrams/flowcharts.
+- [frontend](/frontend): Contains all of the front-end code (in Vue 3 and Yarn) and documents:
+  - [api](/frontend/api): Includes the cookies API.
+  - [public](/frontend/public): Includes some front-end documents.
+  - [src](/frontend/src): Includes the front-end code.
+- [src](/src): Contains all of the back-end code (in Java) and documents:
+  - [main](/src/main): Includes the back-end code.
+  - [static](/src/main/resources/static): Includes all static documents, including index.html of the front-end.
+  - [test/java/com/UoB/AILearningTool](/src/test/java/com/UoB/AILearningTool): Includes all of the unit tests. 
+- [LICENSE](/LICENSE): Includes the project's MIT license file.
+- [mvnw](/mvnw) and [pom.xml](/pom.xml): Documents for Maven.
 
 ## Tech Stack:
 ### Frontend
-The frontend is a JavaScript Vue 3-based web application. It makes requests to the backend using HTTP requests.
+The front end is a JavaScript Vue 3-based web application. It makes requests to the backend using HTTP requests.
 ### Backend
 The backend is based on Spring Boot (open-source Java framework).
 Data will be stored in a MariaDB database.
-User prompts for the chatbot will be sent using API requests from the Spring Boot backend to the IBM Watsonx language model.\
+User prompts for the chatbot will be sent using API requests from the Spring Boot backend to the IBM Watsonx language model.
+
 ![Architecture diagram, showing the technologies used in the project.](/docs/architecture_diagram.png)
 
 ## User Instructions:
@@ -134,6 +147,12 @@ User prompts for the chatbot will be sent using API requests from the Spring Boo
 
    If you accepted the optional cookies, your conversation history will be saved for 30 days. You can return to the web app at any time within that period to continue where you left off or ask follow-up questions based on previous conversations.
 
+## Chatbot Interaction Flow:
+
+This flowchart outlines the interaction pathways within the chatbot, guiding users through key topics such as SkillsBuild courses, university life questions, and IBM SkillsBuild platform information. Each pathway details the chatbot's prompts, and user responses, providing an overview of the chatbot’s functionality.
+
+![watson_flow](/docs/watson_flow.png)
+
 ## Developer Instructions:
 To get started with developing or contributing to this project, follow the steps below:
 
@@ -151,12 +170,21 @@ To get started with developing or contributing to this project, follow the steps
 4. **Install Maven**:
    This project uses Maven as the build automation tool. If you don't have Maven installed, download the latest stable release [here](https://maven.apache.org/download.cgi).
 
-6. **Open the Project in Your IDE**:
+5. **Install Vue and Yarn**:
+   The front end of this project is built using Vue 3 and Yarn, so make sure you have them installed: 
+   - Vue 3 installation guide [here](https://v3.ru.vuejs.org/guide/installation.html)
+   - Yarn installation guide [here](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)
+
+7. **Open the Project in Your IDE**:
    Open the cloned repository in your preferred Integrated Development Environment (IDE) (we recommend IntelliJ) for further development.
 
 ## Team Members:
-Vlad Kirlovics (fi23561) \
-Gerard Chaba (tl23383) \
-Mohammed Elzobair (yi23484) \
-Weifan Liu (au22116) \
-Zixuan Zhu (kh23199) 
+
+| Name              | GitHub                                                      						| Email                 |
+|-------------------|-----------------------------------------------------------------------------------------------------------|-----------------------|                           
+| Vlad Kirilovics   | [vladislav-k1](https://github.com/vladislav-k1) and [kirilovich-vlad](https://github.com/kirilovich-vlad) | fi23561@bristol.ac.uk |
+| Gerard Chaba      | [GerardChabaBristol](https://github.com/GerardChabaBristol) 						| tl23383@bristol.ac.uk |  
+| Mohammed Elzobair | [yi23484](https://github.com/yi23484)	                  						| yi23484@bristol.ac.uk | 
+| Weifan Liu 	    | [Liuwf4319](https://github.com/Liuwf4319)		          						| au22116@bristol.ac.uk |
+| Zixuan Zhu 	    | [RainBOY-ZZX](https://github.com/RainBOY-ZZX)	          						| kh23199@bristol.ac.uk | 
+| Siyuan Zhang 	    | [Siyuan106](https://github.com/Siyuan106)		          						| gr23994@bristol.ac.uk |
