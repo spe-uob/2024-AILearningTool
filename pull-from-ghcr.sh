@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Run sudo systemctl start docker before running the script
+
 # Exit script immediately on error
 set -e
 
