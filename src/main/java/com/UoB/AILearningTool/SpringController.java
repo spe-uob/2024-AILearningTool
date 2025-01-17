@@ -5,17 +5,23 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 
 @RestController
 public class SpringController {
     private final Logger log = LoggerFactory.getLogger(SpringController.class);
-    private final DatabaseController DBC = new DatabaseController();
+    private final DatabaseController DBC;
     //    TODO: Replace with OpenAIAPIController with WatsonxAPIController when API quota issue will be resolved.
     //    private final WatsonxAPIController WXC = new WatsonxAPIController();
-    private final OpenAIAPIController WXC = new OpenAIAPIController();
+    private final OpenAIAPIController WXC;
 
+    @Autowired
+    public SpringController(DatabaseController DBC, OpenAIAPIController WXC) {
+        this.DBC = DBC;
+        this.WXC = WXC;
+    }
     // Assign a unique user ID for the user.
     @GetMapping("/signup")
     public void signup(@CookieValue(value = "optionalConsent", defaultValue = "false") boolean optionalConsent,
