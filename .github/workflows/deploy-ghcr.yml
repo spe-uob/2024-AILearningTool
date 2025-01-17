@@ -19,8 +19,8 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          java-version: 21  
-          distribution: temurin
+          java-version: '21'  
+          distribution: 'temurin'
 
       # Step 3: Build the JAR file with Maven
       - name: Build JAR
