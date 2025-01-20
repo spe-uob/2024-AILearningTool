@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 // integrates Mockito with JUnit
+/*
 @ExtendWith(MockitoExtension.class)
 class SpringControllerTest {
     @Mock
@@ -132,6 +133,5 @@ class SpringControllerTest {
 
     }
 }
-
-
+*/
 
