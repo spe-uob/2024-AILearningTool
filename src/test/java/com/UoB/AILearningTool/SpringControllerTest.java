@@ -15,8 +15,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 // integrates Mockito with JUnit
-
-
 @ExtendWith(MockitoExtension.class)
 class SpringControllerTest {
     @Mock
@@ -44,7 +42,7 @@ class SpringControllerTest {
     }
 
     @Test
-    public void testNewUserCreated() throws IOException {
+    public void testNewUserCreated() {
 
         // mock addUser to return a specific ID "user123" when called wit optional consent = true
         boolean optionalConsent = true;
@@ -69,7 +67,7 @@ class SpringControllerTest {
     }
 
     @Test
-    public void testRevokeConsent() throws IOException {
+    public void testRevokeConsent() {
 
         // define a userID "user123" to revoke consent for
         String userID = "user123";
@@ -94,9 +92,9 @@ class SpringControllerTest {
         assertEquals("", capturedCookie.getValue(), "Cookie value should be empty");
         assertEquals(0, capturedCookie.getMaxAge(), "Cookie max age should be 0");
     }
-/*
+
     @Test
-    void testCreateChat() throws IOException {
+    void testCreateChat() {
         // Given
         String userID = "user123";
         String initialMessage = "Hello chatbot!";
@@ -136,7 +134,6 @@ class SpringControllerTest {
         verify(mockWriter).write(generatedChatID);
     }
 
- */
 }
 
 
