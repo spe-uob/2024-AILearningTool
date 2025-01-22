@@ -182,6 +182,13 @@ To get started with developing or contributing to this project, follow the steps
 7. **Test and Run the Server**:
    - To run the unit tests, use the command ```mvn test```
    - To start the server, use the command ```mvn spring-boot:run```
+  
+8. **Continuous Deployment (CD) with Docker and GHCR**:
+Our project now includes Continuous Deployment (CD) with Docker and GitHub Container Registry (GHCR). Every time changes are pushed to the dev branch, a new Docker image is automatically built and pushed to our [GHCR repository](ghcr.io/spe-uob/2024-ailearningtool:latest).
+To pull the latest Docker image from GHCR and update the application on the server, follow these steps:
+- Start the Docker service: ```sudo systemctl start docker```
+- Run the pull script: ```./pull-from-ghcr.sh```
+
 
 ## Team Members:
 
