@@ -41,6 +41,7 @@ export default {
   data() {
     return {
       isSettingsOpen: false,
+      isColorblind: false, // Added this to track the toggle state
     };
   },
   methods: {
