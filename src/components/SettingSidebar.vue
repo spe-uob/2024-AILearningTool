@@ -143,5 +143,17 @@ button {
 button:hover {
   background-color: #e0e0e0;
 }
-</style>
 
+/* Add colorblind mode styles using CSS variables */
+.red-green-colorblind {
+  --primary-color: #004b23; /* Dark Green */
+  --secondary-color: #f2b104; /* Gold */
+  --accent-color: #ef6c6c; /* Soft Red */
+  --background-color: #f4f4f4;
+  --text-color: #2e2e2e;
+  --border-color: #d3d3d3;
+  --button-color: #4caf50;
+  --error-color: #e74c3c;
+  --success-color: #27ae60;
+}
+</style>
