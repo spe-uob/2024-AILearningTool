@@ -173,7 +173,7 @@ To get started with developing or contributing to this project, follow the steps
 
 5. **Install Vue and Yarn**:
    The front end of this project is built using Vue 3 and Yarn, so make sure you have them installed: 
-   - Vue 3 installation guide [here](https://v3.ru.vuejs.org/guide/installation.html)
+   - Vue 3 installation guide [here](https://vuejs.org/guide/quick-start.html)
    - Yarn installation guide [here](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)
 
 6. **Open the Project in Your IDE**:
