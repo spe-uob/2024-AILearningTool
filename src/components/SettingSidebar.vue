@@ -19,6 +19,13 @@
               <button @click="changeLanguage('zh')">Chinese</button>
             </div>
           </li>
+          <li>
+            <h4>3) Color Blind Mode</h4>
+            <!-- Button to toggle color blind mode -->
+            <button @click="toggleColorblindMode">
+              {{ isColorblind ? 'Turn Off Color Blind Mode' : 'Turn On Color Blind Mode' }}
+            </button>
+          </li>
         </ul>
         <div class="action-buttons">
           <button @click="goToCookiePage">Go to Cookie Settings</button>
@@ -54,6 +61,10 @@ export default {
       } else if (language === "zh") {
         alert("Language changed to Chinese");
       }
+    },
+    toggleColorblindMode() {
+      this.isColorblind = !this.isColorblind;  // Toggle colorblind mode on/off
+      this.$emit("colorblindToggled", this.isColorblind);  // Emit event to notify parent (optional, for future color scheme changes)
     },
     goToCookiePage() {
       //Go to the /cookie page to view or modify Cookie Settings
@@ -133,3 +144,4 @@ button:hover {
   background-color: #e0e0e0;
 }
 </style>
+
