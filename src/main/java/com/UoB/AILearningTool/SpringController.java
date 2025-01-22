@@ -5,17 +5,24 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
-@RestController
+@Service
 public class SpringController {
     private final Logger log = LoggerFactory.getLogger(SpringController.class);
-    private final DatabaseController DBC = new DatabaseController();
+    private final DatabaseController DBC;
     //    TODO: Replace with OpenAIAPIController with WatsonxAPIController when API quota issue will be resolved.
     //    private final WatsonxAPIController WXC = new WatsonxAPIController();
-    private final OpenAIAPIController WXC = new OpenAIAPIController();
+    private final OpenAIAPIController WXC;
 
+    @Autowired
+    public SpringController(DatabaseController DBC, OpenAIAPIController WXC) {
+        this.DBC = DBC;
+        this.WXC = WXC;
+    }
     // Assign a unique user ID for the user.
     @GetMapping("/signup")
     public void signup(@CookieValue(value = "optionalConsent", defaultValue = "false") boolean optionalConsent,
@@ -56,17 +63,27 @@ public class SpringController {
         // Create a chat
         User user = DBC.getUser(userID);
         if (user != null) {
-            WatsonxResponse wresponse;
             String chatID = DBC.createChat(user, initialMessage);
 
             // Send the message history (system prompt and initial message) to Watsonx API,
             // add the AI response to the message history of the chat.
             try {
-                wresponse = WXC.sendUserMessage(DBC.getChat(DBC.getUser(userID), chatID).getMessageHistory(user));
-                response.getWriter().write(chatID);
-                response.setStatus(wresponse.statusCode);
-                if (wresponse.statusCode == 200) {
-                    DBC.getChat(DBC.getUser(userID), chatID).addAIMessage(userID, wresponse.responseText);
+                // Grab the chat one time
+                Chat chat = DBC.getChat(user, chatID);
+                if (chat != null) {
+                    String messageHistory = chat.getMessageHistory(user);
+                    WatsonxResponse wresponse = WXC.sendUserMessage(messageHistory);
+
+                    response.getWriter().write(chatID);
+                    response.setStatus(wresponse.statusCode);
+
+                    if (wresponse.statusCode == 200) {
+                        // Reuse the same chat and user objects, instead of creating new ones
+                        chat.addAIMessage(userID, wresponse.responseText);
+                    }
+                } else {
+                    response.getWriter().write("null");
+                    response.setStatus(400);
                 }
             } catch (IOException e) {
                 log.warn(String.valueOf(e));
@@ -87,25 +104,34 @@ public class SpringController {
                             @RequestParam(name = "newMessage") String newMessage,
                            @RequestParam(name = "chatID") String chatID,
                            HttpServletResponse response) {
-        Chat chat = DBC.getChat(DBC.getUser(userID), chatID);
-        String inputString = chat.getMessageHistory(DBC.getUser(userID));
-
-        // Default response - Unauthorised
-        WatsonxResponse wresponse = new WatsonxResponse(401, "");
         response.setContentType("text/plain");
-        response.setStatus(401);
+        response.setStatus(401); // Default
 
-        if (chat != null && inputString != null) {
-            // If a message can be added to the message history of a chat, then send the message history
-            // to Watsonx API.
-            boolean success = chat.addUserMessage(userID, newMessage);
-            if (success) {
-                inputString = chat.getMessageHistory(DBC.getUser(userID));
-//                TODO: Revert wresponse when issue with Watsonx API quota will be resolved.
-//                wresponse = WXC.sendUserMessage(StringTools.messageHistoryPrepare(inputString));
-                wresponse = WXC.sendUserMessage(inputString);
-                response.setStatus(wresponse.statusCode);
-            }
+        // 1) Get the user
+        User user = DBC.getUser(userID);
+        // 2) get the chat
+        Chat chat = DBC.getChat(user, chatID);
+        if (chat == null) {
+            // null chat
+            return;
+        }
+
+        // 3) Get existing history
+        String inputString = chat.getMessageHistory(user);
+        if (inputString == null) {
+            return;
+        }
+
+        // 4) Try to add the new user message
+        boolean success = chat.addUserMessage(userID, newMessage);
+        if (success) {
+            // 5) Re-fetch history & call AI
+            inputString = chat.getMessageHistory(user);
+            WatsonxResponse wresponse = WXC.sendUserMessage(inputString);
+
+            // Update status from AI
+            response.setStatus(wresponse.statusCode);
+
             try {
                 if (wresponse.statusCode == 200) {
                     chat.addAIMessage(userID, wresponse.responseText);
@@ -152,24 +178,36 @@ public class SpringController {
     public void getChatHistory(@CookieValue(value = "userID", defaultValue = "") String userID,
                                @RequestParam(name = "chatID") String chatID,
                                HttpServletResponse response) {
+        User user = DBC.getUser(userID);
         Chat chat = DBC.getChat(DBC.getUser(userID), chatID);
-        String messageHistory = chat.getMessageHistory(DBC.getUser(userID));
-        if (chat != null && messageHistory != null) {
-            response.setContentType("text/plain");
-            response.setStatus(200);
-            try {
-                response.getWriter().write(messageHistory);
-            } catch (IOException e) {
-                log.warn(String.valueOf(e));
+        if (chat == null) {
+            response.setStatus(401);
+        try {
+            response.getWriter().write("");
+        } catch (IOException e) {
+            log.warn(String.valueOf(e));
             }
-        } else {
-            response.setContentType("text/plain");
+            return;
+        }
+
+        String messageHistory = chat.getMessageHistory(user);
+        if (messageHistory == null) {
             response.setStatus(401);
             try {
                 response.getWriter().write("");
             } catch (IOException e) {
                 log.warn(String.valueOf(e));
             }
+            return;
+
+        }
+        // If we reach here, chat != null and messageHistory != null
+        response.setStatus(200);
+        try {
+            response.getWriter().write(messageHistory);
+        } catch (IOException e) {
+            log.warn(String.valueOf(e));
+            response.setStatus(500);
         }
     }
 }

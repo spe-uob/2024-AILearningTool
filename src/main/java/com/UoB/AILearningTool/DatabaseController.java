@@ -3,8 +3,11 @@ package com.UoB.AILearningTool;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.stereotype.Service;
+
 
 // Communication with SQL database.
+@Service
 public class DatabaseController {
     private Map<String, User> users = new HashMap<>();
     private Map<String, Chat> chats = new HashMap<>();
