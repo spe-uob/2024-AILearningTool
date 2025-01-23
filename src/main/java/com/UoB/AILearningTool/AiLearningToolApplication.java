@@ -20,12 +20,7 @@ public class AiLearningToolApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		// 1) Check if keystore.p12 exists in current directory
 		Path keystorePath = Paths.get("keystore.p12");
-		if (!Files.exists(keystorePath)) {
-			System.out.println("keystore.p12 not found, add the file and try again");
-			System.exit(1);
-		}
 
 		// 2) Copy keystore.p12 to src/main/resources
 		Path resourcesDir = Paths.get("src","main", "resources");
