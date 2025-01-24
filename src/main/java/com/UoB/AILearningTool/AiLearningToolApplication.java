@@ -25,7 +25,7 @@ public class AiLearningToolApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		Path keystorePath = Paths.get("keystore.p12");
+		Path keystorePath = Paths.get("src", "main", "resources", "keystore.p12");
 
 		// If there's no keystore in the working directory, skip the SSL setup.
 		if (!Files.exists(keystorePath)) {
