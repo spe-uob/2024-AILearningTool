@@ -15,6 +15,10 @@ import java.util.List;
 public class AiLearningToolApplication implements CommandLineRunner {
 
 	public static void main(String[] args) {
+		// 1) disable SSL if launched without keystore.p12
+		if (!Files.exists(Paths.get("src/main/resources/keystore.p12"))) {
+			System.setProperty("server.ssl.enabled", "false");
+		}
 		SpringApplication.run(AiLearningToolApplication.class, args);
 	}
 
