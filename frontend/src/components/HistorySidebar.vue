@@ -22,7 +22,7 @@ export default {
   methods: {
     // 添加新聊天
     addChat() {
-      fetch("http:/ailearningtool.ddns.net:8080/createChat", {
+      fetch("http://localhost:8080/createChat", {
         method: "GET",
         credentials: "include",
       })
@@ -50,7 +50,7 @@ export default {
     },
     // 加载历史会话
     loadChatHistory() {
-      fetch("http://ailearningtool.ddns.net:8080/getChatHistory", {
+      fetch("http://localhost:8080/getChatHistory", {
         method: "GET",
         credentials: "include",
       })

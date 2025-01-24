@@ -23,7 +23,7 @@ export default {
       document.cookie = `optionalConsent=${consentValue};${expires};path=/`;
     },
     signUp() {
-      fetch("https://ailearningtool.ddns.net:8080", {
+      fetch("http://localhost:8080", {
         method: "GET",
         credentials: "include",
       })

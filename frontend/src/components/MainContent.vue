@@ -45,7 +45,7 @@ export default {
       currentTopic: '', // 当前选择的话题
       userId: localStorage.getItem('userId') || '', // 从 LocalStorage 获取用户ID
       chatId: localStorage.getItem('chatId') || '', // 从 LocalStorage 获取对话ID
-      aiServerUrl: 'https://ailearningtool.ddns.net:8080/sendMessage', // AI 服务器地址
+      aiServerUrl: 'http://localhost:8080/sendMessage', // AI 服务器地址
     };
   },
   computed: {
