@@ -15,8 +15,9 @@ import java.util.List;
 public class AiLearningToolApplication implements CommandLineRunner {
 
 	public static void main(String[] args) {
-		// 1) disable SSL if launched without keystore.p12
+		//  disable SSL if launched without keystore.p12
 		if (!Files.exists(Paths.get("src/main/resources/keystore.p12"))) {
+			// Force disable SSL
 			System.setProperty("server.ssl.enabled", "false");
 		}
 		SpringApplication.run(AiLearningToolApplication.class, args);
@@ -26,17 +27,23 @@ public class AiLearningToolApplication implements CommandLineRunner {
 	public void run(String... args) throws Exception {
 		Path keystorePath = Paths.get("keystore.p12");
 
-		// 2) Copy keystore.p12 to src/main/resources
-		Path resourcesDir = Paths.get("src","main", "resources");
+		// If there's no keystore in the working directory, skip the SSL setup.
+		if (!Files.exists(keystorePath)) {
+			System.out.println("No keystore.p12 found in working directory; skipping SSL copy/overwrite");
+			return;
+		}
+
+		// Otherwise, proceed with the copy and overwrite
+		Path resourcesDir = Paths.get("src","main","resources");
 		Path targetKeystore = resourcesDir.resolve("keystore.p12");
 		copyFile(keystorePath, targetKeystore);
 		System.out.println("keystore.p12 copied to src/main/resources successfully");
 
-		// 3) Overwrite application.properties
 		Path applicationProps = Paths.get("application.properties");
 		overwriteApplicationProperties(applicationProps);
 		System.out.println("application.properties has been updated successfully");
 	}
+
 
 	private void copyFile(Path source, Path target) throws IOException {
 		Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
