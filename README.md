@@ -179,9 +179,13 @@ To get started with developing or contributing to this project, follow the steps
 6. **Open the Project in Your IDE**:
    Open the cloned repository in your preferred Integrated Development Environment (IDE) (we recommend IntelliJ) for further development.
 
-7. **Test and Run the Server**:
+7. **Add keystore.p12 file to the root of the cloned repository**:
+    Keystore has to contain both private key and full certificate chain files.
+    Not adding the keystore file will result in unencrypted (non-HTTPS) connection.
+
+8. **Test and Run the Server**:
    - To run the unit tests, use the command ```mvn test```
-   - To start the server, use the command ```mvn spring-boot:run```
+   - To start the server, use the command ```startServer.sh```
 
 ## Team Members:
 
