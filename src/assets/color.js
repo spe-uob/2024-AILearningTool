@@ -1,4 +1,4 @@
-const colorSchemes= {
+const colorSchemes = {
     default: {
         primary: "#000000",
         secondary: "#FFFFFF",
@@ -10,16 +10,21 @@ const colorSchemes= {
         error: "#E74C3C",
         success: "#27AE60",
     },
-    colorblind: {
-            primary: "#1F4E79",
-            secondary: "#F2C94C",
-            accent: "#E94E77",
-            background: "#F4F4F4",
-            text: "#2E2E2E",
-            border: "#B6B6B6",
-            button: "#4CAF50",
-            error: "#E74C3C",
-            success: "#27AE60",
+    colorblind_red_green: {
+        primary: "#1F4E79",
+        secondary: "#F2C94C",
+        accent: "#E94E77",
+        background: "#F4F4F4",
+        text: "#2E2E2E",
+        border: "#B6B6B6",
+        button: "#F2994A", 
+        error: "#D33F49",  
+        success: "#6BAF92", 
     },
 };
-export default colorSchemes;
+
+// Export with a fallback function
+const getTheme = (themeName = "default") =>
+    colorSchemes[themeName] || colorSchemes.default;
+
+export { colorSchemes, getTheme };
