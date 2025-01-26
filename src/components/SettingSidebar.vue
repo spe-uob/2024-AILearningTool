@@ -37,11 +37,13 @@
 </template>
 
 <script>
+import { getTheme } from "@/color.js";
+
 export default {
   data() {
     return {
       isSettingsOpen: false,
-      isColorblind: false, // Added this to track the toggle state
+      isColorblind: false, // Tracks the toggle state for color blind mode
     };
   },
   methods: {
@@ -64,13 +66,24 @@ export default {
       }
     },
     toggleColorblindMode() {
-      this.isColorblind = !this.isColorblind;  // Toggle colorblind mode on/off
-      this.$emit("colorblindToggled", this.isColorblind);  // Emit event to notify parent (optional, for future color scheme changes)
+      this.isColorblind = !this.isColorblind; // Toggle colorblind mode on/off
+      const themeName = this.isColorblind ? "colorblind_red_green" : "default";
+      this.applyTheme(themeName);
+      this.$emit("colorblindToggled", this.isColorblind); // Notify parent 
+    },
+    applyTheme(themeName) {
+      const theme = getTheme(themeName);
+      Object.keys(theme).forEach((key) => {
+        document.documentElement.style.setProperty(`--${key}-color`, theme[key]);
+      });
     },
     goToCookiePage() {
-      //Go to the /cookie page to view or modify Cookie Settings
-      this.$router.push("/");
+      this.$router.push("/"); // Redirect to the /cookie page
     },
+  },
+  mounted() {
+    // Apply default theme on mount
+    this.applyTheme("default");
   },
 };
 </script>
@@ -145,16 +158,26 @@ button:hover {
   background-color: #e0e0e0;
 }
 
-/* Add colorblind mode styles using CSS variables */
-.red-green-colorblind {
-  --primary-color: #004b23; /* Dark Green */
-  --secondary-color: #f2b104; /* Gold */
-  --accent-color: #ef6c6c; /* Soft Red */
+/* Use CSS variables for theming */
+:root {
+  --primary-color: #000000;
+  --secondary-color: #ffffff;
+  --accent-color: #b0b0b0;
   --background-color: #f4f4f4;
   --text-color: #2e2e2e;
   --border-color: #d3d3d3;
   --button-color: #4caf50;
   --error-color: #e74c3c;
   --success-color: #27ae60;
+}
+
+body {
+  color: var(--text-color);
+  background-color: var(--background-color);
+}
+
+button {
+  background-color: var(--button-color);
+  color: var(--text-color);
 }
 </style>
