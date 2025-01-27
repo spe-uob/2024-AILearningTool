@@ -70,6 +70,8 @@ export default {
       const themeName = this.isColorblind ? "colorblind_red_green" : "default";
       this.applyTheme(themeName);
       this.$emit("colorblindToggled", this.isColorblind); // Notify parent 
+      const event = new CustomEvent("themeChange", { detail: { themeName } });
+      window.dispatchEvent(event);
     },
     applyTheme(themeName) {
       const theme = getTheme(themeName);
