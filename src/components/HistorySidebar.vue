@@ -110,6 +110,13 @@ export default {
         },
       };
     },
+
+    // Listen for theme change events
+    listenForThemeChange() {
+      window.addEventListener("themeChange", (event) => {
+        this.applyTheme(event.detail.themeName);
+      });
+    },
   },
   computed: {
     asideStyles() {
@@ -125,6 +132,9 @@ export default {
   mounted() {
     // Apply the default theme when the component is mounted
     this.applyTheme("default");
+
+    // Start listening for theme changes
+    this.listenForThemeChange();
   },
 };
 </script>
@@ -161,3 +171,4 @@ button:hover {
   margin-top: 10px;
 }
 </style>
+
