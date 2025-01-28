@@ -23,7 +23,7 @@ export default {
       document.cookie = `optionalConsent=${consentValue};${expires};path=/`;
     },
     signUp() {
-      fetch("http://localhost:8080", {
+      fetch("http://localhost:8080/signup", {
         method: "GET",
         credentials: "include",
       })

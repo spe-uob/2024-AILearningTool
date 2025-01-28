@@ -2,6 +2,7 @@ package com.UoB.AILearningTool;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
-@Service
+@Service @Controller
 public class SpringController {
     private final Logger log = LoggerFactory.getLogger(SpringController.class);
     private final DatabaseController DBC;
