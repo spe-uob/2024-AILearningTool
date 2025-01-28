@@ -2,4 +2,6 @@ target
 backend/.idea
 .idea
 .env
+keystore.p12
+src/main/resources/keystore.p12
 
