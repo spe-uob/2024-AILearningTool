@@ -10,16 +10,16 @@ const colorSchemes = {
         error: "#E74C3C",  // Red
         success: "#27AE60",  // Green
     },
-    colorblind_red_green: { //Blue-blind friendly mode
-        primary: "#D17B0F",  // Deep Orange
-        secondary: "#F2C14E",  // Gold
-        accent: "#E88B8B",  // Soft Red-Pink
-        background: "#F5E6CC",  // Warm Beige
-        text: "#4A403A",  // Dark Brown
-        border: "#A68A64",  // Warm Brown
-        button: "#D17B0F",  // Deep Orange for emphasis
-        error: "#D7263D",  // Bright Red for warnings
-        success: "#A0C24D",  // Yellow-Green 
+    high_contrast: {
+        primary: "#002147",  // Deep Navy Blue
+        secondary: "#FFD700",  // Bright Gold (high contrast)
+        accent: "#FF4500",  // Bright Orange-Red
+        background: "#001F3F",  // Dark Blue (better than pure black)
+        text: "#FFFFFF",  // White for max readability
+        border: "#FFD700",  // Gold for clear separation
+        button: "#00FFFF",  // Cyan for distinct interaction
+        error: "#FF0000",  // Bright Red for warnings
+        success: "#00FF00",  // Neon Green for success indicators
     },
 };
 
