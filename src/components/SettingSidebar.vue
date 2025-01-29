@@ -30,7 +30,6 @@
         <div class="action-buttons">
           <button @click="goToCookiePage">Go to Cookie Settings</button>
           <button class="close-btn" @click="closeSettings">Close</button>
-          <button class="close-btn" :style="closeButtonStyle" @click="closeSettings">Close</button>
         </div>
       </div>
     </div>
