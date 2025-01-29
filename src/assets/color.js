@@ -4,7 +4,7 @@ const colorSchemes = {
         secondary: "#FFFFE0",  // Light Yellow
         accent: "#CDDAF3",  // Pastel Blue
         background: "#F4F4F4",  // Light Gray
-        text: "#FFFFFF",  // White
+        text: "#2E2E2E",  // Dark Grey
         border: "#D3D3D3",  // Light Border Gray
         button: "#5C88DA",  // IBM Blue
         error: "#E74C3C",  // Red
@@ -14,7 +14,7 @@ const colorSchemes = {
         primary: "#0050C8",  // Stronger IBM Blue
         secondary: "#FFEB99",  // Brighter Yellow 
         accent: "#A3C4F3",  // More vivid pastel blue
-        background: "#EDEDED",  // Very light gray for softer contrast
+        background: "#767676",  // Grey
         text: "#FFFFFF",  // White
         border: "#A0A0A0",  // Medium Gray for stronger borders
         button: "#0050C8",  // Stronger IBM Blue 
