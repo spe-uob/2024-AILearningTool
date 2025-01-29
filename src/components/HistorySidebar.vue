@@ -6,21 +6,20 @@
     <!-- History content, only visible when not collapsed -->
     <div v-if="!isCollapsed" class="history-content">
       <h3 :style="textStyles">Conversation History</h3>
-      <ul>
-        <!-- Dynamically generated chat log button -->
-        <li v-for="conversation in conversations" :key="conversation.chatId">
-          <button :style="buttonStyles" @click="loadConversation(conversation.chatId)">
-            {{ conversation.chatId }}
-          </button>
-        </li>
-      </ul>
+
+      <!-- Scrollable conversation list -->
+      <div class="history-list">
+        <ul>
+          <li v-for="conversation in conversations" :key="conversation.chatId">
+            <button :style="buttonStyles" @click="loadConversation(conversation.chatId)">
+              {{ conversation.chatId }}
+            </button>
+          </li>
+        </ul>
+      </div>
 
       <!-- Button for adding a new conversation -->
-      <button
-        class="new-conversation-btn"
-        :style="buttonStyles"
-        @click="createNewConversation"
-      >
+      <button class="new-conversation-btn" :style="buttonStyles" @click="createNewConversation">
         ➕ New Conversation
       </button>
     </div>
@@ -29,7 +28,7 @@
 
 <script>
 import axios from "axios";
-import { getTheme } from "@/color.js";
+import { getTheme } from "../assets/color.js";
 
 export default {
   data() {
@@ -145,18 +144,30 @@ aside {
   padding: 10px;
   transition: width 0.3s ease;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .collapsed {
   width: 50px;
 }
 
+/* Make the conversation history scrollable */
+.history-list {
+  max-height: 300px; /* Adjust based on your layout */
+  overflow-y: auto;
+  margin-top: 10px;
+  padding-right: 5px; /* Prevents content from touching scrollbar */
+}
+
+/* Ensure consistent button styling */
 button {
   margin: 5px 0;
   padding: 10px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  width: 100%; /* Ensure buttons take full width */
 }
 
 button:hover {
@@ -164,11 +175,12 @@ button:hover {
 }
 
 .history-content {
-  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
 .new-conversation-btn {
   margin-top: 10px;
 }
 </style>
-
