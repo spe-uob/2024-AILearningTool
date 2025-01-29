@@ -52,7 +52,7 @@ export default {
       currentTopic: "", // 当前话题
       userId: localStorage.getItem("userId") || "", // 存储用户 ID
       chatId: localStorage.getItem("chatId") || "", // 存储对话 ID
-      aiServerUrl: "http://localhost:8080/api", // API 基础路径
+      aiServerUrl: "http://localhost:8080", // API 基础路径
     };
   },
   methods: {
@@ -138,8 +138,8 @@ export default {
         // 发送消息到后端
         const response = await axios.get(`${this.aiServerUrl}/sendMessage`, {
           params: {
-            userId: this.userId,
-            chatId: this.chatId,
+            userID: this.userId,
+            chatID: this.chatId,
             newMessage: messageToSend,
           },
           withCredentials: true,

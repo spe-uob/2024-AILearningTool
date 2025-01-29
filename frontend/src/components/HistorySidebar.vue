@@ -24,7 +24,7 @@ export default {
       chats: [], // 聊天会话列表
       selectedChatID: localStorage.getItem("chatId") || null, // 存储当前会话 ID
       chatHistory: [], // 聊天记录
-      aiServerUrl: "http://localhost:8080/api", // 服务器 API
+      aiServerUrl: "http://localhost:8080", // 服务器 API
     };
   },
   methods: {
