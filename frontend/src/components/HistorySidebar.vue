@@ -3,10 +3,12 @@
     <button class="add-chat-btn" @click="addChat">Add Chat</button>
     <div class="chat-list">
       <ul>
-        <li v-for="chat in chats" :key="chat.id">
+        <li v-if="isLoading">Loading chats...</li>
+        <li v-else-if="chats.length === 0">No chats available. Click "Add Chat" to start a new one!</li>
+        <li v-for="chat in chats" :key="chat.id" v-else>
           <button
-              @click="selectChat(chat.id)"
-              :class="{ active: chat.id === selectedChatID }">
+            @click="selectChat(chat.id)"
+            :class="{ active: chat.id === selectedChatID }">
             {{ chat.name }}
           </button>
         </li>
@@ -21,14 +23,14 @@ import axios from "axios";
 export default {
   data() {
     return {
-      chats: [], // 聊天会话列表
-      selectedChatID: localStorage.getItem("chatId") || null, // 存储当前会话 ID
-      chatHistory: [], // 聊天记录
-      aiServerUrl: "http://localhost:8080", // 服务器 API
+      chats: [],
+      selectedChatID: localStorage.getItem("chatId") || null,
+      chatHistory: [],
+      aiServerUrl: "http://localhost:8080",
+      isLoading: false,
     };
   },
   methods: {
-    // **创建新聊天**
     async addChat() {
       const initialMessage = "Hello, this is a new chat!";
 
@@ -42,25 +44,24 @@ export default {
           throw new Error(`Unexpected response code: ${response.status}`);
         }
 
-        const newChatID = response.data; // 服务器返回 chatID
+        const newChatID = response.data;
         this.chats.push({ id: newChatID, name: `Chat ${this.chats.length + 1}` });
 
-        // 选中新创建的聊天
+        // Select new chat
         this.selectChat(newChatID);
       } catch (error) {
         console.error("Error creating chat:", error);
+        alert("Failed to create a new chat. Please try again.");
       }
     },
 
-    // **选择聊天并加载聊天记录**
     selectChat(chatID) {
       this.selectedChatID = chatID;
-      localStorage.setItem("chatId", chatID); // 存储当前聊天 ID
-      this.$emit("chat-selected", chatID); // 触发事件通知 `MainContent.vue`
-      this.loadChatHistory(chatID); // 加载聊天记录
+      localStorage.setItem("chatId", chatID);
+      this.$emit("chat-selected", chatID);
+      this.loadChatHistory(chatID);
     },
 
-    // **加载聊天记录**
     async loadChatHistory(chatID) {
       try {
         const response = await axios.get(`${this.aiServerUrl}/getChatHistory`, {
@@ -73,22 +74,19 @@ export default {
         }
 
         const messageHistory = response.data;
-
-        // 解析聊天记录
         this.chatHistory = this.processChatHistory(messageHistory);
       } catch (error) {
         console.error("Error loading chat history:", error);
+        alert("Failed to load chat history. Please try again.");
       }
     },
 
-    // **解析聊天记录**
     processChatHistory(messageHistory) {
       const messages = [];
       const lines = messageHistory.split("\n");
 
       for (const line of lines) {
         if (line.includes("<|system|>") || line.includes("<|assistant|>")) {
-          // 跳过系统消息
           continue;
         }
 
@@ -102,10 +100,10 @@ export default {
       return messages;
     },
 
-    // **加载所有聊天会话**
     async loadChats() {
+      this.isLoading = true;
       try {
-        const response = await axios.get(`${this.aiServerUrl}/getChatHistory`, {
+        const response = await axios.get(`${this.aiServerUrl}/getAllChats`, {
           withCredentials: true,
         });
 
@@ -120,11 +118,14 @@ export default {
         }));
       } catch (error) {
         console.error("Error loading chats:", error);
+        alert("Failed to load chats. Please check your login status.");
+      } finally {
+        this.isLoading = false;
       }
     },
   },
   mounted() {
-    this.loadChats(); // 页面加载时获取聊天列表
+    this.loadChats();
   },
 };
 </script>
