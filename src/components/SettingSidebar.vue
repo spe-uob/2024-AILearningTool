@@ -37,7 +37,7 @@
 </template>
 
 <script>
-import { getTheme } from "@/color.js";
+import { getTheme } from "../assets/color.js";
 
 export default {
   data() {
