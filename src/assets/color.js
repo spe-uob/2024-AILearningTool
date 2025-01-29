@@ -11,13 +11,13 @@ const colorSchemes = {
         success: "#27AE60",  // Green
     },
     high_contrast: {
-        primary: "#0050C8",  // Stronger IBM Blue
+        primary: "#0A6CFF",  // Stronger Blue
         secondary: "#FFEB99",  // Brighter Yellow 
         accent: "#A3C4F3",  // More vivid pastel blue
         background: "#FFFFFF",  // White
-        text: "#111111",  // Dark Gray
+        text: "#000000",  // Black
         border: "#A0A0A0",  // Medium Gray for stronger borders
-        button: "#0050C8",  // Stronger IBM Blue 
+        button: "#0A6CFF",  // Stronger Blue 
         error: "#CC0000",  // Deeper Red for better visibility
         success: "#008F28",  // Stronger Green 
     },
