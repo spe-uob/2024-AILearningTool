@@ -28,7 +28,7 @@ export default {
   methods: {
     onHighContrastToggled(isHighContrast) {
       // Set the theme based on high contrast mode state
-      this.currentTheme = isHighContrast ? "high_contrast_red_green" : "default";
+      this.currentTheme = isHighContrast ? "high_contrast" : "default";
       this.applyTheme(this.currentTheme);
     },
     applyTheme(themeName) {
