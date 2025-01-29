@@ -23,7 +23,7 @@
             <h4>3) Color Blind Mode</h4>
             <!-- Button to toggle color blind mode -->
             <button @click="toggleColorblindMode">
-              {{ isColorblind ? 'Turn Off Color Blind Mode' : 'Turn On Color Blind Mode' }}
+              {{ isColorblind ? 'Turn Off High Contrast Mode' : 'Turn On High Contrast Mode' }}
             </button>
           </li>
         </ul>
