@@ -4,29 +4,36 @@
       <p>Welcome to Watsonx AI!</p>
       <p v-if="!topicSelected">Select one of the topics below:</p>
 
-      <!-- Buttons for selecting topics -->
+      <!-- 话题选择按钮 -->
       <div v-if="!topicSelected">
-        <button @click="startTopic('First Time Coming to University')">First Time Coming to University</button>
+        <button @click="startTopic('First Time Coming to University')">
+          First Time Coming to University
+        </button>
         <button @click="startTopic('Academic Inquiry')">Academic Inquiry</button>
       </div>
 
-      <!-- Chatbox -->
+      <!-- 聊天窗口 -->
       <div v-if="topicSelected">
-        <!-- Display messages -->
-        <div v-for="msg in processedMessages" :key="msg.id" class="message">
+        <!-- 显示聊天消息 -->
+        <div
+            v-for="msg in messages"
+            :key="msg.id"
+            class="message"
+            :class="{ 'from-ai': msg.sender === 'AI', 'from-user': msg.sender === 'You' }"
+        >
           <strong v-if="msg.sender === 'AI'">AI:</strong>
           <strong v-else>You:</strong>
           <p>{{ msg.content }}</p>
         </div>
 
-        <!-- Input area -->
+        <!-- 输入框 -->
         <textarea
             v-model="userInput"
             placeholder="Type your message..."
             @keypress.enter.prevent="sendMessage"
         ></textarea>
 
-        <!-- Send button -->
+        <!-- 发送按钮 -->
         <button @click="sendMessage">Send</button>
       </div>
     </div>
@@ -34,104 +41,187 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 
 export default {
   data() {
     return {
-      userInput: '', // 用户输入内容
+      userInput: "", // 用户输入内容
       messages: [], // 聊天记录
-      topicSelected: false, // 是否选择了话题
-      currentTopic: '', // 当前选择的话题
-      userId: localStorage.getItem('userId') || '', // 从 LocalStorage 获取用户ID
-      chatId: localStorage.getItem('chatId') || '', // 从 LocalStorage 获取对话ID
-      aiServerUrl: 'https://ailearningtool.ddns.net:8080/sendMessage', // AI 服务器地址
+      topicSelected: false, // 是否已选择话题
+      currentTopic: "", // 当前话题
+      userId: localStorage.getItem("userId") || "", // 存储用户 ID
+      chatId: localStorage.getItem("chatId") || "", // 存储对话 ID
+      aiServerUrl: "http://localhost:8080/api", // API 基础路径
     };
   },
-  computed: {
-    processedMessages() {
-      return this.messages.map((msg) => ({
-        ...msg,
-        content: this.wrapText(msg.content, 1000),
-      }));
-    },
-  },
   methods: {
-    wrapText(text, maxLength) {
-      let result = '';
-      let currentLine = '';
-      const words = text.split(' ');
-
-      words.forEach((word) => {
-        if ((currentLine + word).length > maxLength) {
-          result += currentLine.trim() + '\n';
-          currentLine = word + ' ';
-        } else {
-          currentLine += word + ' ';
-        }
-      });
-
-      result += currentLine.trim();
-      return result;
-    },
-    async sendMessage() {
-      if (!this.userInput.trim()) return;
-
-      // 将用户输入添加到聊天记录
-      this.messages.push({
-        id: Date.now(),
-        sender: 'You',
-        content: this.userInput,
-      });
-
-      const userMessage = this.userInput; // 缓存用户输入
-      this.userInput = ''; // 清空输入框
-
+    // 获取 userId（避免刷新后丢失）
+    async getUserId() {
       try {
-        // 向 AI 服务器发送消息
-        const response = await axios.get(this.aiServerUrl, {
-          params: {
-            userId: this.userId, // 当前用户ID
-            message: userMessage, // 用户输入的文本
-            chatId: this.chatId, // 当前对话ID
-
-          },
-        });
-
-        // 将 AI 回复添加到聊天记录
-        this.messages.push({
-          id: Date.now() + 1,
-          sender: 'AI',
-          content: response.data.responseText, // 假设返回字段为 `responseText`
-        });
+        const response = await axios.get(`${this.aiServerUrl}/signup`, { withCredentials: true });
+        if (response.status === 200) {
+          this.userId = response.data;
+          localStorage.setItem("userId", this.userId);
+        } else {
+          console.error("Failed to get userId.");
+        }
       } catch (error) {
-        console.error('Error communicating with AI server:', error);
-        this.messages.push({
-          id: Date.now() + 1,
-          sender: 'AI',
-          content: 'Sorry, there was an error connecting to the server.',
-        });
+        console.error("Error fetching userId:", error);
       }
     },
-    startTopic(topic) {
-      // 设置当前话题
+
+    // 选择话题并启动对话
+    async startTopic(topic) {
       this.topicSelected = true;
       this.currentTopic = topic;
 
-      // 添加系统提示到聊天记录
+      // 记录用户选择的主题
       this.messages.push({
-        id: Date.now(),
-        sender: 'system',
+        id: `system-${Date.now()}`,
+        sender: "System",
         content: `You have selected the topic: ${topic}`,
       });
 
-      // 模拟设置 ChatID（如需动态生成，请从后端获取并保存）
-      this.chatId = `chat_${Date.now()}`;
-      localStorage.setItem('chatId', this.chatId);
+      try {
+        // 创建新聊天会话
+        const response = await axios.get(`${this.aiServerUrl}/createChat`, {
+          params: { initialMessage: topic },
+          withCredentials: true,
+        });
+
+        if (response.status !== 200) {
+          throw new Error(`Unexpected response code: ${response.status}`);
+        }
+
+        // 存储 chatId
+        this.chatId = response.data;
+        localStorage.setItem("chatId", this.chatId);
+
+        // 获取聊天历史记录
+        await this.loadChatHistory();
+      } catch (error) {
+        console.error("Error starting chat:", error);
+        this.messages.push({
+          id: `error-${Date.now()}`,
+          sender: "System",
+          content: "Failed to start the chat. Please try again.",
+        });
+        this.topicSelected = false;
+      }
     },
+
+    // 发送消息
+    async sendMessage() {
+      if (!this.userInput.trim()) {
+        alert("Please enter a message!");
+        return;
+      }
+
+      if (!this.chatId) {
+        alert("ChatId is not set. Please start a new chat.");
+        return;
+      }
+
+      // 添加用户消息到聊天记录
+      const userMessage = {
+        id: `user-${Date.now()}`,
+        sender: "You",
+        content: this.userInput,
+      };
+      this.messages.push(userMessage);
+
+      const messageToSend = this.userInput.trim();
+      this.userInput = ""; // 清空输入框
+
+      try {
+        // 发送消息到后端
+        const response = await axios.get(`${this.aiServerUrl}/sendMessage`, {
+          params: {
+            userId: this.userId,
+            chatId: this.chatId,
+            newMessage: messageToSend,
+          },
+          withCredentials: true,
+        });
+
+        if (response.status !== 200) {
+          throw new Error(`Unexpected response code: ${response.status}`);
+        }
+
+        // 添加 AI 回复到聊天记录
+        this.messages.push({
+          id: `ai-${Date.now()}`,
+          sender: "AI",
+          content: response.data || "No response from AI.",
+        });
+      } catch (error) {
+        console.error("Error sending message:", error);
+
+        // 添加错误提示到聊天记录
+        this.messages.push({
+          id: `error-${Date.now()}`,
+          sender: "System",
+          content: "Failed to send message. Please try again.",
+        });
+      }
+    },
+
+    // 加载聊天历史记录
+    async loadChatHistory() {
+      if (!this.chatId) {
+        console.error("No chatId found. Unable to load chat history.");
+        return;
+      }
+
+      try {
+        const response = await axios.get(`${this.aiServerUrl}/getChatHistory`, {
+          params: { chatID: this.chatId },
+          withCredentials: true,
+        });
+
+        if (response.status !== 200) {
+          throw new Error("Failed to load chat history.");
+        }
+
+        // 解析历史消息
+        this.messages = this.processChatHistory(response.data);
+      } catch (error) {
+        console.error("Error loading chat history:", error);
+      }
+    },
+
+    // 解析聊天记录，去掉 `<|system|>` 标记
+    processChatHistory(messageHistory) {
+      const messages = [];
+      const lines = messageHistory.split("\n");
+
+      for (const line of lines) {
+        if (line.includes("<|system|>") || line.includes("<|assistant|>")) {
+          continue;
+        }
+        if (line.includes("<|user|>")) {
+          messages.push({ sender: "You", content: line.replace("<|user|>", "").trim() });
+        } else {
+          messages.push({ sender: "AI", content: line.trim() });
+        }
+      }
+
+      return messages;
+    },
+  },
+
+  async mounted() {
+    if (!this.userId) {
+      await this.getUserId();
+    }
+    if (this.chatId) {
+      this.loadChatHistory();
+    }
   },
 };
 </script>
+
 
 <style scoped>
 main {
@@ -148,21 +238,20 @@ main {
 .message {
   margin: 10px 0;
   padding: 10px;
-  background-color: #e0f7fa;
   border-radius: 15px;
-  border: 1px solid #b2ebf2;
+  border: 1px solid #ccc;
   max-width: 60%;
   white-space: pre-wrap;
   word-wrap: break-word;
 }
 
-.message:nth-child(odd) {
+.message.from-ai {
   align-self: flex-start;
   background-color: #e3f2fd;
   border-color: #bbdefb;
 }
 
-.message:nth-child(even) {
+.message.from-user {
   align-self: flex-end;
   background-color: #c8e6c9;
   border-color: #a5d6a7;
@@ -184,10 +273,14 @@ textarea:focus {
 button {
   margin-top: 10px;
   padding: 10px;
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
 }
 </style>

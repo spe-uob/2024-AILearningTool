@@ -16,7 +16,7 @@
   "devDependencies": {
     "@babel/core": "^7.12.16",
     "@vue/cli-plugin-babel": "~5.0.0",
-    "@vue/cli-service": "~5.0.0"
+    "@vue/cli-service": "^5.0.8"
   },
   "browserslist": [
     "> 1%",
