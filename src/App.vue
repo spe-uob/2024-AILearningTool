@@ -7,13 +7,13 @@
     </div>
 
     <!-- Include Settings Sidebar -->
-    <SettingSidebar @colorblindToggled="onColorblindToggled" />
+    <SettingSidebar @highContrastToggled="onHighContrastToggled" />
   </div>
 </template>
 
 <script>
 import SettingSidebar from "./SettingSidebar.vue";
-import { getTheme } from "@/color.js";
+import { getTheme } from "../assets/color.js";
 
 export default {
   name: "App",
@@ -26,9 +26,9 @@ export default {
     };
   },
   methods: {
-    onColorblindToggled(isColorblind) {
-      // Set the theme based on colorblind mode state
-      this.currentTheme = isColorblind ? "colorblind_red_green" : "default";
+    onHighContrastToggled(isHighContrast) {
+      // Set the theme based on high contrast mode state
+      this.currentTheme = isHighContrast ? "high_contrast" : "default";
       this.applyTheme(this.currentTheme);
     },
     applyTheme(themeName) {
