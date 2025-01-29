@@ -11,23 +11,25 @@
       </div>
 
       <!-- Chatbox -->
-      <div v-if="topicSelected">
-        <!-- Display messages -->
-        <div v-for="msg in processedMessages" :key="msg.id" class="message">
-          <strong v-if="msg.sender === 'AI'">AI:</strong>
-          <strong v-else>You:</strong>
-          <p>{{ msg.content }}</p>
+      <div v-if="topicSelected" class="chat-container">
+        <!-- Scrollable message area -->
+        <div class="messages-container">
+          <div v-for="msg in processedMessages" :key="msg.id" class="message">
+            <strong v-if="msg.sender === 'AI'">AI:</strong>
+            <strong v-else>You:</strong>
+            <p>{{ msg.content }}</p>
+          </div>
         </div>
 
-        <!-- Input area -->
-        <textarea
-          v-model="userInput"
-          placeholder="Type your message..."
-          @keypress.enter.prevent="sendMessage"
-        ></textarea>
-
-        <!-- Send button -->
-        <button @click="sendMessage">Send</button>
+        <!-- Fixed input area -->
+        <div class="input-area">
+          <textarea
+            v-model="userInput"
+            placeholder="Type your message..."
+            @keypress.enter.prevent="sendMessage"
+          ></textarea>
+          <button @click="sendMessage">Send</button>
+        </div>
       </div>
     </div>
   </main>
@@ -89,6 +91,10 @@ export default {
       const userMessage = this.userInput; // Cache user input
       this.userInput = ""; // Empty the input box
 
+      this.$nextTick(() => {
+        this.scrollToBottom();
+      });
+
       try {
         // Send a message to the AI server
         const response = await axios.get(this.aiServerUrl, {
@@ -103,7 +109,11 @@ export default {
         this.messages.push({
           id: Date.now() + 1,
           sender: "AI",
-          content: response.data.responseText, // Assuming the return field is `responseText`.
+          content: response.data.responseText, // Assuming the return field is `responseText`
+        });
+
+        this.$nextTick(() => {
+          this.scrollToBottom();
         });
       } catch (error) {
         console.error("Error communicating with AI server:", error);
@@ -112,21 +122,22 @@ export default {
           sender: "AI",
           content: "Sorry, there was an error connecting to the server.",
         });
+
+        this.$nextTick(() => {
+          this.scrollToBottom();
+        });
       }
     },
     startTopic(topic) {
-      // Setting the current topic
       this.topicSelected = true;
       this.currentTopic = topic;
 
-      // Add system alerts to chat logs
       this.messages.push({
         id: Date.now(),
         sender: "system",
         content: `You have selected the topic: ${topic}`,
       });
 
-      // Simulate the ChatID (if you want to generate it dynamically, get it from the backend and save it)
       this.chatId = `chat_${Date.now()}`;
       localStorage.setItem("chatId", this.chatId);
     },
@@ -136,9 +147,14 @@ export default {
         document.documentElement.style.setProperty(`--${key}-color`, theme[key]);
       });
     },
+    scrollToBottom() {
+      const chatContainer = this.$el.querySelector(".messages-container");
+      if (chatContainer) {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+    },
   },
   mounted() {
-    // Apply the default theme on mount
     this.applyTheme(this.currentTheme);
   },
 };
@@ -150,21 +166,43 @@ main {
   padding: 20px;
   background-color: var(--background-color);
   color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Full viewport height */
 }
 
 .chat-area {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
   background-color: var(--background-color);
   padding: 20px;
   border-radius: 5px;
   border: 1px solid var(--border-color);
+  overflow: hidden; /* Prevents chat overflow */
+}
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.messages-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid var(--border-color);
+  background-color: var(--background-color);
+  max-height: calc(100vh - 180px); /* Ensure it fits with input area */
 }
 
 .message {
   margin: 10px 0;
   padding: 10px;
-  background-color: var(--success-color);
   border-radius: 15px;
-  border: 1px solid var(--border-color);
   max-width: 60%;
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -182,9 +220,17 @@ main {
   border-color: var(--border-color);
 }
 
+.input-area {
+  display: flex;
+  flex-direction: column;
+  background: var(--background-color);
+  padding: 10px;
+  border-top: 1px solid var(--border-color);
+}
+
 textarea {
   width: 100%;
-  height: 100px;
+  height: 80px;
   resize: none;
   padding: 5px;
   box-sizing: border-box;
