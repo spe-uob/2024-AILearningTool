@@ -6,7 +6,7 @@ const colorSchemes = {
         background: "#F4F4F4",
         text: "#2E2E2E",
         border: "#D3D3D3",
-        button: "#4CAF50",
+        button: "#5C88DA",
         error: "#E74C3C",
         success: "#27AE60",
     },
