@@ -2,7 +2,7 @@ const colorSchemes = {
     default: {
         primary: "#5C88DA",  // IBM Blue
         secondary: "#FFFFE0",  // Light Yellow
-        accent: "#B0B0B0",  // Gray
+        accent: "#CDDAF3",  // Pastel Blue
         background: "#F4F4F4",  // Light Gray
         text: "#2E2E2E",  // Dark Gray
         border: "#D3D3D3",  // Light Border Gray
