@@ -20,10 +20,10 @@
             </div>
           </li>
           <li>
-            <h4>3) Color Blind Mode</h4>
-            <!-- Button to toggle color blind mode -->
-            <button @click="toggleColorblindMode">
-              {{ isColorblind ? 'Turn Off High Contrast Mode' : 'Turn On High Contrast Mode' }}
+            <h4>3) High Contrast Mode</h4>
+            <!-- Button to toggle high contrast mode -->
+            <button @click="toggleHighContrastMode">
+              {{ isHighContrast ? 'Turn Off High Contrast Mode' : 'Turn On High Contrast Mode' }}
             </button>
           </li>
         </ul>
@@ -43,7 +43,7 @@ export default {
   data() {
     return {
       isSettingsOpen: false,
-      isColorblind: false, // Tracks the toggle state for color blind mode
+      isHighContrast: false, // Tracks the toggle state for high contrast mode
     };
   },
   methods: {
@@ -65,11 +65,11 @@ export default {
         alert("Language changed to Chinese");
       }
     },
-    toggleColorblindMode() {
-      this.isColorblind = !this.isColorblind; // Toggle colorblind mode on/off
-      const themeName = this.isColorblind ? "colorblind_red_green" : "default";
+    toggleHighContrastMode() {
+      this.isHighContrast = !this.isHighContrast; // Toggle high contrast mode on/off
+      const themeName = this.isHighContrast ? "high_contrast" : "default";
       this.applyTheme(themeName);
-      this.$emit("colorblindToggled", this.isColorblind); // Notify parent 
+      this.$emit("highContrastToggled", this.isHighContrast); // Notify parent 
       const event = new CustomEvent("themeChange", { detail: { themeName } });
       window.dispatchEvent(event);
     },
