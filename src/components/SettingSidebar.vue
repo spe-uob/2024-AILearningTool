@@ -84,9 +84,11 @@ export default {
     },
   },
   mounted() {
-    // Apply default theme on mount
-    this.applyTheme("default");
-  },
+  window.addEventListener("themeChange", (event) => {
+    this.currentTheme = event.detail.themeName;
+    this.isColorblind = this.currentTheme === "colorblind_red_green";
+  });
+}
 };
 </script>
 
