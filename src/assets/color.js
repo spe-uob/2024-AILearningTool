@@ -1,25 +1,25 @@
 const colorSchemes = {
     default: {
-        primary: "#5C88DA",
-        secondary: "#FFFFE0",
-        accent: "#B0B0B0",
-        background: "#F4F4F4",
-        text: "#2E2E2E",
-        border: "#D3D3D3",
-        button: "#5C88DA",
-        error: "#E74C3C",
-        success: "#27AE60",
+        primary: "#5C88DA",  // IBM Blue
+        secondary: "#FFFFE0",  // Light Yellow
+        accent: "#B0B0B0",  // Gray
+        background: "#F4F4F4",  // Light Gray
+        text: "#2E2E2E",  // Dark Gray
+        border: "#D3D3D3",  // Light Border Gray
+        button: "#5C88DA",  // IBM Blue
+        error: "#E74C3C",  // Red
+        success: "#27AE60",  // Green
     },
-    colorblind_red_green: {
-        primary: "#1F4E79",
-        secondary: "#F2C94C",
-        accent: "#E94E77",
-        background: "#F4F4F4",
-        text: "#2E2E2E",
-        border: "#B6B6B6",
-        button: "#F2994A", 
-        error: "#D33F49",  
-        success: "#6BAF92", 
+    colorblind_red_green: { //Blue-blind friendly mode
+        primary: "#D17B0F",  // Deep Orange
+        secondary: "#F2C14E",  // Gold
+        accent: "#E88B8B",  // Soft Red-Pink
+        background: "#F5E6CC",  // Warm Beige
+        text: "#4A403A",  // Dark Brown
+        border: "#A68A64",  // Warm Brown
+        button: "#D17B0F",  // Deep Orange for emphasis
+        error: "#D7263D",  // Bright Red for warnings
+        success: "#A0C24D",  // Yellow-Green 
     },
 };
 
