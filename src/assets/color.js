@@ -1,7 +1,7 @@
 const colorSchemes = {
     default: {
-        primary: "#000000",
-        secondary: "#FFFFFF",
+        primary: "#5C88DA",
+        secondary: "#FFFFE0",
         accent: "#B0B0B0",
         background: "#F4F4F4",
         text: "#2E2E2E",
@@ -26,5 +26,7 @@ const colorSchemes = {
 // Export with a fallback function
 const getTheme = (themeName = "default") =>
     colorSchemes[themeName] || colorSchemes.default;
+
+export { colorSchemes, getTheme };
 
 export { colorSchemes, getTheme };
