@@ -30,6 +30,7 @@
         <div class="action-buttons">
           <button @click="goToCookiePage">Go to Cookie Settings</button>
           <button class="close-btn" @click="closeSettings">Close</button>
+          <button class="close-btn" :style="closeButtonStyle" @click="closeSettings">Close</button>
         </div>
       </div>
     </div>
@@ -84,11 +85,9 @@ export default {
     },
   },
   mounted() {
-  window.addEventListener("themeChange", (event) => {
-    this.currentTheme = event.detail.themeName;
-    this.isColorblind = this.currentTheme === "colorblind_red_green";
-  });
-}
+    // Apply default theme on mount
+    this.applyTheme("default");
+  },
 };
 </script>
 
