@@ -28,5 +28,3 @@ const getTheme = (themeName = "default") =>
     colorSchemes[themeName] || colorSchemes.default;
 
 export { colorSchemes, getTheme };
-
-export { colorSchemes, getTheme };
