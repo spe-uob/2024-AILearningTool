@@ -1,10 +1,14 @@
 <template>
   <div class="main-view">
     <div class="left-sidebar-container">
-      <HistorySidebar />
+      <HistorySidebar @resetMainContent="this.resetMainContent"/>
       <SettingSidebar @toggleSettings="toggleSettings" />
     </div>
-    <MainContent />
+    <MainContent @selectTopic="this.topicSelected = true"
+                 :topicSelected="this.topicSelected"
+                 :messages="this.messages"
+                 @addMessage="(a, b) => this.addMessage(a, b)"
+    />
     <ImportantSidebar :isDisabled="isSettingsOpen" />
   </div>
 </template>
@@ -18,10 +22,24 @@ export default {
   name: 'MainView',
   data() {
     return {
-      isSettingsOpen: false, // 控制重要部分是否禁用
+      topicSelected: false,
+      messages: [],
+      isSettingsOpen: false,
     };
   },
   methods: {
+    // Used to reset MainContent component (e.g. when "Add chat" button is clicked)
+    resetMainContent() {
+      this.topicSelected = false;
+      this.messages = [];
+    },
+    // Add message to "message" variable in MainView
+    addMessage(senderArg, contentArg) {
+      this.messages.push({
+        sender: senderArg,
+        content: contentArg
+      })
+    },
     toggleSettings(isOpen) {
       this.isSettingsOpen = isOpen;
     },

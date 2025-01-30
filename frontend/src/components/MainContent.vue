@@ -2,10 +2,11 @@
   <main>
     <div class="chat-area">
       <p>Welcome to Watsonx AI!</p>
-      <p v-if="!topicSelected">Select one of the topics below:</p>
 
-      <!-- 话题选择按钮 -->
-      <div v-if="!topicSelected">
+      <p v-if="!this.topicSelected">Select one of the topics below:</p>
+
+      <!-- Buttons for chat initialisation -->
+      <div v-if="!this.topicSelected">
         <button @click="sendInitialMessage('First Time Coming to University')">
           First Time Coming to University
         </button>
@@ -13,7 +14,7 @@
       </div>
 
       <!-- All messages of the conversation -->
-      <div v-if="topicSelected">
+      <div v-if="this.topicSelected">
         <!-- One "message bubble" -->
         <div
             v-for="msg in messages"
@@ -46,8 +47,6 @@ export default {
   data() {
     return {
       userInput: "",
-      messages: [],
-      topicSelected: false,
       currentTopic: "",
       userId: localStorage.getItem("userId") || "",
       currentChatID: "",
@@ -55,17 +54,12 @@ export default {
       aiServerURL: "http://localhost:8080",
     };
   },
-
+  props: ["topicSelected", "messages"],
   methods: {
-    // Used to reset MainContent component (eg. when "Add chat" button is clicked
-    resetMainContent() {
-      this.messages = []
-      this.topicSelected = false
-      this.userInput = ""
-    },
     // Send the first message, create a chat
     async sendInitialMessage(message) {
-      this.topicSelected = true
+      this.$emit("selectTopic")
+      // this.topicSelected = true
       let response = await fetch(this.aiServerURL + "/createChat?" + new URLSearchParams({
         "initialMessage": message
       }),{
@@ -82,6 +76,7 @@ export default {
       this.requestChatHistory()
     },
 
+    // Make "getChatHistory" request for some chatID
     requestChatHistory() {
       fetch(this.aiServerURL + "/getChatHistory?" + new URLSearchParams({
         "chatID": this.currentChatID
@@ -136,10 +131,7 @@ export default {
           if (currentRole === "<|system|>") {
             continue
           }
-          this.messages.push({
-            sender: this.currentTurn,
-            content: currentMessage
-          })
+          this.$emit("addMessage", this.currentTurn, currentMessage)
           if (this.currentTurn === "user") {
             this.currentTurn = "assistant"
           } else {
@@ -150,6 +142,8 @@ export default {
         }
       }
     },
+
+    // Send a message in existing chat
     async sendMessage() {
       if (!this.userInput.trim()) {
         alert("Please enter a message!");
@@ -161,11 +155,7 @@ export default {
         return;
       }
 
-      const userMessage = {
-        sender: "user",
-        content: this.userInput,
-      };
-      this.messages.push(userMessage);
+      this.$emit("addMessage", "user", this.userInput)
 
       const messageToSend = this.userInput.trim();
       this.userInput = "";
@@ -184,22 +174,16 @@ export default {
           throw new Error(`Unexpected response code: ${response.status}`);
         }
 
-        this.messages.push({
-          sender: "assistant",
-          content: response.data || "No response from AI.",
-        });
+        this.$emit("addMessage", "assistant", response.data)
       } catch (error) {
         console.error("Error sending message:", error);
 
-        this.messages.push({
-          sender: "System",
-          content: "Failed to send message. Please try again.",
-        });
+        this.$emit("addMessage", "System", "Failed to send message. Please try again.")
       }
     },
   },
 
-    // Former stuff
+    // TODO: Why is this here? We have Cookie.vue, right?
     async getUserId() {
       try {
         const response = await axios.get(this.aiServerURL + "/signup", { withCredentials: true });

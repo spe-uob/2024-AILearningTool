@@ -31,8 +31,9 @@ export default {
     };
   },
   methods: {
+    // Reverts the state of MainContent to initial state.
     async addChat() {
-      // TODO: somehow revert the state of MainContent
+      this.$emit("resetMainContent")
     },
 
     selectChat(chatID) {
