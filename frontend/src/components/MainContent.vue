@@ -3,10 +3,10 @@
     <div class="chat-area">
       <p>Welcome to Watsonx AI!</p>
 
-      <p v-if="!this.topicSelected">Select one of the topics below:</p>
+      <p v-if="this.currentChatID.length === 0">Select one of the topics below:</p>
 
       <!-- Buttons for chat initialisation -->
-      <div v-if="!this.topicSelected">
+      <div v-if="this.currentChatID.length === 0">
         <button @click="sendInitialMessage('First Time Coming to University')">
           First Time Coming to University
         </button>
@@ -14,7 +14,7 @@
       </div>
 
       <!-- All messages of the conversation -->
-      <div v-if="this.topicSelected">
+      <div v-if="this.currentChatID.length > 0">
         <!-- One "message bubble" -->
         <div
             v-for="msg in messages"
@@ -48,18 +48,24 @@ export default {
     return {
       userInput: "",
       currentTopic: "",
+      currentTurn: "user", // Used for message history parsing
       userId: localStorage.getItem("userId") || "",
-      currentChatID: "",
-      currentTurn: "user",
       aiServerURL: "http://localhost:8080",
     };
   },
-  props: ["topicSelected", "messages"],
+  props: ["messages", "chats", "currentChatID"],
+  watch: {
+    // When amount of messages = 0 and an existing chat has been chosen, chat history is loaded in MainContent
+    messages() {
+      if ((this.messages.length === 0) && (this.currentChatID.length > 0)) {
+        this.currentTurn = "user"
+        this.requestChatHistory()
+      }
+    }
+  },
   methods: {
     // Send the first message, create a chat
     async sendInitialMessage(message) {
-      this.$emit("selectTopic")
-      // this.topicSelected = true
       let response = await fetch(this.aiServerURL + "/createChat?" + new URLSearchParams({
         "initialMessage": message
       }),{
@@ -71,10 +77,13 @@ export default {
         throw new Error("Non-200 backend API response");
       }
 
-      this.currentChatID = await response.text();
-
-      this.requestChatHistory()
+      this.$emit("updateChatID", await response.text())
+      await this.$nextTick(() => {
+        this.$emit("addChat", this.currentChatID, message)
+        this.requestChatHistory()
+      })
     },
+
 
     // Make "getChatHistory" request for some chatID
     requestChatHistory() {
@@ -94,7 +103,7 @@ export default {
       })
     },
 
-    processChatHistory(messageHistory) {
+    async processChatHistory(messageHistory) {
       messageHistory = String(messageHistory)
       let currentRole;
       let openAIRole;

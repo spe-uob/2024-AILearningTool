@@ -1,13 +1,21 @@
 <template>
   <div class="main-view">
     <div class="left-sidebar-container">
-      <HistorySidebar @resetMainContent="this.resetMainContent"/>
+      <HistorySidebar
+          @resetMainContent="this.resetMainContent"
+          @chatSelected="(id) => this.loadChat(id)"
+          :currentChatID="this.currentChatID"
+          :chats="this.chats"
+      />
       <SettingSidebar @toggleSettings="toggleSettings" />
     </div>
-    <MainContent @selectTopic="this.topicSelected = true"
-                 :topicSelected="this.topicSelected"
-                 :messages="this.messages"
-                 @addMessage="(a, b) => this.addMessage(a, b)"
+    <MainContent
+        :messages="this.messages"
+        :chats="this.chats"
+        :currentChatID="this.currentChatID"
+        @addMessage="(a, b) => this.addMessage(a, b)"
+        @addChat="(a, b) => this.addChat(a, b)"
+        @updateChatID="(id) => this.currentChatID = id"
     />
     <ImportantSidebar :isDisabled="isSettingsOpen" />
   </div>
@@ -22,16 +30,22 @@ export default {
   name: 'MainView',
   data() {
     return {
-      topicSelected: false,
       messages: [],
       isSettingsOpen: false,
+      chats: JSON.parse(localStorage.getItem("chats")) || [], // Stores id-title pair for every chat
+      currentChatID: ""
     };
   },
   methods: {
     // Used to reset MainContent component (e.g. when "Add chat" button is clicked)
     resetMainContent() {
-      this.topicSelected = false;
+      this.currentChatID = "";
       this.messages = [];
+    },
+    // Load existing chat
+    loadChat(id) {
+      this.resetMainContent()
+      this.currentChatID = id
     },
     // Add message to "message" variable in MainView
     addMessage(senderArg, contentArg) {
@@ -39,6 +53,14 @@ export default {
         sender: senderArg,
         content: contentArg
       })
+    },
+    // Add a new chat to chat list (used in HistorySidebar) + save to localStorage
+    addChat(chatID, title) {
+      this.chats.push({
+        chatID: chatID,
+        title: title
+      })
+      localStorage.setItem("chats", JSON.stringify(this.chats))
     },
     toggleSettings(isOpen) {
       this.isSettingsOpen = isOpen;

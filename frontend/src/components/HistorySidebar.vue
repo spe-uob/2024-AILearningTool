@@ -3,13 +3,12 @@
     <button class="add-chat-btn" @click="addChat">Add Chat</button>
     <div class="chat-list">
       <ul>
-        <li v-if="isLoading">Loading chats...</li>
-        <li v-else-if="chats.length === 0">No chats available. Click "Add Chat" to start a new one!</li>
-        <li v-for="chat in chats" :key="chat.id" v-else>
+        <li v-if="this.chats.length === 0">No chats available. Click "Add Chat" to start a new one!</li>
+        <li v-else v-for="chat in this.chats" :key="chat.chatID">
           <button
-            @click="selectChat(chat.id)"
-            :class="{ active: chat.id === selectedChatID }">
-            {{ chat.name }}
+            @click="selectChat(chat.chatID)"
+            :class="{ active: chat.chatID === this.currentChatID }">
+            {{ chat.title }}
           </button>
         </li>
       </ul>
@@ -18,59 +17,24 @@
 </template>
 
 <script>
-import axios from "axios";
 
 export default {
   data() {
     return {
-      chats: [],
-      selectedChatID: localStorage.getItem("chatId") || null,
-      chatHistory: [],
       aiServerUrl: "http://localhost:8080",
-      isLoading: false,
     };
   },
+  props: ["chats", "currentChatID"],
   methods: {
     // Reverts the state of MainContent to initial state.
     async addChat() {
       this.$emit("resetMainContent")
     },
 
+    // Sends a chat selection event, asks other components to render the required chat
     selectChat(chatID) {
-      // TODO: Rewrite, MainContent has to request and render chat history
-      this.selectedChatID = chatID;
-      localStorage.setItem("chatId", chatID);
-      this.$emit("chat-selected", chatID);
-      this.loadChatHistory(chatID);
+      this.$emit("chatSelected", chatID);
     },
-
-    // TODO: No such backend method (getAllChats), rewrite, fetch IDs (and maybe titles) from localStorage
-    async loadChats() {
-      this.isLoading = true;
-      try {
-        const response = await axios.get(`${this.aiServerUrl}/getAllChats`, {
-          withCredentials: true,
-        });
-
-        if (response.status !== 200) {
-          throw new Error(`Unexpected response code: ${response.status}`);
-        }
-
-        const chats = response.data;
-        this.chats = chats.map((chat, index) => ({
-          id: chat.id,
-          name: chat.name || `Chat ${index + 1}`,
-        }));
-      } catch (error) {
-        console.error("Error loading chats:", error);
-        alert("Failed to load chats. Please check your login status.");
-      } finally {
-        this.isLoading = false;
-      }
-    },
-  },
-  mounted() {
-    this.loadChats();
   },
 };
 </script>
