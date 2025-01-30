@@ -32,74 +32,18 @@ export default {
   },
   methods: {
     async addChat() {
-      const initialMessage = "Hello, this is a new chat!";
-
-      try {
-        const response = await axios.get(`${this.aiServerUrl}/createChat`, {
-          params: { initialMessage },
-          withCredentials: true,
-        });
-
-        if (response.status !== 200) {
-          throw new Error(`Unexpected response code: ${response.status}`);
-        }
-
-        const newChatID = response.data;
-        this.chats.push({ id: newChatID, name: `Chat ${this.chats.length + 1}` });
-
-        // Select new chat
-        this.selectChat(newChatID);
-      } catch (error) {
-        console.error("Error creating chat:", error);
-        alert("Failed to create a new chat. Please try again.");
-      }
+      // TODO: somehow revert the state of MainContent
     },
 
     selectChat(chatID) {
+      // TODO: Rewrite, MainContent has to request and render chat history
       this.selectedChatID = chatID;
       localStorage.setItem("chatId", chatID);
       this.$emit("chat-selected", chatID);
       this.loadChatHistory(chatID);
     },
 
-    async loadChatHistory(chatID) {
-      try {
-        const response = await axios.get(`${this.aiServerUrl}/getChatHistory`, {
-          params: { chatID },
-          withCredentials: true,
-        });
-
-        if (response.status !== 200) {
-          throw new Error(`Unexpected response code: ${response.status}`);
-        }
-
-        const messageHistory = response.data;
-        this.chatHistory = this.processChatHistory(messageHistory);
-      } catch (error) {
-        console.error("Error loading chat history:", error);
-        alert("Failed to load chat history. Please try again.");
-      }
-    },
-
-    processChatHistory(messageHistory) {
-      const messages = [];
-      const lines = messageHistory.split("\n");
-
-      for (const line of lines) {
-        if (line.includes("<|system|>") || line.includes("<|assistant|>")) {
-          continue;
-        }
-
-        if (line.includes("<|user|>")) {
-          messages.push({ sender: "You", content: line.replace("<|user|>", "").trim() });
-        } else {
-          messages.push({ sender: "AI", content: line.trim() });
-        }
-      }
-
-      return messages;
-    },
-
+    // TODO: No such backend method (getAllChats), rewrite, fetch IDs (and maybe titles) from localStorage
     async loadChats() {
       this.isLoading = true;
       try {
