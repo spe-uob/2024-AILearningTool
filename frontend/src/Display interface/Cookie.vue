@@ -11,13 +11,13 @@
 <script>
 export default {
   methods: {
-    // 处理用户同意或拒绝
+    // Handling of user consent or refusal
     handleConsent(isConsent) {
       this.setConsentCookie(isConsent);
       this.signUp();
     },
 
-    // 设置 Cookie
+    // Setting Cookies
     setConsentCookie(isConsent) {
       const consentValue = isConsent ? "true" : "false";
       const d = new Date();
@@ -26,7 +26,7 @@ export default {
       document.cookie = `optionalConsent=${consentValue};${expires};path=/`;
     },
 
-    // 调用注册 API
+    // Calling the Registration API
     async signUp() {
       try {
         const response = await fetch("http://localhost:8080/signup", {
@@ -38,13 +38,13 @@ export default {
           throw new Error(`Non-200 response: ${response.status}`);
         }
 
-        // 从 Cookie 中读取 userID 并存储到 LocalStorage
+        // Read the userID from the cookie and store it in LocalStorage.
         this.storeUserID();
 
-        // 隐藏 Cookie 弹窗
+        // Hide Cookie Popups
         document.getElementById("cookiePopUp").style.display = "none";
 
-        // 跳转到主界面
+        // Skip to main screen
         this.redirectToMain();
       } catch (error) {
         console.error("Registration failure:", error);
@@ -52,7 +52,7 @@ export default {
       }
     },
 
-    // 从 Cookie 中提取 userID 并存储到 LocalStorage
+    // Extracts the userID from the cookie and stores it in LocalStorage.
     storeUserID() {
       const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
         const [key, value] = cookie.split("=");
@@ -67,7 +67,7 @@ export default {
       }
     },
 
-    // 跳转到主界面
+    // Skip to main screen
     redirectToMain() {
       this.$router.push("/main");
     },
