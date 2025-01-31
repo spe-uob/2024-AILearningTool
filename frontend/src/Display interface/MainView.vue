@@ -17,14 +17,12 @@
         @addChat="(a, b) => this.addChat(a, b)"
         @updateChatID="(id) => this.currentChatID = id"
     />
-    <ImportantSidebar :isDisabled="isSettingsOpen" />
   </div>
 </template>
 
 <script>
 import HistorySidebar from '../components/HistorySidebar.vue';
 import MainContent from '../components/MainContent.vue';
-import ImportantSidebar from '../components/ImportantSidebar.vue';
 import SettingSidebar from '../components/SettingSidebar.vue';
 export default {
   name: 'MainView',
@@ -69,7 +67,6 @@ export default {
   components: {
     HistorySidebar,
     MainContent,
-    ImportantSidebar,
     SettingSidebar,
   },
 };
