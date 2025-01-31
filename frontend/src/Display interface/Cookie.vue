@@ -21,7 +21,7 @@ export default {
     setConsentCookie(isConsent) {
       const consentValue = isConsent ? "true" : "false";
       const d = new Date();
-      d.setTime(d.getTime() + 30 * 24 * 60 * 60 * 1000); // 设置 30 天有效期
+      d.setTime(d.getTime() + 30 * 24 * 60 * 60 * 1000); // Set a 30-day expiry date
       const expires = "expires=" + d.toUTCString();
       document.cookie = `optionalConsent=${consentValue};${expires};path=/`;
     },
