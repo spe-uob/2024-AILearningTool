@@ -102,92 +102,81 @@ export default {
 aside {
   width: 250px;
   padding: 10px;
-  transition: width 0.3s ease;
+  transition: width 0.3s ease-in-out, box-shadow 0.3s ease-in-out, background-color 0.3s ease-in-out;
   position: relative;
   display: flex;
   flex-direction: column;
-}
-
-.history-sidebar {
-  width: 250px;
-  background-color: #f8f9fa;
-  padding: 10px;
-  border-right: 1px solid #ddd;
-}
-
-/* Make the conversation history scrollable */
-.history-list {
-  max-height: 300px; /* Adjust based on your layout */
-  overflow-y: auto;
-  margin-top: 10px;
-  padding-right: 5px; /* Prevents content from touching scrollbar */
-}
-
-.add-chat-btn {
-  display: block;
-  margin: 10px auto;
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.add-chat-btn:hover {
-  background-color: #0056b3;
+  border-radius: 12px;
+  box-shadow: 3px 0 12px rgba(0, 0, 0, 0.1);
 }
 
 .collapsed {
-  width: 50px;
+  width: 60px;
+  box-shadow: none;
 }
 
-.chat-list ul {
-  list-style: none;
-  padding: 0;
+.history-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 10px;
+  padding-right: 5px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease-in-out;
 }
 
-.chat-list li {
-  margin: 5px 0;
+.history-list::-webkit-scrollbar {
+  width: 6px;
 }
 
-.chat-list button {
-  background: none;
-  border: none;
-  color: #007bff;
-  cursor: pointer;
+.history-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
 }
 
-.chat-list button.active {
-  font-weight: bold;
-  color: #0056b3;
+.history-list::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.chat-list button:hover {
-  text-decoration: underline;
-}
-
-/* Ensure consistent button styling */
 button {
   margin: 5px 0;
-  padding: 10px;
+  padding: 12px;
   border: none;
-  border-radius: 5px;
+  border-radius: 10px;
   cursor: pointer;
-  width: 100%; /* Ensure buttons take full width */
+  width: 100%;
+  font-weight: bold;
+  transition: transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
 }
 
 button:hover {
-  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.18);
+}
+
+button:active {
+  transform: scale(0.96);
 }
 
 .history-content {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeIn 0.4s forwards ease-in-out;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .new-conversation-btn {
-  margin-top: 10px;
+  margin-top: 12px;
 }
+
 </style>
