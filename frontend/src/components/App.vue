@@ -12,8 +12,8 @@
 </template>
 
 <script>
-import SettingSidebar from "./SettingSidebar.vue";
-import { getTheme } from "../assets/color.js";
+import SettingSidebar from "./components/SettingSidebar.vue";
+import { getTheme } from "./assets/color.js";
 
 export default {
   name: "App",
@@ -47,7 +47,6 @@ export default {
 </script>
 
 <style>
-
 /* Apply the color scheme globally using CSS variables */
 body {
   background-color: var(--background-color);
