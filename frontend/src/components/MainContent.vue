@@ -7,10 +7,11 @@
 
       <!-- Buttons for chat initialisation -->
       <div v-if="this.currentChatID.length === 0">
-        <button @click="sendInitialMessage('First Time Coming to University')">
-          First Time Coming to University
+        <button @click="sendInitialMessage('I need help with choosing a course')">
+          I need help with choosing a course
         </button>
-        <button @click="sendInitialMessage('Academic Inquiry')">Academic Inquiry</button>
+        <button @click="sendInitialMessage('I need help with IBM SkillsBuild platform')">I need help with IBM SkillsBuild platform</button>
+        <button @click="sendInitialMessage('I have questions about university life')">I have questions about university life</button>
       </div>
 
       <!-- All messages of the conversation -->
