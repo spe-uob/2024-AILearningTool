@@ -239,7 +239,7 @@ main {
   color: var(--text-color);
   display: flex;
   flex-direction: column;
-  height: 100vh; /* Full viewport height */
+  height: 100vh;
 }
 
 .chat-area {
@@ -248,9 +248,10 @@ main {
   flex-grow: 1;
   background-color: var(--background-color);
   padding: 20px;
-  border-radius: 5px;
+  border-radius: 12px;
   border: 1px solid var(--border-color);
-  overflow: hidden; /* Prevents chat overflow */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .chat-container {
@@ -263,80 +264,109 @@ main {
 .messages-container {
   flex-grow: 1;
   overflow-y: auto;
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid var(--border-color);
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid var(--border-color);
   background-color: var(--background-color);
-  max-height: calc(100vh - 180px); /* Ensure it fits with input area */
+  max-height: calc(100vh - 180px);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease-in-out;
+}
+
+.messages-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messages-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.messages-container::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .message {
   margin: 10px 0;
-  padding: 10px;
-  border-radius: 15px;
-  max-width: 60%;
+  padding: 14px;
+  border-radius: 20px;
+  max-width: 75%;
   white-space: pre-wrap;
   word-wrap: break-word;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeIn 0.3s forwards ease-in-out;
 }
 
 .message:nth-child(odd) {
   align-self: flex-start;
   background-color: var(--primary-color);
-  border-color: var(--secondary-color);
+  border: 1px solid var(--secondary-color);
 }
 
 .message:nth-child(even) {
   align-self: flex-end;
   background-color: var(--accent-color);
-  border-color: var(--border-color);
+  border: 1px solid var(--border-color);
 }
 
-.message.from-ai {
-  align-self: flex-start;
-  background-color: #e3f2fd;
-  border-color: #bbdefb;
-}
-
-.message.from-user {
-  align-self: flex-end;
-  background-color: #c8e6c9;
-  border-color: #a5d6a7;
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .input-area {
   display: flex;
   flex-direction: column;
   background: var(--background-color);
-  padding: 10px;
-  border-top: 1px solid var(--border-color);
+  padding: 12px;
+  border-top: 2px solid var(--border-color);
+  box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
 }
 
 textarea {
   width: 100%;
   height: 80px;
   resize: none;
-  padding: 5px;
+  padding: 12px;
   box-sizing: border-box;
   font-size: 14px;
   background-color: var(--background-color);
   color: var(--text-color);
+  border-radius: 12px;
+  border: 2px solid var(--border-color);
+  transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 
 textarea:focus {
   outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 10px var(--accent-color);
 }
 
 button {
   margin-top: 10px;
-  padding: 10px;
+  padding: 12px;
   background-color: var(--button-color);
   color: var(--text-color);
   border: none;
-  border-radius: 5px;
+  border-radius: 10px;
   cursor: pointer;
+  font-weight: bold;
+  transition: transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
 }
 
 button:hover {
-  background-color: var(--accent-color);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.18);
 }
+
+button:active {
+  transform: scale(0.96);
+}
+
 </style>
