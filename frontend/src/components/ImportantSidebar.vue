@@ -16,57 +16,58 @@
 <script>
 import { getTheme } from "../assets/color.js";
 
-export default {
-  props: {
-    isDisabled: {
-      type: Boolean,
-      default: false,
+export default
+{
+    props: {
+     isDisabled: {
+        type: Boolean,
+        default: false,
+     },
+   },
+    data() {
+      return {
+        isCollapsed: false,
+        memoContent: '',
+        currentTheme: "default", // Tracks the current theme
+        themeStyles: {}, // Stores styles for the theme
+     };
     },
-  },
-  data() {
-    return {
-      isCollapsed: false,
-      memoContent: "",
-      currentTheme: "default", // Tracks the current theme
-      themeStyles: {}, // Stores styles for the theme
-    };
-  },
-  methods: {
-    toggleSidebar() {
-      this.isCollapsed = !this.isCollapsed;
+   methods: {
+     toggleSidebar() {
+       this.isCollapsed = !this.isCollapsed;
+      },
+      handleInput() {
+       // Handle input if necessary
+     },
+     applyTheme(themeName) {
+       const theme = getTheme(themeName);
+       this.themeStyles = {
+         aside: {
+           backgroundColor: theme.background,
+           color: theme.text,
+           border: `1px solid ${theme.border}`,
+         },
+         button: {
+           backgroundColor: theme.button,
+           color: theme.text,
+         },
+         text: {
+           color: theme.text,
+         },
+         textarea: {
+           backgroundColor: theme.background,
+           color: theme.text,
+           border: `1px solid ${theme.border}`,
+         },
+       };
+     },
+     // Listen for theme change events
+     listenForThemeChange() {
+       window.addEventListener("themeChange", (event) => {
+         this.applyTheme(event.detail.themeName);
+       });
+     },
     },
-    handleInput() {
-      // Handle input if necessary
-    },
-    applyTheme(themeName) {
-      const theme = getTheme(themeName);
-      this.themeStyles = {
-        aside: {
-          backgroundColor: theme.background,
-          color: theme.text,
-          border: `1px solid ${theme.border}`,
-        },
-        button: {
-          backgroundColor: theme.button,
-          color: theme.text,
-        },
-        text: {
-          color: theme.text,
-        },
-        textarea: {
-          backgroundColor: theme.background,
-          color: theme.text,
-          border: `1px solid ${theme.border}`,
-        },
-      };
-    },
-    // Listen for theme change events
-    listenForThemeChange() {
-      window.addEventListener("themeChange", (event) => {
-        this.applyTheme(event.detail.themeName);
-      });
-    },
-  },
   computed: {
     asideStyles() {
       return this.themeStyles.aside;
@@ -94,6 +95,7 @@ export default {
 <style scoped>
 aside {
   width: 250px;
+  background-color: #f0f0f0;
   padding: 10px;
   transition: width 0.3s ease;
 }

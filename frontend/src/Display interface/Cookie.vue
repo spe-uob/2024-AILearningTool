@@ -11,37 +11,65 @@
 <script>
 export default {
   methods: {
+    // 处理用户同意或拒绝
     handleConsent(isConsent) {
       this.setConsentCookie(isConsent);
       this.signUp();
     },
+
+    // 设置 Cookie
     setConsentCookie(isConsent) {
       const consentValue = isConsent ? "true" : "false";
       const d = new Date();
-      d.setTime(d.getTime() + 30 * 24 * 60 * 60 * 1000);
+      d.setTime(d.getTime() + 30 * 24 * 60 * 60 * 1000); // 设置 30 天有效期
       const expires = "expires=" + d.toUTCString();
       document.cookie = `optionalConsent=${consentValue};${expires};path=/`;
     },
-    signUp() {
-      fetch("https://ailearningtool.ddns.net:8080", {
-        method: "GET",
-        credentials: "include",
-      })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Non-200 response, back-end API call failed");
-            } else {
-              document.getElementById("cookiePopUp").style.display = "none";
-              this.redirectToMain();
-            }
-          })
-          .catch((error) => {
-            console.error("Registration failure:", error);
-          });
+
+    // 调用注册 API
+    async signUp() {
+      try {
+        const response = await fetch("http://localhost:8080/signup", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          throw new Error(`Non-200 response: ${response.status}`);
+        }
+
+        // 从 Cookie 中读取 userID 并存储到 LocalStorage
+        this.storeUserID();
+
+        // 隐藏 Cookie 弹窗
+        document.getElementById("cookiePopUp").style.display = "none";
+
+        // 跳转到主界面
+        this.redirectToMain();
+      } catch (error) {
+        console.error("Registration failure:", error);
+        alert("Failed to sign up. Please try again.");
+      }
     },
 
+    // 从 Cookie 中提取 userID 并存储到 LocalStorage
+    storeUserID() {
+      const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
+        const [key, value] = cookie.split("=");
+        acc[key] = value;
+        return acc;
+      }, {});
+
+      if (cookies.userID) {
+        localStorage.setItem("userId", cookies.userID);
+      } else {
+        console.error("userID cookie not found after signup.");
+      }
+    },
+
+    // 跳转到主界面
     redirectToMain() {
-    this.$router.push("/main");
+      this.$router.push("/main");
     },
   },
 };
@@ -77,17 +105,24 @@ export default {
   margin: 0 0 40px;
 }
 
+button {
+  font-size: 16px;
+  padding: 12px 24px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+
+button:focus {
+  outline: 2px solid #0056b3;
+}
+
 .reject-button {
   position: absolute;
   bottom: 20px;
   left: 20px;
   background-color: #dc3545;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
 }
 
 .reject-button:hover {
@@ -99,12 +134,6 @@ export default {
   bottom: 20px;
   right: 20px;
   background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
 }
 
 .accept-button:hover {

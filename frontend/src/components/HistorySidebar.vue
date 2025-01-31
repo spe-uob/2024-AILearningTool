@@ -9,17 +9,16 @@
 
       <!-- Scrollable conversation list -->
       <div class="history-list">
-        <ul>
-          <li v-for="conversation in conversations" :key="conversation.chatId">
-            <button :style="buttonStyles" @click="loadConversation(conversation.chatId)">
-              {{ conversation.chatId }}
-            </button>
-          </li>
-        </ul>
-      </div>
-
+      <ul>
+        <li v-for="chat in this.chats" :key="chat.chatID">
+          <button :style="buttonStyles" @click="selectChat(chat.chatID)">
+            {{ chat.title }}
+          </button>
+        </li>
+      </ul>
+    </div>
       <!-- Button for adding a new conversation -->
-      <button class="new-conversation-btn" :style="buttonStyles" @click="createNewConversation">
+      <button class="new-conversation-btn" :style="buttonStyles" @click="addChat">
         ➕ New Conversation
       </button>
     </div>
@@ -27,69 +26,31 @@
 </template>
 
 <script>
-import axios from "axios";
 import { getTheme } from "../assets/color.js";
 
 export default {
   data() {
     return {
       isCollapsed: false, // Controls the collapse state of the sidebar
-      conversations: [], // List of conversations (chatId)
+      aiServerUrl: "http://localhost:8080",
       currentTheme: "default", // Tracks the current theme
       themeStyles: {}, // Stores styles for the theme
     };
   },
+  props: ["chats", "currentChatID"],
   methods: {
+    // Reverts the state of MainContent to initial state.
+    async addChat() {
+      this.$emit("resetMainContent")
+    },
+
     toggleSidebar() {
       this.isCollapsed = !this.isCollapsed;
     },
 
-    // Create new conversations and dynamically add them to the session list
-    async createNewConversation() {
-      try {
-        const response = await axios.get(
-          "https://ailearningtool.ddns.net:8080/createChat",
-          {
-            params: {
-              userId: localStorage.getItem("userId"), // Get userId from LocalStorage
-              initialMessage: "", // Empty initial content
-            },
-          }
-        );
-
-        const chatId = response.data.chatId; // Assuming the return field is chatId
-        console.log("Created chat with ID:", chatId);
-
-        // Dynamically added to the session list
-        this.conversations.push({ chatId });
-      } catch (error) {
-        console.error("Failed to create a new conversation:", error);
-        alert("Failed to create a new conversation. Please try again.");
-      }
-    },
-
-    // Load the contents of the specified session
-    async loadConversation(chatId) {
-      try {
-        const response = await axios.get(
-          "https://ailearningtool.ddns.net:8080/getChatHistory",
-          {
-            params: {
-              userId: localStorage.getItem("userId"), // Get userId from LocalStorage
-              chatId, // The currently selected chatId
-            },
-          }
-        );
-
-        const chatHistory = response.data.history; // Assuming the return field is history
-        console.log("Chat History:", chatHistory);
-
-        // Pass the chat content to the parent component (requires the parent component to listen to this event)
-        this.$emit("loadConversation", chatHistory);
-      } catch (error) {
-        console.error("Failed to load conversation:", error);
-        alert("Failed to load the conversation. Please try again.");
-      }
+    // Sends a chat selection event, asks other components to render the required chat
+    selectChat(chatID) {
+      this.$emit("chatSelected", chatID);
     },
 
     applyTheme(themeName) {
@@ -109,7 +70,6 @@ export default {
         },
       };
     },
-
     // Listen for theme change events
     listenForThemeChange() {
       window.addEventListener("themeChange", (event) => {
@@ -148,8 +108,11 @@ aside {
   flex-direction: column;
 }
 
-.collapsed {
-  width: 50px;
+.history-sidebar {
+  width: 250px;
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-right: 1px solid #ddd;
 }
 
 /* Make the conversation history scrollable */
@@ -158,6 +121,50 @@ aside {
   overflow-y: auto;
   margin-top: 10px;
   padding-right: 5px; /* Prevents content from touching scrollbar */
+}
+
+.add-chat-btn {
+  display: block;
+  margin: 10px auto;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-chat-btn:hover {
+  background-color: #0056b3;
+}
+
+.collapsed {
+  width: 50px;
+}
+
+.chat-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.chat-list li {
+  margin: 5px 0;
+}
+
+.chat-list button {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+}
+
+.chat-list button.active {
+  font-weight: bold;
+  color: #0056b3;
+}
+
+.chat-list button:hover {
+  text-decoration: underline;
 }
 
 /* Ensure consistent button styling */

@@ -47,6 +47,7 @@ export default {
 </script>
 
 <style>
+
 /* Apply the color scheme globally using CSS variables */
 body {
   background-color: var(--background-color);

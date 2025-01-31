@@ -69,7 +69,7 @@ export default {
       this.isHighContrast = !this.isHighContrast; // Toggle high contrast mode on/off
       const themeName = this.isHighContrast ? "high_contrast" : "default";
       this.applyTheme(themeName);
-      this.$emit("highContrastToggled", this.isHighContrast); // Notify parent 
+      this.$emit("highContrastToggled", this.isHighContrast); // Notify parent
       const event = new CustomEvent("themeChange", { detail: { themeName } });
       window.dispatchEvent(event);
     },

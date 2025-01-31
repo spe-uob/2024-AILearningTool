@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import MainView from '../components/MainView.vue';
+import MainView from '../Display interface/MainView.vue';
 import Cookie from '../Display interface/Cookie.vue';
 
 const routes = [
