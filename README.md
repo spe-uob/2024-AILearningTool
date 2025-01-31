@@ -92,12 +92,12 @@ Below is an overview of the key components of the system:
   - [api](/frontend/api): Includes the cookies API.
   - [public](/frontend/public): Includes some front-end documents.
   - [src](/frontend/src): Includes the front-end code.
-- [src](/src): Contains all of the back-end code (in Java) and documents:
-  - [main](/src/main): Includes the back-end code.
-  - [static](/src/main/resources/static): Includes all static documents, including index.html of the front-end.
-  - [test/java/com/UoB/AILearningTool](/src/test/java/com/UoB/AILearningTool): Includes all of the unit tests. 
+- [backend](/backend): Contains all of the back-end code (in Java), Maven config and documents:
+  - [src/main](/backend/src/main): Includes the back-end Java code.
+  - [src/main/static](/backend/src/main/resources/static): Includes all static documents, including index.html of the front-end.
+  - [src/test/java/com/UoB/AILearningTool](/backend/src/test/java/com/UoB/AILearningTool): Includes all backend Java the unit tests.
+  - [mvnw]((/backend/mvnw)), [mvnw.cmd]((/backend/mvnw.cmd))  and [pom.xml](/backend/pom.xml): Documents for Maven.
 - [LICENSE](/LICENSE): Includes the project's MIT license file.
-- [mvnw](/mvnw) and [pom.xml](/pom.xml): Documents for Maven.
 
 ## Tech Stack:
 ### Frontend
