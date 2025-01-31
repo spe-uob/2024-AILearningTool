@@ -14,27 +14,25 @@
       </div>
 
       <!-- All messages of the conversation -->
-      <div v-if="this.currentChatID.length > 0">
-        <!-- One "message bubble" -->
-        <div
-            v-for="msg in messages"
-            :key="msg.id"
-            class="message"
-            :class="{ 'from-ai': msg.sender === 'assistant', 'from-user': msg.sender === 'user' }"
-        >
-          <strong v-if="msg.sender === 'user'">User</strong>
-          <strong v-else>AI</strong>
-          <p>{{ msg.content }}</p>
+      <div v-if="this.currentChatID.length > 0" class="chat-container">
+        <!-- Scrollable message area -->
+        <div class="messages-container">
+          <div v-for="msg in messages" :key="msg.id" class="message">
+            <strong v-if="msg.sender === 'user'">User</strong>
+            <strong v-else>AI</strong>
+            <p>{{ msg.content }}</p>
+          </div>
         </div>
 
-        <!-- Text box for entering messages, for user -->
-        <textarea
-            v-model="userInput"
-            placeholder="Type your message..."
-            @keypress.enter.prevent="sendMessage"
-        ></textarea>
-
-        <button @click="sendMessage">Send</button>
+        <!-- Fixed input area -->
+        <div class="input-area">
+          <textarea
+              v-model="userInput"
+              placeholder="Type your message..."
+              @keypress.enter.prevent="sendMessage"
+          ></textarea>
+          <button @click="sendMessage()">Send</button>
+        </div>
       </div>
     </div>
   </main>
@@ -42,6 +40,7 @@
 
 <script>
 import axios from "axios";
+import { getTheme } from "../assets/color.js";
 
 export default {
   data() {
@@ -51,6 +50,7 @@ export default {
       currentTurn: "user", // Used for message history parsing
       userId: localStorage.getItem("userId") || "",
       aiServerURL: "http://localhost:8080",
+      currentTheme: "default", // Current theme for the component
     };
   },
   props: ["messages", "chats", "currentChatID"],
@@ -189,7 +189,20 @@ export default {
 
         this.$emit("addMessage", "System", "Failed to send message. Please try again.")
       }
+      this.scrollToBottom();
     },
+    applyTheme(themeName) {
+      const theme = getTheme(themeName);
+      Object.keys(theme).forEach((key) => {
+        document.documentElement.style.setProperty(`--${key}-color`, theme[key]);
+      });
+    },
+    scrollToBottom() {
+      const chatContainer = this.$el.querySelector(".messages-container");
+      if (chatContainer) {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+    }
   },
 
     // TODO: Why is this here? We have Cookie.vue, right?
@@ -212,7 +225,8 @@ export default {
       await this.getUserId();
     }
   },
-};
+}
+;
 </script>
 
 
@@ -220,22 +234,60 @@ export default {
 main {
   flex-grow: 1;
   padding: 20px;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Full viewport height */
 }
 
 .chat-area {
-  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  background-color: var(--background-color);
   padding: 20px;
   border-radius: 5px;
+  border: 1px solid var(--border-color);
+  overflow: hidden; /* Prevents chat overflow */
+}
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.messages-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid var(--border-color);
+  background-color: var(--background-color);
+  max-height: calc(100vh - 180px); /* Ensure it fits with input area */
 }
 
 .message {
   margin: 10px 0;
   padding: 10px;
   border-radius: 15px;
-  border: 1px solid #ccc;
   max-width: 60%;
   white-space: pre-wrap;
   word-wrap: break-word;
+}
+
+.message:nth-child(odd) {
+  align-self: flex-start;
+  background-color: var(--primary-color);
+  border-color: var(--secondary-color);
+}
+
+.message:nth-child(even) {
+  align-self: flex-end;
+  background-color: var(--accent-color);
+  border-color: var(--border-color);
 }
 
 .message.from-ai {
@@ -250,13 +302,23 @@ main {
   border-color: #a5d6a7;
 }
 
+.input-area {
+  display: flex;
+  flex-direction: column;
+  background: var(--background-color);
+  padding: 10px;
+  border-top: 1px solid var(--border-color);
+}
+
 textarea {
   width: 100%;
-  height: 100px;
+  height: 80px;
   resize: none;
   padding: 5px;
   box-sizing: border-box;
   font-size: 14px;
+  background-color: var(--background-color);
+  color: var(--text-color);
 }
 
 textarea:focus {
@@ -266,14 +328,14 @@ textarea:focus {
 button {
   margin-top: 10px;
   padding: 10px;
-  background-color: #4caf50;
-  color: white;
+  background-color: var(--button-color);
+  color: var(--text-color);
   border: none;
   border-radius: 5px;
   cursor: pointer;
 }
 
 button:hover {
-  background-color: #45a049;
+  background-color: var(--accent-color);
 }
 </style>
