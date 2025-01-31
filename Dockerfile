@@ -2,7 +2,7 @@
 FROM openjdk:21-jdk-slim
 
 # Specify the JAR file's build location.
-ARG JAR_FILE=backend/target/*.jar
+ARG JAR_FILE=target/*.jar
 
 # Copy the JAR file into the container.
 COPY ${JAR_FILE} app.jar
