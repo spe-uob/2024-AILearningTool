@@ -16,7 +16,7 @@ public class AiLearningToolApplication implements CommandLineRunner {
 
 	public static void main(String[] args) {
 		//  disable SSL if launched without keystore.p12
-		if (!Files.exists(Paths.get("src/main/resources/keystore.p12"))) {
+		if (!Files.exists(Paths.get("src", "main", "resources", "keystore.p12"))) {
 			// Force disable SSL.
 			System.setProperty("server.ssl.enabled", "false");
 		}
