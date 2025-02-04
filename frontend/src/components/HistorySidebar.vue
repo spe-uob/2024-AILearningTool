@@ -1,26 +1,25 @@
 <template>
+  <!-- Sidebar for chat history -->
   <aside class="history-sidebar" :class="{ collapsed: isCollapsed }" :style="asideStyles">
-    <!-- Toggle Button with Tooltip -->
+    <!-- Toggle Button (Top Left) -->
     <button class="toggle-btn" @click="toggleSidebar" :title="isCollapsed ? 'Open History' : 'Close History'">
-      <i class="icon">📜</i>
+      <i class="icon">💬</i> 
     </button>
 
     <!-- Sidebar Content (Only shown when expanded) -->
     <div v-if="!isCollapsed" class="history-content">
       <!-- New Conversation Button -->
       <button class="new-conversation-btn" @click="addChat" :style="buttonStyles" title="New Chat">
-        <i class="icon">➕</i> WatsonX AI
+        <i class="icon">➕</i> New Conversation
       </button>
 
       <!-- Scrollable Conversation List -->
       <div class="history-list">
-        <ul>
-          <li v-for="chat in chats" :key="chat.chatID">
-            <button class="chat-item" @click="selectChat(chat.chatID)" :style="buttonStyles">
-              {{ chat.title }}
-            </button>
-          </li>
-        </ul>
+        <div v-for="chat in chats" :key="chat.chatID">
+          <button class="chat-item" @click="selectChat(chat.chatID)" :style="buttonStyles">
+            {{ chat.title }}
+          </button>
+        </div>
       </div>
     </div>
   </aside>
@@ -33,22 +32,29 @@ export default {
   props: ["chats", "currentChatID"],
   data() {
     return {
-      isCollapsed: false,
-      aiServerUrl: "http://localhost:8080",
-      currentTheme: "default",
-      themeStyles: {},
+      isCollapsed: false, // Controls whether the sidebar is open or closed
+      aiServerUrl: "http://localhost:8080", // Placeholder server URL
+      currentTheme: "default", // Tracks the current theme
+      themeStyles: {}, // Holds dynamic styles for theming
     };
   },
   methods: {
+    // Creates a new chat and resets main content
     addChat() {
       this.$emit("resetMainContent");
     },
+
+    // Toggles the sidebar open/closed
     toggleSidebar() {
       this.isCollapsed = !this.isCollapsed;
     },
+
+    // Selects a conversation from the history
     selectChat(chatID) {
       this.$emit("chatSelected", chatID);
     },
+
+    // Applies the selected theme
     applyTheme(themeName) {
       const theme = getTheme(themeName);
       this.themeStyles = {
@@ -66,6 +72,8 @@ export default {
         },
       };
     },
+
+    // Listens for theme changes and updates styles
     listenForThemeChange() {
       window.addEventListener("themeChange", (event) => {
         this.applyTheme(event.detail.themeName);
@@ -90,7 +98,7 @@ export default {
 <style scoped>
 /* Sidebar Layout */
 .history-sidebar {
-  width: 220px; /* Reduced width to match ChatGPT */
+  width: 220px; /* ChatGPT-like width */
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -101,19 +109,22 @@ export default {
   overflow: hidden;
 }
 
-/* Collapsed Sidebar */
+/* Fully Collapsed Sidebar */
 .history-sidebar.collapsed {
-  width: 60px;
+  width: 0; /* Completely hidden when collapsed */
+  padding: 0;
+  border: none;
 }
 
-/* Toggle Button */
+/* Toggle Button - Moved to Top Left */
 .toggle-btn {
   background: transparent;
   border: none;
   cursor: pointer;
   padding: 8px;
-  width: 100%;
-  text-align: center;
+  position: absolute;
+  top: 10px;
+  left: 10px;
   font-size: 20px;
 }
 
@@ -156,16 +167,17 @@ export default {
   scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 }
 
-/* Chat Item Buttons */
+/* Chat Item Buttons - Centered and Without Bullet Points */
 .chat-item {
   width: 100%;
   padding: 12px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  text-align: left;
+  text-align: center; /* Center text */
   transition: background-color 0.2s ease-in-out, transform 0.2s;
-  margin: 8px 0; /* Added space above and below chat bubbles */
+  margin: 8px 0; /* Added space above and below */
+  list-style-type: none; /* Remove bullets */
 }
 
 .chat-item:hover {
