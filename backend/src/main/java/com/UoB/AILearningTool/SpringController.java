@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @RestController  // Use RestController for handling HTTP requests
-@RequestMapping("/api")  // Base URL for all handlers
 @Service @Controller
 public class SpringController {
     private final Logger log = LoggerFactory.getLogger(SpringController.class);
