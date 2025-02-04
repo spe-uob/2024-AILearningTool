@@ -25,6 +25,7 @@ jobs:
       # Step 3: Build the JAR file with Maven
       - name: Build JAR
         run: mvn clean package
+        working-directory: backend
 
       # Step 4: Log in to GitHub Container Registry
       - name: Log in to GHCR
