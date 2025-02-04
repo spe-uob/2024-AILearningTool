@@ -1,25 +1,26 @@
 <template>
-  <!-- Sidebar for chat history -->
   <aside class="history-sidebar" :class="{ collapsed: isCollapsed }" :style="asideStyles">
-    <!-- Toggle Button (Top Left) -->
-    <button class="toggle-btn" @click="toggleSidebar" :title="isCollapsed ? 'Open History' : 'Close History'">
-      <i class="icon">💬</i> 
+    <!-- Toggle Button -->
+    <button class="toggle-btn chat-item" @click="toggleSidebar" :style="buttonStyles" :title="isCollapsed ? 'Open History' : 'Close History'">
+      <i class="icon">💬</i> <span v-if="!isCollapsed">History</span>
     </button>
 
-    <!-- Sidebar Content (Only shown when expanded) -->
-    <div v-if="!isCollapsed" class="history-content">
-      <!-- New Conversation Button -->
-      <button class="new-conversation-btn" @click="addChat" :style="buttonStyles" title="New Chat">
-        <i class="icon">➕</i> New Conversation
+    <!-- Sidebar Content -->
+    <div v-if="!isCollapsed" class="history-container">
+      <!-- New Chat Button -->
+      <button class="chat-item" @click="addChat" :style="buttonStyles" title="New Chat">
+        <i class="icon">➕</i> WatsonX AI
       </button>
 
-      <!-- Scrollable Conversation List -->
-      <div class="history-list">
-        <div v-for="chat in chats" :key="chat.chatID">
-          <button class="chat-item" @click="selectChat(chat.chatID)" :style="buttonStyles">
-            {{ chat.title }}
-          </button>
-        </div>
+      <!-- Chat History List -->
+      <div class="history-list-wrapper">
+        <ul>
+          <li v-for="chat in chats" :key="chat.chatID">
+            <button class="chat-item" @click="selectChat(chat.chatID)" :style="buttonStyles">
+              {{ chat.title }}
+            </button>
+          </li>
+        </ul>
       </div>
     </div>
   </aside>
@@ -32,29 +33,20 @@ export default {
   props: ["chats", "currentChatID"],
   data() {
     return {
-      isCollapsed: false, // Controls whether the sidebar is open or closed
-      aiServerUrl: "http://localhost:8080", // Placeholder server URL
-      currentTheme: "default", // Tracks the current theme
-      themeStyles: {}, // Holds dynamic styles for theming
+      isCollapsed: false,
+      themeStyles: {},
     };
   },
   methods: {
-    // Creates a new chat and resets main content
     addChat() {
       this.$emit("resetMainContent");
     },
-
-    // Toggles the sidebar open/closed
     toggleSidebar() {
       this.isCollapsed = !this.isCollapsed;
     },
-
-    // Selects a conversation from the history
     selectChat(chatID) {
       this.$emit("chatSelected", chatID);
     },
-
-    // Applies the selected theme
     applyTheme(themeName) {
       const theme = getTheme(themeName);
       this.themeStyles = {
@@ -67,13 +59,8 @@ export default {
           backgroundColor: theme.button,
           color: theme.text,
         },
-        text: {
-          color: theme.text,
-        },
       };
     },
-
-    // Listens for theme changes and updates styles
     listenForThemeChange() {
       window.addEventListener("themeChange", (event) => {
         this.applyTheme(event.detail.themeName);
@@ -96,92 +83,89 @@ export default {
 </script>
 
 <style scoped>
-/* Sidebar Layout */
 .history-sidebar {
-  width: 220px; /* ChatGPT-like width */
-  height: 100vh;
+  width: 240px;
+  height: 90vh;
   display: flex;
+  border-radius: 12px;
   flex-direction: column;
-  background-color: var(--sidebar-bg, #f9f9f9);
-  transition: width 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-  border-right: 1px solid rgba(0, 0, 0, 0.1);
-  padding: 10px;
+  transition: width 0.3s ease-in-out;
+  border-right: 2px solid var(--border-color);
+  padding: 12px;
+  background-color: var(--background-color);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
-/* Fully Collapsed Sidebar */
 .history-sidebar.collapsed {
-  width: 0; /* Completely hidden when collapsed */
-  padding: 0;
-  border: none;
+  width: 60px;
 }
 
-/* Toggle Button - Moved to Top Left */
 .toggle-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 8px;
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  font-size: 20px;
-}
-
-.toggle-btn .icon {
-  font-size: 24px;
-}
-
-/* New Conversation Button (Styled like a chat bubble) */
-.new-conversation-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 100%;
-  padding: 12px;
-  font-weight: bold;
+  padding: 14px;
   cursor: pointer;
-  border-radius: 8px;
-  transition: background-color 0.2s ease-in-out, transform 0.2s;
-  margin-bottom: 10px;
-  background: rgba(0, 0, 0, 0.05);
-  border: none;
+  text-align: center;
+  font-weight: bold;
+  transition: background-color 0.3s ease-in-out, transform 0.2s;
+  margin: 10px 0;
+  background: var(--button-color);
+  color: var(--text-color);
+  border: none !important;
+  border-radius: 10px;
 }
 
-.new-conversation-btn:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+.toggle-btn:hover {
+  background-color: var(--primary-color);
   transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.18);
 }
 
-.new-conversation-btn .icon {
-  margin-right: 8px;
-  font-size: 18px;
+.history-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding-top: 12px;
+  overflow: hidden;
+  max-height: calc(100vh - 150px);
 }
 
-/* Chat List */
-.history-list {
+.history-list-wrapper {
   flex-grow: 1;
   overflow-y: auto;
-  padding-right: 5px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  padding: 10px;
+  border-radius: 12px;
+  background-color: var(--background-color);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease-in-out;
 }
 
-/* Chat Item Buttons - Centered and Without Bullet Points */
+.history-list-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.history-list-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
 .chat-item {
   width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
+  padding: 14px;
   cursor: pointer;
-  text-align: center; /* Center text */
-  transition: background-color 0.2s ease-in-out, transform 0.2s;
-  margin: 8px 0; /* Added space above and below */
-  list-style-type: none; /* Remove bullets */
+  text-align: left;
+  font-weight: bold;
+  transition: background-color 0.3s ease-in-out, transform 0.2s;
+  margin: 10px 0;
+  background: var(--button-color);
+  color: var(--text-color);
+  border: none !important;
+  border-radius: 10px;
 }
 
 .chat-item:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: var(--primary-color);
   transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.18);
 }
 </style>
