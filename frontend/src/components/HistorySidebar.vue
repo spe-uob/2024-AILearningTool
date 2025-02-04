@@ -1,24 +1,28 @@
 <template>
-  <aside :class="{'collapsed': isCollapsed}" :style="asideStyles">
-    <!-- Toggle Button for Collapsing/Expanding -->
-    <button :style="buttonStyles" @click="toggleSidebar">History</button>
+  <aside class="history-sidebar" :class="{ collapsed: isCollapsed }" :style="asideStyles">
+    <!-- Toggle Button -->
+    <button class="toggle-btn" @click="toggleSidebar">
+      <span v-if="isCollapsed">📜</span>
+      <span v-else>History</span>
+    </button>
 
     <!-- History content, only visible when not collapsed -->
     <div v-if="!isCollapsed" class="history-content">
-      <h3 :style="textStyles">Conversation History</h3>
+      <h3 class="sidebar-title" :style="textStyles">Conversation History</h3>
 
       <!-- Scrollable conversation list -->
       <div class="history-list">
-      <ul>
-        <li v-for="chat in this.chats" :key="chat.chatID">
-          <button :style="buttonStyles" @click="selectChat(chat.chatID)">
-            {{ chat.title }}
-          </button>
-        </li>
-      </ul>
-    </div>
-      <!-- Button for adding a new conversation -->
-      <button class="new-conversation-btn" :style="buttonStyles" @click="addChat">
+        <ul>
+          <li v-for="chat in chats" :key="chat.chatID">
+            <button class="chat-item" @click="selectChat(chat.chatID)" :style="buttonStyles">
+              {{ chat.title }}
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <!-- New Conversation Button -->
+      <button class="new-conversation-btn" @click="addChat" :style="buttonStyles">
         ➕ New Conversation
       </button>
     </div>
@@ -29,30 +33,25 @@
 import { getTheme } from "../assets/color.js";
 
 export default {
+  props: ["chats", "currentChatID"],
   data() {
     return {
-      isCollapsed: false, // Controls the collapse state of the sidebar
+      isCollapsed: false,
       aiServerUrl: "http://localhost:8080",
-      currentTheme: "default", // Tracks the current theme
-      themeStyles: {}, // Stores styles for the theme
+      currentTheme: "default",
+      themeStyles: {},
     };
   },
-  props: ["chats", "currentChatID"],
   methods: {
-    // Reverts the state of MainContent to initial state.
-    async addChat() {
-      this.$emit("resetMainContent")
+    addChat() {
+      this.$emit("resetMainContent");
     },
-
     toggleSidebar() {
       this.isCollapsed = !this.isCollapsed;
     },
-
-    // Sends a chat selection event, asks other components to render the required chat
     selectChat(chatID) {
       this.$emit("chatSelected", chatID);
     },
-
     applyTheme(themeName) {
       const theme = getTheme(themeName);
       this.themeStyles = {
@@ -70,7 +69,6 @@ export default {
         },
       };
     },
-    // Listen for theme change events
     listenForThemeChange() {
       window.addEventListener("themeChange", (event) => {
         this.applyTheme(event.detail.themeName);
@@ -89,94 +87,94 @@ export default {
     },
   },
   mounted() {
-    // Apply the default theme when the component is mounted
     this.applyTheme("default");
-
-    // Start listening for theme changes
     this.listenForThemeChange();
   },
 };
 </script>
 
 <style scoped>
-aside {
-  width: 250px;
-  padding: 10px;
-  transition: width 0.3s ease-in-out, box-shadow 0.3s ease-in-out, background-color 0.3s ease-in-out;
-  position: relative;
+/* Sidebar Layout */
+.history-sidebar {
+  width: 280px;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  border-radius: 12px;
-  box-shadow: 3px 0 12px rgba(0, 0, 0, 0.1);
+  background-color: var(--sidebar-bg, #f9f9f9);
+  transition: width 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  overflow: hidden;
 }
 
-.collapsed {
+/* Collapsed Sidebar */
+.history-sidebar.collapsed {
   width: 60px;
-  box-shadow: none;
 }
 
+/* Toggle Button */
+.toggle-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  padding: 8px;
+  width: 100%;
+  text-align: left;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.collapsed .toggle-btn {
+  text-align: center;
+}
+
+/* Sidebar Title */
+.sidebar-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+/* Chat List */
 .history-list {
-  max-height: 300px;
+  flex-grow: 1;
   overflow-y: auto;
-  margin-top: 10px;
+  max-height: 60vh;
   padding-right: 5px;
   border-radius: 8px;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease-in-out;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 }
 
-.history-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.history-list::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
-}
-
-.history-list::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-button {
-  margin: 5px 0;
-  padding: 12px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
+/* Chat Item Buttons */
+.chat-item {
   width: 100%;
-  font-weight: bold;
-  transition: transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s ease-in-out, transform 0.2s;
 }
 
-button:hover {
+.chat-item:hover {
+  background-color: rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.18);
 }
 
-button:active {
-  transform: scale(0.96);
-}
-
-.history-content {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  opacity: 0;
-  transform: translateY(10px);
-  animation: fadeIn 0.4s forwards ease-in-out;
-}
-
-@keyframes fadeIn {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
+/* New Conversation Button */
 .new-conversation-btn {
-  margin-top: 12px;
+  width: 100%;
+  padding: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.2s ease-in-out;
 }
 
+.new-conversation-btn:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
 </style>
