@@ -1,16 +1,18 @@
 <template>
   <aside class="history-sidebar" :class="{ collapsed: isCollapsed }" :style="asideStyles">
-    <!-- Toggle Button -->
-    <button class="toggle-btn" @click="toggleSidebar">
-      <span v-if="isCollapsed">📜</span>
-      <span v-else>History</span>
+    <!-- Toggle Button with Tooltip -->
+    <button class="toggle-btn" @click="toggleSidebar" :title="isCollapsed ? 'Open History' : 'Close History'">
+      <i class="icon">📜</i>
     </button>
 
-    <!-- History content, only visible when not collapsed -->
+    <!-- Sidebar Content (Only shown when expanded) -->
     <div v-if="!isCollapsed" class="history-content">
-      <h3 class="sidebar-title" :style="textStyles">Conversation History</h3>
+      <!-- New Conversation Button -->
+      <button class="new-conversation-btn" @click="addChat" :style="buttonStyles" title="New Chat">
+        <i class="icon">➕</i> WatsonX AI
+      </button>
 
-      <!-- Scrollable conversation list -->
+      <!-- Scrollable Conversation List -->
       <div class="history-list">
         <ul>
           <li v-for="chat in chats" :key="chat.chatID">
@@ -20,11 +22,6 @@
           </li>
         </ul>
       </div>
-
-      <!-- New Conversation Button -->
-      <button class="new-conversation-btn" @click="addChat" :style="buttonStyles">
-        ➕ New Conversation
-      </button>
     </div>
   </aside>
 </template>
@@ -82,9 +79,6 @@ export default {
     buttonStyles() {
       return this.themeStyles.button;
     },
-    textStyles() {
-      return this.themeStyles.text;
-    },
   },
   mounted() {
     this.applyTheme("default");
@@ -96,7 +90,7 @@ export default {
 <style scoped>
 /* Sidebar Layout */
 .history-sidebar {
-  width: 280px;
+  width: 220px; /* Reduced width to match ChatGPT */
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -117,33 +111,47 @@ export default {
   background: transparent;
   border: none;
   cursor: pointer;
-  font-weight: bold;
-  font-size: 16px;
   padding: 8px;
   width: 100%;
-  text-align: left;
-  transition: opacity 0.3s ease-in-out;
-}
-
-.collapsed .toggle-btn {
   text-align: center;
+  font-size: 20px;
 }
 
-/* Sidebar Title */
-.sidebar-title {
-  font-size: 18px;
+.toggle-btn .icon {
+  font-size: 24px;
+}
+
+/* New Conversation Button (Styled like a chat bubble) */
+.new-conversation-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px;
   font-weight: bold;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.2s ease-in-out, transform 0.2s;
   margin-bottom: 10px;
-  text-align: center;
+  background: rgba(0, 0, 0, 0.05);
+  border: none;
+}
+
+.new-conversation-btn:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.new-conversation-btn .icon {
+  margin-right: 8px;
+  font-size: 18px;
 }
 
 /* Chat List */
 .history-list {
   flex-grow: 1;
   overflow-y: auto;
-  max-height: 60vh;
   padding-right: 5px;
-  border-radius: 8px;
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 }
@@ -151,30 +159,17 @@ export default {
 /* Chat Item Buttons */
 .chat-item {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   text-align: left;
   transition: background-color 0.2s ease-in-out, transform 0.2s;
+  margin: 8px 0; /* Added space above and below chat bubbles */
 }
 
 .chat-item:hover {
   background-color: rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
-}
-
-/* New Conversation Button */
-.new-conversation-btn {
-  width: 100%;
-  padding: 12px;
-  font-weight: bold;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.new-conversation-btn:hover {
-  background-color: rgba(0, 0, 0, 0.1);
 }
 </style>
