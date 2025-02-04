@@ -80,7 +80,7 @@ export default {
       }
     },
     login() {
-      fetch('/api/login', {
+      fetch('/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -103,7 +103,7 @@ export default {
         });
     },
     register() {
-      fetch('/api/register', {
+      fetch('/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
