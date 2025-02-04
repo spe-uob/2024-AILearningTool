@@ -10,18 +10,17 @@
         <ul>
           <li>
             <h4>1) Day/Night Mode</h4>
-            <button @click="toggleTheme">Toggle Day/Night</button>
+            <button @click="toggleTheme">{{ isDarkMode ? "Switch to Day Mode" : "Switch to Night Mode" }}</button>
           </li>
           <li>
             <h4>2) Language</h4>
             <div class="language-buttons">
-              <button @click="changeLanguage('en')">English</button>
-              <button @click="changeLanguage('zh')">Chinese</button>
+              <button @click="changeLanguage('en')" :class="{ active: language === 'en' }">English</button>
+              <button @click="changeLanguage('zh')" :class="{ active: language === 'zh' }">Chinese</button>
             </div>
           </li>
           <li>
             <h4>3) High Contrast Mode</h4>
-            <!-- Button to toggle high contrast mode -->
             <button @click="toggleHighContrastMode">
               {{ isHighContrast ? 'Turn Off High Contrast Mode' : 'Turn On High Contrast Mode' }}
             </button>
@@ -43,35 +42,35 @@ export default {
   data() {
     return {
       isSettingsOpen: false,
-      isHighContrast: false, // Tracks the toggle state for high contrast mode
+      isHighContrast: false, // Tracks high contrast mode
+      isDarkMode: false, // Tracks day/night mode
+      language: "en", // Tracks selected language
     };
   },
   methods: {
     openSettings() {
       this.isSettingsOpen = true;
-      this.$emit("toggleSettings", true); // Notify parent that settings are open
     },
     closeSettings() {
       this.isSettingsOpen = false;
-      this.$emit("toggleSettings", false); // Notify parent that settings are closed
     },
     toggleTheme() {
-      alert("Day/Night Mode toggled");
+      this.isDarkMode = !this.isDarkMode;
+      const themeName = this.isDarkMode ? "dark" : "light";
+      this.applyTheme(themeName);
+      localStorage.setItem("theme", themeName);
     },
-    changeLanguage(language) {
-      if (language === "en") {
-        alert("Language changed to English");
-      } else if (language === "zh") {
-        alert("Language changed to Chinese");
-      }
+    changeLanguage(lang) {
+      this.language = lang;
+      localStorage.setItem("language", lang);
+      this.$emit("languageChanged", lang); // Notify parent component
     },
     toggleHighContrastMode() {
-      this.isHighContrast = !this.isHighContrast; // Toggle high contrast mode on/off
-      const themeName = this.isHighContrast ? "high_contrast" : "default";
+      this.isHighContrast = !this.isHighContrast;
+      const themeName = this.isHighContrast ? "high_contrast" : (this.isDarkMode ? "dark" : "light");
       this.applyTheme(themeName);
-      this.$emit("highContrastToggled", this.isHighContrast); // Notify parent
-      const event = new CustomEvent("themeChange", { detail: { themeName } });
-      window.dispatchEvent(event);
+      localStorage.setItem("highContrast", this.isHighContrast ? "true" : "false");
+      this.$emit("highContrastToggled", this.isHighContrast);
     },
     applyTheme(themeName) {
       const theme = getTheme(themeName);
@@ -80,12 +79,21 @@ export default {
       });
     },
     goToCookiePage() {
-      this.$router.push("/"); // Redirect to the /cookie page
+      this.$router.push("/"); // Ensure correct navigation
     },
   },
   mounted() {
-    // Apply default theme on mount
-    this.applyTheme("default");
+    // Load saved theme
+    const savedTheme = localStorage.getItem("theme") || "light";
+    this.isDarkMode = savedTheme === "dark";
+    this.applyTheme(savedTheme);
+
+    // Load saved high contrast setting
+    const savedHighContrast = localStorage.getItem("highContrast") === "true";
+    this.isHighContrast = savedHighContrast;
+
+    // Load saved language setting
+    this.language = localStorage.getItem("language") || "en";
   },
 };
 </script>
@@ -132,6 +140,12 @@ li {
   display: flex;
   gap: 10px;
   margin-top: 10px;
+}
+
+.language-buttons button.active {
+  font-weight: bold;
+  background-color: var(--button-color);
+  color: white;
 }
 
 .action-buttons {
