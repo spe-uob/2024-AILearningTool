@@ -91,6 +91,7 @@ export default {
         .then((res) => res.json())
         .then((data) => {
           if (data.success) {
+            localStorage.setItem('token', data.token);
             this.$router.push('/main');
           } else {
             alert(data.message || 'Login failed!');
