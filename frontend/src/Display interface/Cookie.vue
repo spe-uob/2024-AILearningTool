@@ -13,16 +13,57 @@ export default {
   methods: {
     handleConsent(isConsent) {
       this.setConsentCookie(isConsent);
-      this.$emit('consent-choice', isConsent); 
+      this.$emit('consent-choice', isConsent);
+      this.signUp();
     },
-    setConsentCookie(isConsent) {
-      const consentValue = isConsent ? "true" : "false";
-      const d = new Date();
-      d.setTime(d.getTime() + 30 * 24 * 60 * 60 * 1000); 
-      const expires = "expires=" + d.toUTCString();
-      document.cookie = `optionalConsent=${consentValue};${expires};path=/`;
-    },
+
+  // Setting Cookies
+  setConsentCookie(isConsent) {
+    const consentValue = isConsent ? "true" : "false";
+    const d = new Date();
+    d.setTime(d.getTime() + 30 * 24 * 60 * 60 * 1000); // Set a 30-day expiry date
+    const expires = "expires=" + d.toUTCString();
+    document.cookie = `optionalConsent=${consentValue};${expires};path=/`;
   },
+
+  // Calling the Registration API
+  async signUp() {
+    try {
+      const response = await fetch("http://localhost:8080/signup", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`Non-200 response: ${response.status}`);
+      }
+
+      // Read the userID from the cookie and store it in LocalStorage.
+      this.storeUserID();
+
+      // Hide Cookie Popups
+      document.getElementById("cookiePopUp").style.display = "none";
+
+      // Skip to main screen
+      this.redirectToMain();
+    } catch (error) {
+      console.error("Registration failure:", error);
+    }
+  },
+
+  // Extracts the userID from the cookie and stores it in LocalStorage.
+  storeUserID() {
+    const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
+      const [key, value] = cookie.split("=");
+      acc[key] = value;
+      return acc;
+    }, {});
+
+    if (cookies.userID) {
+      localStorage.setItem("userId", cookies.userID);
+    }
+  },
+},
 };
 </script>
 
