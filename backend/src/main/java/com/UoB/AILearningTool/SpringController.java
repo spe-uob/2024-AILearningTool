@@ -8,9 +8,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@RestController  // Use RestController for handling HTTP requests
+@RequestMapping("/api")  // Base URL for all handlers
 @Service @Controller
 public class SpringController {
     private final Logger log = LoggerFactory.getLogger(SpringController.class);
@@ -24,6 +35,31 @@ public class SpringController {
         this.DBC = DBC;
         this.WXC = WXC;
     }
+
+    private final Map<String, String> userStore = new ConcurrentHashMap<>();
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody Map<String, String> credentials) {
+        String username = credentials.get("username");
+        String password = credentials.get("password");
+        if (userStore.containsKey(username) && userStore.get(username).equals(password)) {
+            return ResponseEntity.ok(Collections.singletonMap("success", true));
+        } else {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Invalid username or password"));
+        }
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<Map<String, Object>> registerUser(@RequestBody Map<String, String> credentials) {
+        String username = credentials.get("username");
+        String password = credentials.get("password");
+        if (userStore.containsKey(username)) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Username already exists"));
+        } else {
+            userStore.put(username, password);
+            return ResponseEntity.ok(Collections.singletonMap("success", true));
+        }
+    }
+
     // Assign a unique user ID for the user.
     @GetMapping("/signup")
     public void signup(@CookieValue(value = "optionalConsent", defaultValue = "false") boolean optionalConsent,
