@@ -1,5 +1,7 @@
 <template>
   <div class="login-container">
+    <Cookie v-if="showCookiePopup" @consent-choice="handleConsent" />
+
     <div class="card">
       <h2>{{ isLoginMode ? 'Login' : 'Register' }}</h2>
 
@@ -24,7 +26,7 @@
           />
         </div>
 
-        <button type="submit">
+        <button type="submit" :disabled="showCookiePopup">
           {{ isLoginMode ? 'Login' : 'Register' }}
         </button>
       </form>
@@ -40,15 +42,19 @@
 </template>
 
 <script>
+import Cookie from '../Display interface/Cookie.vue';
+
 export default {
+  components: { Cookie },
   data() {
     return {
-      isLoginMode: true, 
+      isLoginMode: true,
       form: {
         username: '',
         password: '',
         confirmPassword: '',
       },
+      showCookiePopup: true, 
     };
   },
   methods: {
@@ -58,6 +64,11 @@ export default {
       this.form.confirmPassword = '';
     },
     handleSubmit() {
+      if (this.showCookiePopup) {
+        alert("Please accept or reject cookies first.");
+        return;
+      }
+
       if (this.isLoginMode) {
         this.login();
       } else {
@@ -80,8 +91,7 @@ export default {
         .then((res) => res.json())
         .then((data) => {
           if (data.success) {
-            alert('Login successful!');
-            this.$router.push('/cookie'); 
+            this.$router.push('/main');
           } else {
             alert(data.message || 'Login failed!');
           }
@@ -113,6 +123,9 @@ export default {
           console.error('Registration error:', err);
           alert('An error occurred while trying to register.');
         });
+    },
+    handleConsent(consent) {
+      this.showCookiePopup = false;
     },
   },
 };
@@ -164,14 +177,14 @@ button {
   padding: 0.75rem;
   border: none;
   border-radius: 4px;
-  background-color: #007bff;
+  background-color: #5C88DA;
   color: white;
   font-size: 16px;
   cursor: pointer;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: #5C88DA;
 }
 
 .toggle-text {
@@ -180,7 +193,7 @@ button:hover {
 }
 
 .toggle-text span {
-  color: #007bff;
+  color: #5C88DA;
   cursor: pointer;
   font-weight: bold;
 }
