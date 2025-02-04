@@ -61,7 +61,6 @@ export default {
       if (this.isLoginMode) {
         this.login();
       } else {
- 
         if (this.form.password !== this.form.confirmPassword) {
           alert('Passwords do not match!');
           return;
@@ -78,15 +77,19 @@ export default {
           password: this.form.password,
         }),
       })
-        .then((res) => {
-          if (res.ok) {
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
             alert('Login successful!');
-            this.$router.push('/main');
+            this.$router.push('/cookie'); 
           } else {
-            alert('Login failed!');
+            alert(data.message || 'Login failed!');
           }
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          console.error('Login error:', err);
+          alert('An error occurred while trying to log in.');
+        });
     },
     register() {
       fetch('/api/register', {
@@ -97,21 +100,26 @@ export default {
           password: this.form.password,
         }),
       })
-        .then((res) => {
-          if (res.ok) {
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
             alert('Registration successful! Please login.');
-            this.toggleMode(); 
+            this.toggleMode();
           } else {
-            alert('Registration failed!');
+            alert(data.message || 'Registration failed!');
           }
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          console.error('Registration error:', err);
+          alert('An error occurred while trying to register.');
+        });
     },
   },
 };
 </script>
 
 <style scoped>
+/* CSS code unchanged */
 .login-container {
   display: flex;
   justify-content: center;
@@ -156,14 +164,14 @@ button {
   padding: 0.75rem;
   border: none;
   border-radius: 4px;
-  background-color: #4caf50;
+  background-color: #007bff;
   color: white;
   font-size: 16px;
   cursor: pointer;
 }
 
 button:hover {
-  background-color: #45a049;
+  background-color: #0056b3;
 }
 
 .toggle-text {
