@@ -4,7 +4,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 const Cookie = () => import('./Display interface/Cookie.vue');
 const MainView = () => import('./Display interface/MainView.vue');
-const Login = () => import('./components/Login.vue'); 
+const Login = () => import('./Display interface/Login.vue'); 
 
 const routes = [
     { path: '/', component: Cookie, meta: { title: 'Cookie' } },
