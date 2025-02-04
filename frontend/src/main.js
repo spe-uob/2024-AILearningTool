@@ -4,11 +4,12 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 const Cookie = () => import('./Display interface/Cookie.vue');
 const MainView = () => import('./Display interface/MainView.vue');
+const Login = () => import('./components/Login.vue'); 
 
 const routes = [
     { path: '/', component: Cookie, meta: { title: 'Cookie' } },
+    { path: '/login', component: Login, meta: { title: 'Login' } }, 
     { path: '/main', component: MainView, meta: { title: 'Chatbot' } },
-
 ];
 
 const router = createRouter({
