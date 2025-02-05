@@ -66,8 +66,8 @@ export default {
       }
 
       if (this.isLoginMode) {
-        this.login();          // 然后登录
-        this.signUp();  // 先尝试注册
+        this.login();
+        this.signUp();
       } else {
         if (this.form.password !== this.form.confirmPassword) {
           alert('Passwords do not match!');
