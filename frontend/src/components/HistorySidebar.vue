@@ -125,6 +125,7 @@ export default {
 /* Lower the "New Conversation" button */
 .chat-item:first-of-type {
   margin-top: 40px;
+  background-color: var(--button-color);
 }
 
 /* Sidebar Content */
