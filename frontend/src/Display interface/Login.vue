@@ -18,12 +18,7 @@
 
         <div v-if="!isLoginMode" class="form-group">
           <label for="confirmPassword">Confirm Password</label>
-          <input
-            v-model="form.confirmPassword"
-            id="confirmPassword"
-            type="password"
-            required
-          />
+          <input v-model="form.confirmPassword" id="confirmPassword" type="password" required />
         </div>
 
         <button type="submit" :disabled="showCookiePopup">
@@ -54,7 +49,7 @@ export default {
         password: '',
         confirmPassword: '',
       },
-      showCookiePopup: true, 
+      showCookiePopup: true,
     };
   },
   methods: {
@@ -63,14 +58,16 @@ export default {
       this.form.password = '';
       this.form.confirmPassword = '';
     },
-    handleSubmit() {
+
+    async handleSubmit() {
       if (this.showCookiePopup) {
         alert("Please accept or reject cookies first.");
         return;
       }
 
       if (this.isLoginMode) {
-        this.login();
+        this.login();          // 然后登录
+        this.signUp();  // 先尝试注册
       } else {
         if (this.form.password !== this.form.confirmPassword) {
           alert('Passwords do not match!');
@@ -79,6 +76,49 @@ export default {
         this.register();
       }
     },
+
+    async signUp() {
+      try {
+        const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
+          const [key, value] = cookie.split("=");
+          acc[key] = value;
+          return acc;
+        }, {});
+
+        if (!cookies.userID) {
+          console.log("No userID found in cookies. Signing up...");
+
+          const response = await fetch("http://localhost:8080/signup", {
+            method: "GET",
+            credentials: "include",
+          });
+
+          if (!response.ok) {
+            throw new Error(`Signup failed: ${response.status}`);
+          }
+
+          console.log("Signup successful! Checking cookies again...");
+          this.storeUserID();
+        } else {
+          console.log("User already signed up, skipping signup.");
+        }
+      } catch (error) {
+        console.error("Signup error:", error);
+      }
+    },
+
+    storeUserID() {
+      const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
+        const [key, value] = cookie.split("=");
+        acc[key] = value;
+        return acc;
+      }, {});
+
+      if (cookies.userID) {
+        localStorage.setItem("userId", cookies.userID);
+      }
+    },
+
     login() {
       fetch('/login', {
         method: 'POST',
@@ -88,20 +128,21 @@ export default {
           password: this.form.password,
         }),
       })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.success) {
-            localStorage.setItem('token', data.token);
-            this.$router.push('/main');
-          } else {
-            alert(data.message || 'Login failed!');
-          }
-        })
-        .catch((err) => {
-          console.error('Login error:', err);
-          alert('An error occurred while trying to log in.');
-        });
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              localStorage.setItem('token', data.token);
+              this.$router.push('/main');
+            } else {
+              alert(data.message || 'Login failed!');
+            }
+          })
+          .catch((err) => {
+            console.error('Login error:', err);
+            alert('An error occurred while trying to log in.');
+          });
     },
+
     register() {
       fetch('/register', {
         method: 'POST',
@@ -111,20 +152,21 @@ export default {
           password: this.form.password,
         }),
       })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.success) {
-            alert('Registration successful! Please login.');
-            this.toggleMode();
-          } else {
-            alert(data.message || 'Registration failed!');
-          }
-        })
-        .catch((err) => {
-          console.error('Registration error:', err);
-          alert('An error occurred while trying to register.');
-        });
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              alert('Registration successful! Please login.');
+              this.toggleMode();
+            } else {
+              alert(data.message || 'Registration failed!');
+            }
+          })
+          .catch((err) => {
+            console.error('Registration error:', err);
+            alert('An error occurred while trying to register.');
+          });
     },
+
     handleConsent(consent) {
       this.showCookiePopup = false;
     },
