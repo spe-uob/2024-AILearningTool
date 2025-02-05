@@ -73,7 +73,7 @@ export default {
 </script>
 
 <style scoped>
-/* Fixed sidebar settings button */
+/* Settings button */
 .settings-btn {
   position: fixed;
   bottom: 20px;
@@ -86,6 +86,14 @@ export default {
   border-radius: 50%;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: background-color 0.3s, transform 0.2s;
+
+  /* Centering the emoji */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px; 
+  height: 50px;
+  line-height: 1;
 }
 
 .settings-btn:hover {
