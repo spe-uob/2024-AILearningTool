@@ -153,14 +153,34 @@ export default {
   font-weight: bold;
   transition: background-color 0.3s ease-in-out, transform 0.2s;
   margin: 10px 0;
-  background: var(--button-color);
   color: var(--text-color);
   border: none;
   border-radius: 10px;
 }
 
-.chat-item:hover {
-  background-color: var(--primary-color);
+/* Centered Chat Bubbles (Only Chat History, Not "New Conversation") */
+.history-list-wrapper .chat-item {
+  width: 100%;
+  padding: 12px;
+  cursor: pointer;
+  text-align: center;
+  font-weight: bold;
+  transition: background-color 0.3s ease-in-out, transform 0.2s;
+  margin: 4px 0; /* Reduce vertical spacing */
+  background: transparent;
+  color: var(--text-color);
+  border: none;
+  border-radius: 10px;
+}
+
+.history-list-wrapper .chat-item:hover {
+  background-color: rgba(0, 0, 0, 0.1); /* Light highlight on hover */
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.18);
+}
+
+.history-list-wrapper .chat-item:active {
+  background-color: var(--primary-color); /* Turn blue when clicked */
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.18);
 }
