@@ -120,11 +120,11 @@ export default {
   color: black;
 }
 
-/* New Chat Button (Lowered) */
-.new-chat-btn {
-  margin-top: 20px; /* Push it down slightly */
+/* Lower the "New Conversation" button */
+.chat-item:first-of-type {
+  margin-top: 40px; /* Adjust this value as needed */
 }
-  
+
 /* Sidebar Content */
 .history-container {
   display: flex;
