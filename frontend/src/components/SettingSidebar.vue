@@ -24,7 +24,7 @@
           </li>
         </ul>
         <div class="action-buttons">
-          <button @click="goToCookiePage">Go to Cookie Settings</button>
+          <button @click="Logout">Log out</button>
           <button class="close-btn" @click="closeSettings">Close</button>
         </div>
       </div>
@@ -72,7 +72,12 @@ export default {
         document.documentElement.style.setProperty(`--${key}-color`, theme[key]);
       });
     },
-    goToCookiePage() {
+    Logout() {
+      localStorage.clear();
+      document.cookie.split(";").forEach((cookie) => {
+        const name = cookie.split("=")[0].trim();
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+      });
       this.$router.push("/"); // Redirect to the /cookie page
     },
   },
