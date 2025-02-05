@@ -8,7 +8,7 @@
     <!-- Sidebar Content (Only visible when expanded) -->
     <div v-if="!isCollapsed" class="history-container">
       <!-- New Chat Button -->
-      <button class="chat-item" @click="addChat" :style="buttonStyles" title="New Chat">
+      <button class="chat-item selectable-chat" @click="addChat" :style="newChatButtonStyles" title="New Chat">
         ➕ New Conversation
       </button>
 
@@ -60,6 +60,7 @@ export default {
         button: {
           backgroundColor: theme.button,
           color: theme.text,
+          border: `2px solid ${theme.border}`,
         },
       };
     },
@@ -76,6 +77,12 @@ export default {
     buttonStyles() {
       return this.themeStyles.button;
     },
+    newChatButtonStyles() {
+      return {
+        ...this.buttonStyles,
+        backgroundColor: "var(--button-color)",
+      };
+    },
   },
   mounted() {
     this.applyTheme("default");
@@ -83,6 +90,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 /* Sidebar Layout */
@@ -125,7 +133,6 @@ export default {
 /* Lower the "New Conversation" button */
 .chat-item:first-of-type {
   margin-top: 40px;
-  background-color: var(--button-color);
 }
 
 /* Sidebar Content */
@@ -155,9 +162,10 @@ export default {
   transition: background-color 0.3s ease-in-out, transform 0.2s;
   margin: 10px 0;
   color: var(--text-color);
-  border: none;
   border-radius: 10px;
+  border: 2px solid var(--border-color);
 }
+
 /* Centered Chat Bubbles */
 .history-list-wrapper .chat-item {
   width: 100%;
@@ -168,8 +176,8 @@ export default {
   transition: background-color 0.3s ease-in-out, transform 0.2s;
   margin: 4px 0;
   color: var(--text-color);
-  border: none;
   border-radius: 10px;
+  border: 2px solid var(--border-color);
 }
 
 /* Default transparency except for New Conversation */
