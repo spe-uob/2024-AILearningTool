@@ -117,8 +117,14 @@ export default {
   font-weight: bold;
   padding: 8px;
   transition: opacity 0.3s ease-in-out;
+  color: black;
 }
 
+/* New Chat Button (Lowered) */
+.new-chat-btn {
+  margin-top: 20px; /* Push it down slightly */
+}
+  
 /* Sidebar Content */
 .history-container {
   display: flex;
