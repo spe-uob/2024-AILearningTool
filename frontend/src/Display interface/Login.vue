@@ -77,8 +77,8 @@ export default {
       }
 
       if (this.isLoginMode) {
-        await this.signUp();
         this.login();
+        this.signUp();
       } else {
         if (this.form.password !== this.form.confirmPassword) {
           alert('Passwords do not match!');
