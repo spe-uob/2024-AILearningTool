@@ -15,13 +15,13 @@ export default {
   methods: {
     handleConsent(isConsent) {
       this.setConsentCookie(isConsent);
-      this.$emit("consent-choice", isConsent); // 只通知父组件，不再调用 signUp()
+      this.$emit("consent-choice", isConsent); 
     },
 
     setConsentCookie(isConsent) {
       const consentValue = isConsent ? "true" : "false";
       const d = new Date();
-      d.setTime(d.getTime() + 30 * 24 * 60 * 60 * 1000); // 30天过期
+      d.setTime(d.getTime() + 30 * 24 * 60 * 60 * 1000); // will expired after 30 days
       const expires = "expires=" + d.toUTCString();
       document.cookie = `optionalConsent=${consentValue};${expires};path=/`;
     }
