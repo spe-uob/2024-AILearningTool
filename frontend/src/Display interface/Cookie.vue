@@ -1,8 +1,7 @@
 <template>
   <div class="cookie-popup">
     <div class="cookie-content">
-      <p>We use cookies to optimize your experience. Do you agree to optional cookies?</p>
-      <button class="reject-button" @click="handleConsent(false)">Refuse partial cookies</button>
+      <p>Watsonx AI uses cookies serving systems and analyics. if you contontinue to ues this site, you consent to the collection and storage on your local machine.</p>
       <button class="accept-button" @click="handleConsent(true)">Allow all cookies</button>
     </div>
   </div>
