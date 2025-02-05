@@ -1,7 +1,10 @@
 <template>
   <div class="cookie-popup">
     <div class="cookie-content">
-      <p>Watsonx AI uses cookies serving systems and analyics. if you contontinue to ues this site, you consent to the collection and storage on your local machine.</p>
+      <p>
+        Watsonx AI uses cookies serving systems and analytics. If you continue to use this site, you consent to
+        the collection and storage on your local machine.
+      </p>
       <button class="accept-button" @click="handleConsent(true)">Allow all cookies</button>
     </div>
   </div>
@@ -12,57 +15,17 @@ export default {
   methods: {
     handleConsent(isConsent) {
       this.setConsentCookie(isConsent);
-      this.$emit('consent-choice', isConsent);
-      this.signUp();
+      this.$emit("consent-choice", isConsent); // 只通知父组件，不再调用 signUp()
     },
 
-  // Setting Cookies
-  setConsentCookie(isConsent) {
-    const consentValue = isConsent ? "true" : "false";
-    const d = new Date();
-    d.setTime(d.getTime() + 30 * 24 * 60 * 60 * 1000); // Set a 30-day expiry date
-    const expires = "expires=" + d.toUTCString();
-    document.cookie = `optionalConsent=${consentValue};${expires};path=/`;
-  },
-
-  // Calling the Registration API
-  async signUp() {
-    try {
-      const response = await fetch("http://localhost:8080/signup", {
-        method: "GET",
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        throw new Error(`Non-200 response: ${response.status}`);
-      }
-
-      // Read the userID from the cookie and store it in LocalStorage.
-      this.storeUserID();
-
-      // Hide Cookie Popups
-      document.getElementById("cookiePopUp").style.display = "none";
-
-      // Skip to main screen
-      this.redirectToMain();
-    } catch (error) {
-      console.error("Registration failure:", error);
+    setConsentCookie(isConsent) {
+      const consentValue = isConsent ? "true" : "false";
+      const d = new Date();
+      d.setTime(d.getTime() + 30 * 24 * 60 * 60 * 1000); // 30天过期
+      const expires = "expires=" + d.toUTCString();
+      document.cookie = `optionalConsent=${consentValue};${expires};path=/`;
     }
-  },
-
-  // Extracts the userID from the cookie and stores it in LocalStorage.
-  storeUserID() {
-    const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
-      const [key, value] = cookie.split("=");
-      acc[key] = value;
-      return acc;
-    }, {});
-
-    if (cookies.userID) {
-      localStorage.setItem("userId", cookies.userID);
-    }
-  },
-},
+  }
 };
 </script>
 
@@ -72,7 +35,7 @@ export default {
   bottom: 0;
   left: 0;
   width: 100%;
-  background-color: transparent; 
+  background-color: transparent;
   z-index: 1000;
   display: flex;
   justify-content: center;
@@ -84,9 +47,9 @@ export default {
   max-width: 500px;
   background-color: #fff;
   padding: 20px;
-  border-radius: 10px 10px 0 0; 
+  border-radius: 10px 10px 0 0;
   text-align: center;
-  box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1); 
+  box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .cookie-content p {
