@@ -52,7 +52,18 @@ export default {
       showCookiePopup: true,
     };
   },
+  mounted() {
+    this.checkUserSession();
+  },
   methods: {
+    checkUserSession() {
+      const userID = localStorage.getItem("userId");
+      if (userID) {
+        console.log("UserID found, redirecting to /main...");
+        this.$router.push("/main");
+      }
+    },
+
     toggleMode() {
       this.isLoginMode = !this.isLoginMode;
       this.form.password = '';
@@ -66,8 +77,8 @@ export default {
       }
 
       if (this.isLoginMode) {
+        await this.signUp();
         this.login();
-        this.signUp();
       } else {
         if (this.form.password !== this.form.confirmPassword) {
           alert('Passwords do not match!');
@@ -116,6 +127,8 @@ export default {
 
       if (cookies.userID) {
         localStorage.setItem("userId", cookies.userID);
+        console.log("UserID stored in localStorage:", cookies.userID);
+        this.$router.push("/main");
       }
     },
 
