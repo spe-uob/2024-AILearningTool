@@ -100,9 +100,9 @@ export default {
 
 /* Fully Collapsed Sidebar */
 .history-sidebar.collapsed {
-  width: 0; 
+  width: 60px; 
   padding: 0;
-  border: none;
+  border-right: none;
 }
 
 /* Toggle Button (☰ in Top Left) */
