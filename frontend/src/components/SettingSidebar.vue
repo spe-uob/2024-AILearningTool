@@ -28,7 +28,7 @@
           </li>
         </ul>
         <div class="action-buttons">
-          <button @click="Log out">Go to Cookie Settings</button>
+          <button @click="Logout">Log out</button>
           <button class="close-btn" @click="closeSettings">Close</button>
         </div>
       </div>
@@ -79,7 +79,7 @@ export default {
         document.documentElement.style.setProperty(`--${key}-color`, theme[key]);
       });
     },
-    goToCookiePage() {
+    Logout() {
       this.$router.push("/"); // Redirect to the /cookie page
     },
   },
