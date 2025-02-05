@@ -32,6 +32,8 @@ export default {
   data() {
     return {
       isCollapsed: false, // Controls sidebar visibility
+      aiServerUrl: "http://localhost:8080", // Placeholder server URL
+      currentTheme: "default", // Tracks the current theme
       themeStyles: {}, // Stores dynamic styles
     };
   },
