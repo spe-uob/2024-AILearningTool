@@ -1,7 +1,7 @@
 <template>
   <aside>
-    <!-- Setting button at the bottom -->
-    <button @click="openSettings">⚙️ Setting</button>
+    <!-- Fixed setting button at bottom-left -->
+    <button class="settings-btn" @click="openSettings">⚙️</button>
 
     <!-- Modal for settings -->
     <div v-if="isSettingsOpen" class="modal-overlay">
@@ -9,19 +9,14 @@
         <h3>Settings</h3>
         <ul>
           <li>
-            <h4>1) Day/Night Mode</h4>
-            <button @click="toggleTheme">Toggle Day/Night</button>
-          </li>
-          <li>
-            <h4>2) Language</h4>
+            <h4>1) Language</h4>
             <div class="language-buttons">
               <button @click="changeLanguage('en')">English</button>
               <button @click="changeLanguage('zh')">Chinese</button>
             </div>
           </li>
           <li>
-            <h4>3) High Contrast Mode</h4>
-            <!-- Button to toggle high contrast mode -->
+            <h4>2) High Contrast Mode</h4>
             <button @click="toggleHighContrastMode">
               {{ isHighContrast ? 'Turn Off High Contrast Mode' : 'Turn On High Contrast Mode' }}
             </button>
@@ -43,35 +38,23 @@ export default {
   data() {
     return {
       isSettingsOpen: false,
-      isHighContrast: false, // Tracks the toggle state for high contrast mode
+      isHighContrast: false,
     };
   },
   methods: {
     openSettings() {
       this.isSettingsOpen = true;
-      this.$emit("toggleSettings", true); // Notify parent that settings are open
     },
     closeSettings() {
       this.isSettingsOpen = false;
-      this.$emit("toggleSettings", false); // Notify parent that settings are closed
-    },
-    toggleTheme() {
-      alert("Day/Night Mode toggled");
     },
     changeLanguage(language) {
-      if (language === "en") {
-        alert("Language changed to English");
-      } else if (language === "zh") {
-        alert("Language changed to Chinese");
-      }
+      alert(`Language changed to ${language === 'en' ? 'English' : 'Chinese'}`);
     },
     toggleHighContrastMode() {
-      this.isHighContrast = !this.isHighContrast; // Toggle high contrast mode on/off
+      this.isHighContrast = !this.isHighContrast;
       const themeName = this.isHighContrast ? "high_contrast" : "default";
       this.applyTheme(themeName);
-      this.$emit("highContrastToggled", this.isHighContrast); // Notify parent
-      const event = new CustomEvent("themeChange", { detail: { themeName } });
-      window.dispatchEvent(event);
     },
     applyTheme(themeName) {
       const theme = getTheme(themeName);
@@ -80,22 +63,34 @@ export default {
       });
     },
     goToCookiePage() {
-      this.$router.push("/"); // Redirect to the /cookie page
+      this.$router.push("/");
     },
   },
   mounted() {
-    // Apply default theme on mount
     this.applyTheme("default");
   },
 };
 </script>
 
 <style scoped>
-/* Sidebar settings button */
-aside {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
+/* Fixed sidebar settings button */
+.settings-btn {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background-color: var(--button-color);
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 12px;
+  border-radius: 50%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.settings-btn:hover {
+  background-color: var(--primary-color);
+  transform: translateY(-2px);
 }
 
 /* Modal styles */
@@ -112,11 +107,12 @@ aside {
 }
 
 .modal-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
+  background-color: var(--background-color);
+  padding: 25px;
+  border-radius: 12px;
   width: 350px;
   max-width: 90%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 ul {
@@ -125,7 +121,7 @@ ul {
 }
 
 li {
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 .language-buttons {
@@ -141,10 +137,19 @@ li {
 }
 
 button {
-  padding: 8px 12px;
+  padding: 10px 16px;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
+  background-color: var(--button-color);
+  color: var(--text-color);
+  font-weight: bold;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+button:hover {
+  background-color: var(--primary-color);
+  transform: translateY(-2px);
 }
 
 .close-btn {
@@ -154,32 +159,5 @@ button {
 
 .close-btn:hover {
   background-color: #d32f2f;
-}
-
-button:hover {
-  background-color: #e0e0e0;
-}
-
-/* Use CSS variables for theming */
-:root {
-  --primary-color: #000000;
-  --secondary-color: #ffffff;
-  --accent-color: #b0b0b0;
-  --background-color: #f4f4f4;
-  --text-color: #2e2e2e;
-  --border-color: #d3d3d3;
-  --button-color: #4caf50;
-  --error-color: #e74c3c;
-  --success-color: #27ae60;
-}
-
-body {
-  color: var(--text-color);
-  background-color: var(--background-color);
-}
-
-button {
-  background-color: var(--button-color);
-  color: var(--text-color);
 }
 </style>
