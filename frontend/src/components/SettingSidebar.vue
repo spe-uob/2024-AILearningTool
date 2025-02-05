@@ -9,18 +9,14 @@
         <h3>Settings</h3>
         <ul>
           <li>
-            <h4>1) Day/Night Mode</h4>
-            <button @click="toggleTheme">Toggle Day/Night</button>
-          </li>
-          <li>
-            <h4>2) Language</h4>
+            <h4>1) Language</h4>
             <div class="language-buttons">
               <button @click="changeLanguage('en')">English</button>
               <button @click="changeLanguage('zh')">Chinese</button>
             </div>
           </li>
           <li>
-            <h4>3) High Contrast Mode</h4>
+            <h4>2) High Contrast Mode</h4>
             <!-- Button to toggle high contrast mode -->
             <button @click="toggleHighContrastMode">
               {{ isHighContrast ? 'Turn Off High Contrast Mode' : 'Turn On High Contrast Mode' }}
@@ -55,9 +51,6 @@ export default {
       this.isSettingsOpen = false;
       this.$emit("toggleSettings", false); // Notify parent that settings are closed
     },
-    toggleTheme() {
-      alert("Day/Night Mode toggled");
-    },
     changeLanguage(language) {
       if (language === "en") {
         alert("Language changed to English");
@@ -80,6 +73,11 @@ export default {
       });
     },
     Logout() {
+      localStorage.clear();
+      document.cookie.split(";").forEach((cookie) => {
+        const name = cookie.split("=")[0].trim();
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+      });
       this.$router.push("/"); // Redirect to the /cookie page
     },
   },
@@ -112,11 +110,12 @@ aside {
 }
 
 .modal-content {
-  background-color: white;
+  background-color: var(--background-color);
   padding: 20px;
-  border-radius: 8px;
-  width: 350px;
+  border-radius: 12px;
+  width: 300px;
   max-width: 90%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 ul {
@@ -141,10 +140,20 @@ li {
 }
 
 button {
-  padding: 8px 12px;
+  padding: 10px 16px;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
+  background-color: var(--button-color);
+  color: var(--text-color);
+  font-weight: bold;
+  transition: background-color 0.3s ease-in-out, transform 0.2s;
+}
+
+button:hover {
+  background-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.18);
 }
 
 .close-btn {
@@ -156,8 +165,12 @@ button {
   background-color: #d32f2f;
 }
 
-button:hover {
-  background-color: #e0e0e0;
+button:focus {
+  outline: none;
+}
+
+button:active {
+  transform: scale(0.96);
 }
 
 /* Use CSS variables for theming */
@@ -176,10 +189,5 @@ button:hover {
 body {
   color: var(--text-color);
   background-color: var(--background-color);
-}
-
-button {
-  background-color: var(--button-color);
-  color: var(--text-color);
 }
 </style>
