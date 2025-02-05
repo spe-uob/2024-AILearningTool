@@ -28,7 +28,7 @@
           </li>
         </ul>
         <div class="action-buttons">
-          <button @click="goToCookiePage">Go to Cookie Settings</button>
+          <button @click="Log out">Go to Cookie Settings</button>
           <button class="close-btn" @click="closeSettings">Close</button>
         </div>
       </div>
