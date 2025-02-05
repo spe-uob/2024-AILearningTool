@@ -15,7 +15,7 @@
       <!-- Chat History List -->
       <div class="history-list-wrapper">
         <div v-for="chat in chats" :key="chat.chatID">
-          <button class="chat-item" @click="selectChat(chat.chatID)" :style="buttonStyles">
+          <button class="chat-item selectable-chat" @click="selectChat(chat.chatID)" :class="{ 'selected': selectedChatID === chat.chatID }">
             {{ chat.title }}
           </button>
         </div>
@@ -35,6 +35,7 @@ export default {
       aiServerUrl: "http://localhost:8080",
       currentTheme: "default", // Tracks the current theme
       themeStyles: {}, // Stores dynamic styles
+      selectedChatID: null, // Tracks the currently selected chat
     };
   },
   methods: {
@@ -45,6 +46,7 @@ export default {
       this.isCollapsed = !this.isCollapsed;
     },
     selectChat(chatID) {
+      this.selectedChatID = chatID;
       this.$emit("chatSelected", chatID);
     },
     applyTheme(themeName) {
@@ -100,7 +102,7 @@ export default {
 
 /* Fully Collapsed Sidebar */
 .history-sidebar.collapsed {
-  width: 60px; 
+  width: 60px;
   padding: 0;
   border-right: none;
 }
@@ -122,7 +124,7 @@ export default {
 
 /* Lower the "New Conversation" button */
 .chat-item:first-of-type {
-  margin-top: 40px; /* Adjust this value as needed */
+  margin-top: 40px;
 }
 
 /* Sidebar Content */
@@ -143,8 +145,6 @@ export default {
   background-color: var(--background-color);
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.08);
 }
-
-/* Centered Chat Bubbles */
 .chat-item {
   width: 100%;
   padding: 14px;
@@ -157,8 +157,7 @@ export default {
   border: none;
   border-radius: 10px;
 }
-
-/* Centered Chat Bubbles (Only Chat History, Not "New Conversation") */
+/* Centered Chat Bubbles */
 .history-list-wrapper .chat-item {
   width: 100%;
   padding: 12px;
@@ -166,28 +165,25 @@ export default {
   text-align: center;
   font-weight: bold;
   transition: background-color 0.3s ease-in-out, transform 0.2s;
-  margin: 4px 0; /* Reduce vertical spacing */
-  background: transparent;
+  margin: 4px 0;
   color: var(--text-color);
   border: none;
   border-radius: 10px;
 }
 
-.history-list-wrapper .chat-item:hover {
-  background-color: rgba(0, 0, 0, 0.1); /* Light highlight on hover */
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.18);
+/* Default transparency except for New Conversation */
+.selectable-chat {
+  background-color: transparent;
 }
 
-.history-list-wrapper .chat-item:active {
-  background-color: var(--primary-color); /* Turn blue when clicked */
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.18);
+/* Hover effect - Light Blue */
+.selectable-chat:hover {
+  background-color: lightblue;
+  opacity: 1;
 }
 
-/* Hide bullet points */
-.history-list-wrapper ul {
-  list-style: none;
-  padding: 0;
+/* Clicked (Selected) effect - Original color */
+.selectable-chat.selected {
+  background-color: var(--primary-color);
 }
 </style>
