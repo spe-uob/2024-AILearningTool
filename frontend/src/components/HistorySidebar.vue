@@ -1,7 +1,7 @@
 <template>
   <aside class="history-sidebar" :class="{ collapsed: isCollapsed }" :style="asideStyles">
-    <!-- Toggle Button (☰ in Top Left) -->
-    <button class="toggle-btn chat-item" @click="toggleSidebar" :style="buttonStyles" title="Toggle History">
+    <!-- Toggle Button (Always in Top Left) -->
+    <button class="toggle-btn" @click="toggleSidebar" :title="isCollapsed ? 'Open History' : 'Close History'">
       ☰
     </button>
 
@@ -9,7 +9,7 @@
     <div v-if="!isCollapsed" class="history-container">
       <!-- New Chat Button -->
       <button class="chat-item" @click="addChat" :style="buttonStyles" title="New Chat">
-        New Conversation
+        ➕ New Conversation
       </button>
 
       <!-- Chat History List -->
@@ -32,28 +32,21 @@ export default {
   data() {
     return {
       isCollapsed: false, // Controls sidebar visibility
-      aiServerUrl: "http://localhost:8080", // Placeholder server URL
+      aiServerUrl: "http://localhost:8080",
       currentTheme: "default", // Tracks the current theme
       themeStyles: {}, // Stores dynamic styles
     };
   },
   methods: {
-    // Triggers new conversation
     addChat() {
       this.$emit("resetMainContent");
     },
-
-    // Toggles sidebar visibility
     toggleSidebar() {
       this.isCollapsed = !this.isCollapsed;
     },
-
-    // Selects a chat from history
     selectChat(chatID) {
       this.$emit("chatSelected", chatID);
     },
-
-    // Applies theming
     applyTheme(themeName) {
       const theme = getTheme(themeName);
       this.themeStyles = {
@@ -68,8 +61,6 @@ export default {
         },
       };
     },
-
-    // Detects theme changes
     listenForThemeChange() {
       window.addEventListener("themeChange", (event) => {
         this.applyTheme(event.detail.themeName);
@@ -104,11 +95,12 @@ export default {
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   transition: width 0.3s ease-in-out;
   overflow: hidden;
+  position: relative;
 }
 
 /* Fully Collapsed Sidebar */
 .history-sidebar.collapsed {
-  width: 0; /* Completely hidden */
+  width: 0; 
   padding: 0;
   border: none;
 }
@@ -124,6 +116,7 @@ export default {
   font-size: 22px;
   font-weight: bold;
   padding: 8px;
+  transition: opacity 0.3s ease-in-out;
 }
 
 /* Sidebar Content */
@@ -150,7 +143,7 @@ export default {
   width: 100%;
   padding: 14px;
   cursor: pointer;
-  text-align: center; /* Center text */
+  text-align: center;
   font-weight: bold;
   transition: background-color 0.3s ease-in-out, transform 0.2s;
   margin: 10px 0;
