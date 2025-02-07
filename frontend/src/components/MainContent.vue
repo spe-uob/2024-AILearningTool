@@ -7,11 +7,11 @@
 
       <!-- Buttons for chat initialisation -->
       <div v-if="this.currentChatID.length === 0">
-        <button @click="sendInitialMessage('I need help with choosing a course')">
+        <button @click="sendInitialMessage('I need help with choosing a course')" :disabled="chatInitButtonsDisabled">
           I need help with choosing a course
         </button>
-        <button @click="sendInitialMessage('I need help with IBM SkillsBuild platform')">I need help with IBM SkillsBuild platform</button>
-        <button @click="sendInitialMessage('I have questions about university life')">I have questions about university life</button>
+        <button @click="sendInitialMessage('I need help with IBM SkillsBuild platform')" :disabled="chatInitButtonsDisabled">I need help with IBM SkillsBuild platform</button>
+        <button @click="sendInitialMessage('I have questions about university life')" :disabled="chatInitButtonsDisabled">I have questions about university life</button>
       </div>
 
       <!-- All messages of the conversation -->
@@ -54,7 +54,7 @@ export default {
       currentTheme: "default", // Current theme for the component
     };
   },
-  props: ["messages", "chats", "currentChatID"],
+  props: ["messages", "chats", "currentChatID", "chatInitButtonsDisabled"],
   watch: {
     // When amount of messages = 0 and an existing chat has been chosen, chat history is loaded in MainContent
     messages() {
@@ -67,6 +67,7 @@ export default {
   methods: {
     // Send the first message, create a chat
     async sendInitialMessage(message) {
+      this.$emit("setButtonLock", true)
       let response = await fetch(this.aiServerURL + "/createChat?" + new URLSearchParams({
         "initialMessage": message
       }),{
@@ -151,6 +152,7 @@ export default {
           break;
         }
       }
+      this.$emit("setButtonLock", false)
     },
 
     // Send a message in existing chat
@@ -165,6 +167,7 @@ export default {
         return;
       }
 
+      this.$emit("setButtonLock", true)
       this.$emit("addMessage", "user", this.userInput)
 
       const messageToSend = this.userInput.trim();
@@ -191,6 +194,7 @@ export default {
         this.$emit("addMessage", "System", "Failed to send message. Please try again.")
       }
       this.scrollToBottom();
+      this.$emit("setButtonLock", false)
     },
     applyTheme(themeName) {
       const theme = getTheme(themeName);
