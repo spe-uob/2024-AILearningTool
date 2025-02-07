@@ -1,21 +1,24 @@
 <template>
   <main>
     <div class="chat-area">
-      <p>Welcome to Watsonx AI!</p>
+      <!-- Welcome Screen with Logo -->
+      <div v-if="this.currentChatID.length === 0" class="welcome-container">
+        <img src="../assets/logo.png" alt="Logo" class="logo" />
+        <p class="welcome-text">Welcome to Watsonx AI!</p>
+        <p class="instruction-text">Select one of the topics below:</p>
 
-      <p v-if="this.currentChatID.length === 0">Select one of the topics below:</p>
-
-      <!-- Buttons for initiating a new chat -->
-      <div v-if="this.currentChatID.length === 0" class="button-container">
-        <button @click="sendInitialMessage('I need help with choosing a course')">
-          I need help with choosing a course
-        </button>
-        <button @click="sendInitialMessage('I need help with IBM SkillsBuild platform')">
-          I need help with IBM SkillsBuild platform
-        </button>
-        <button @click="sendInitialMessage('I have questions about university life')">
-          I have questions about university life
-        </button>
+        <!-- Buttons for initiating a new chat -->
+        <div class="button-container">
+          <button @click="sendInitialMessage('I need help with choosing a course')">
+            I need help with choosing a course
+          </button>
+          <button @click="sendInitialMessage('I need help with IBM SkillsBuild platform')">
+            I need help with IBM SkillsBuild platform
+          </button>
+          <button @click="sendInitialMessage('I have questions about university life')">
+            I have questions about university life
+          </button>
+        </div>
       </div>
 
       <!-- Display all messages in the conversation -->
@@ -384,24 +387,64 @@ button {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
 }
 
+.welcome-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+  height: 100vh;
+}
+
+.logo {
+  width: 160px;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.welcome-text {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.instruction-text {
+  font-size: 20px;
+  color: #666;
+  margin-bottom: 25px;
+}
+
 .button-container {
   display: flex;
-  gap: 5px; /* Controls spacing between buttons */
-  padding: 10px 0;
+  flex-direction: row;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 800px;
 }
 
 .button-container button {
-  flex: 1; /* Makes buttons equal width */
-  max-width: 300px; /* Limits maximum width to prevent oversized buttons */
-  text-align: center;
+  flex: 1;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: bold;
+  background-color: var(--button-color);
+  color: var(--text-color);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
 }
 
-button:hover {
+.button-container button:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.18);
 }
 
-button:active {
+.button-container button:active {
   transform: scale(0.96);
 }
+
 </style>
