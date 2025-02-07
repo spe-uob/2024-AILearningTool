@@ -1,26 +1,25 @@
 <template>
-  <aside :class="{'collapsed': isCollapsed}" :style="asideStyles">
-    <!-- Toggle Button for Collapsing/Expanding -->
-    <button :style="buttonStyles" @click="toggleSidebar">History</button>
+  <aside class="history-sidebar" :class="{ collapsed: isCollapsed }" :style="asideStyles">
+    <!-- Toggle Button (Always in Top Left) -->
+    <button class="toggle-btn" @click="toggleSidebar" :title="isCollapsed ? 'Open History' : 'Close History'">
+      ☰
+    </button>
 
-    <!-- History content, only visible when not collapsed -->
-    <div v-if="!isCollapsed" class="history-content">
-      <h3 :style="textStyles">Conversation History</h3>
-
-      <!-- Scrollable conversation list -->
-      <div class="history-list">
-      <ul>
-        <li v-for="chat in this.chats" :key="chat.chatID">
-          <button :style="buttonStyles" @click="selectChat(chat.chatID)" :disabled="chatInitButtonsDisabled">
-            {{ chat.title }}
-          </button>
-        </li>
-      </ul>
-    </div>
-      <!-- Button for adding a new conversation -->
-      <button class="new-conversation-btn" :style="buttonStyles" @click="addChat" :disabled="chatInitButtonsDisabled">
+    <!-- Sidebar Content (Only visible when expanded) -->
+    <div v-if="!isCollapsed" class="history-container">
+      <!-- New Chat Button -->
+      <button class="chat-item selectable-chat" @click="addChat" :style="newChatButtonStyles" title="New Chat"  :disabled="chatInitButtonsDisabled">
         ➕ New Conversation
       </button>
+
+      <!-- Chat History List -->
+      <div class="history-list-wrapper">
+        <div v-for="chat in chats" :key="chat.chatID">
+          <button class="chat-item selectable-chat" @click="selectChat(chat.chatID)" :class="{ 'selected': currentChatID === chat.chatID }"  :disabled="chatInitButtonsDisabled">
+            {{ chat.title }}
+          </button>
+        </div>
+      </div>
     </div>
   </aside>
 </template>
@@ -29,30 +28,27 @@
 import { getTheme } from "../assets/color.js";
 
 export default {
+  props: ["chats", "currentChatID", "chatInitButtonsDisabled"],
   data() {
     return {
-      isCollapsed: false, // Controls the collapse state of the sidebar
+      isCollapsed: false, // Controls sidebar visibility
       aiServerUrl: "http://localhost:8080",
       currentTheme: "default", // Tracks the current theme
-      themeStyles: {}, // Stores styles for the theme
+      themeStyles: {}, // Stores dynamic styles
+      selectedChatID: null, // Tracks the currently selected chat
     };
   },
-  props: ["chats", "currentChatID", "chatInitButtonsDisabled"],
   methods: {
-    // Reverts the state of MainContent to initial state.
-    async addChat() {
-      this.$emit("resetMainContent")
+    addChat() {
+      this.$emit("resetMainContent");
     },
-
     toggleSidebar() {
       this.isCollapsed = !this.isCollapsed;
     },
-
-    // Sends a chat selection event, asks other components to render the required chat
     selectChat(chatID) {
+      this.selectedChatID = chatID;
       this.$emit("chatSelected", chatID);
     },
-
     applyTheme(themeName) {
       const theme = getTheme(themeName);
       this.themeStyles = {
@@ -64,13 +60,10 @@ export default {
         button: {
           backgroundColor: theme.button,
           color: theme.text,
-        },
-        text: {
-          color: theme.text,
+          border: `2px solid ${theme.border}`,
         },
       };
     },
-    // Listen for theme change events
     listenForThemeChange() {
       window.addEventListener("themeChange", (event) => {
         this.applyTheme(event.detail.themeName);
@@ -84,99 +77,122 @@ export default {
     buttonStyles() {
       return this.themeStyles.button;
     },
-    textStyles() {
-      return this.themeStyles.text;
+    newChatButtonStyles() {
+      return {
+        ...this.buttonStyles,
+        backgroundColor: "var(--button-color)",
+      };
     },
   },
   mounted() {
-    // Apply the default theme when the component is mounted
     this.applyTheme("default");
-
-    // Start listening for theme changes
     this.listenForThemeChange();
   },
 };
 </script>
 
+
 <style scoped>
-aside {
-  width: 250px;
-  padding: 10px;
-  transition: width 0.3s ease-in-out, box-shadow 0.3s ease-in-out, background-color 0.3s ease-in-out;
-  position: relative;
+/* Sidebar Layout */
+.history-sidebar {
+  width: 240px;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  border-radius: 12px;
-  box-shadow: 3px 0 12px rgba(0, 0, 0, 0.1);
-}
-
-.collapsed {
-  width: 60px;
-  box-shadow: none;
-}
-
-.history-list {
-  max-height: 300px;
-  overflow-y: auto;
-  margin-top: 10px;
-  padding-right: 5px;
-  border-radius: 8px;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease-in-out;
-}
-
-.history-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.history-list::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
-}
-
-.history-list::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-button {
-  margin: 5px 0;
+  border-right: 2px solid var(--border-color);
   padding: 12px;
+  background-color: var(--background-color);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  transition: width 0.3s ease-in-out;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Fully Collapsed Sidebar */
+.history-sidebar.collapsed {
+  width: 60px;
+  padding: 0;
+  border-right: none;
+}
+
+/* Toggle Button (☰ in Top Left) */
+.toggle-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: transparent;
   border: none;
-  border-radius: 10px;
   cursor: pointer;
-  width: 100%;
+  font-size: 22px;
   font-weight: bold;
-  transition: transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  padding: 8px;
+  transition: opacity 0.3s ease-in-out;
+  color: black;
 }
 
-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.18);
+/* Lower the "New Conversation" button */
+.chat-item:first-of-type {
+  margin-top: 40px;
 }
 
-button:active {
-  transform: scale(0.96);
-}
-
-.history-content {
+/* Sidebar Content */
+.history-container {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  opacity: 0;
-  transform: translateY(10px);
-  animation: fadeIn 0.4s forwards ease-in-out;
+  padding-top: 12px;
+  max-height: calc(100vh - 150px);
 }
 
-@keyframes fadeIn {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Chat History List - No Bullet Points */
+.history-list-wrapper {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 10px;
+  border-radius: 12px;
+  background-color: var(--background-color);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.08);
+}
+.chat-item {
+  width: 100%;
+  padding: 14px;
+  cursor: pointer;
+  text-align: center;
+  font-weight: bold;
+  transition: background-color 0.3s ease-in-out, transform 0.2s;
+  margin: 10px 0;
+  color: var(--text-color);
+  border-radius: 10px;
+  border: 2px solid var(--border-color);
 }
 
-.new-conversation-btn {
-  margin-top: 12px;
+/* Centered Chat Bubbles */
+.history-list-wrapper .chat-item {
+  width: 100%;
+  padding: 12px;
+  cursor: pointer;
+  text-align: center;
+  font-weight: bold;
+  transition: background-color 0.3s ease-in-out, transform 0.2s;
+  margin: 4px 0;
+  color: var(--text-color);
+  border-radius: 10px;
+  border: 2px solid var(--border-color);
 }
 
+/* Default transparency except for New Conversation */
+.selectable-chat {
+  background-color: transparent;
+}
+
+/* Hover effect - Light Blue */
+.selectable-chat:hover {
+  background-color: lightblue;
+  opacity: 1;
+}
+
+/* Clicked (Selected) effect - Original color */
+.selectable-chat.selected {
+  background-color: var(--primary-color);
+}
 </style>

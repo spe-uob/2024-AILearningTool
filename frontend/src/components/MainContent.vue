@@ -6,7 +6,7 @@
       <p v-if="this.currentChatID.length === 0">Select one of the topics below:</p>
 
       <!-- Buttons for chat initialisation -->
-      <div v-if="this.currentChatID.length === 0">
+      <div v-if="this.currentChatID.length === 0" class="button-container">
         <button @click="sendInitialMessage('I need help with choosing a course')" :disabled="chatInitButtonsDisabled">
           I need help with choosing a course
         </button>
@@ -14,25 +14,35 @@
         <button @click="sendInitialMessage('I have questions about university life')" :disabled="chatInitButtonsDisabled">I have questions about university life</button>
       </div>
 
-      <!-- All messages of the conversation -->
+      <!-- Display all messages in the conversation -->
       <div v-if="this.currentChatID.length > 0" class="chat-container">
         <!-- Scrollable message area -->
         <div class="messages-container">
-          <div v-for="msg in messages" :key="msg.id" class="message">
+          <div
+              v-for="(msg, index) in messages"
+              :key="index"
+              class="message"
+              :class="{
+              'user-message': msg.sender === 'user',
+              'assistant-message': msg.sender === 'assistant',
+              'system-message': msg.sender === 'System'
+            }"
+          >
             <strong v-if="msg.sender === 'user'">User</strong>
-            <strong v-else>AI</strong>
+            <strong v-else-if="msg.sender === 'assistant'">AI</strong>
+            <strong v-else>{{ msg.sender }}</strong>
             <p>{{ msg.content }}</p>
           </div>
         </div>
 
-        <!-- Fixed input area -->
+        <!-- Input area for user messages -->
         <div class="input-area">
           <textarea
               v-model="userInput"
               placeholder="Type your message..."
               @keypress.enter.prevent="sendMessage"
           ></textarea>
-          <button @click="sendMessage()" :disabled="chatInitButtonsDisabled">Send</button>
+          <button @click="sendMessage" :disabled="chatInitButtonsDisabled">Send</button>
         </div>
       </div>
     </div>
@@ -48,24 +58,29 @@ export default {
     return {
       userInput: "",
       currentTopic: "",
-      currentTurn: "user", // Used for message history parsing
+      currentTurn: "user", // Tracks conversation turn (user or AI)
       userId: localStorage.getItem("userId") || "",
-      aiServerURL: "http://localhost:8080",
-      currentTheme: "default", // Current theme for the component
+      aiServerURL: "http://localhost:8080", // API endpoint for AI server
+      currentTheme: "default", // Stores the current UI theme
     };
   },
   props: ["messages", "chats", "currentChatID", "chatInitButtonsDisabled"],
   watch: {
-    // When amount of messages = 0 and an existing chat has been chosen, chat history is loaded in MainContent
+    // Automatically scroll to the bottom when new messages arrive
     messages() {
-      if ((this.messages.length === 0) && (this.currentChatID.length > 0)) {
-        this.currentTurn = "user"
-        this.requestChatHistory()
+      if (this.messages.length === 0 && this.currentChatID.length > 0) {
+        this.currentTurn = "user";
+        this.requestChatHistory();
       }
+      this.$nextTick(() => {
+        this.scrollToBottom();
+      });
     }
   },
   methods: {
-    // Send the first message, create a chat
+    /**
+     * Initializes a new chat with a predefined message.
+     */
     async sendInitialMessage(message) {
       this.$emit("setButtonLock", true)
       let response = await fetch(this.aiServerURL + "/createChat?" + new URLSearchParams({
@@ -73,81 +88,81 @@ export default {
       }),{
             method: "GET",
             credentials: "include",
-      });
+          }
+      );
 
       if (!response.ok) {
         throw new Error("Non-200 backend API response");
       }
 
-      this.$emit("updateChatID", await response.text())
+      this.$emit("updateChatID", await response.text());
       await this.$nextTick(() => {
-        this.$emit("addChat", this.currentChatID, message)
-        this.requestChatHistory()
-      })
+        this.$emit("addChat", this.currentChatID, message);
+        this.requestChatHistory();
+      });
     },
 
-
-    // Make "getChatHistory" request for some chatID
+    /**
+     * Requests chat history from the server based on the current chat ID.
+     */
     requestChatHistory() {
-      fetch(this.aiServerURL + "/getChatHistory?" + new URLSearchParams({
-        "chatID": this.currentChatID
-      }),
+      fetch(
+          this.aiServerURL +
+          "/getChatHistory?" +
+          new URLSearchParams({
+            chatID: this.currentChatID,
+          }),
           {
             method: "GET",
             credentials: "include",
           }
-      ).then(async response => {
+      ).then(async (response) => {
         if (!response.ok) {
           throw new Error("Non-200 backend API response");
         } else {
-          this.processChatHistory(await response.text())
+          this.processChatHistory(await response.text());
         }
-      })
+      });
     },
 
+    /**
+     * Processes retrieved chat history and structures it for display.
+     */
     async processChatHistory(messageHistory) {
-      messageHistory = String(messageHistory)
+      messageHistory = String(messageHistory);
       let currentRole;
-      let openAIRole;
       let nextRole;
       let nextRoleIndex;
       let currentMessage;
       for (let i = 0; ; i++) {
         if (i === 0) {
-          // Parameters for parsing first message in chat history (system prompt)
           currentRole = "<|system|>";
-          openAIRole = "system";
           nextRole = "<|user|>";
         } else if (i % 2 !== 0) {
-          // Parameters for parsing a user message
           currentRole = "<|user|>";
-          openAIRole = "user";
           nextRole = "<|assistant|>";
         } else {
-          // Parameters for parsing an AI message
           currentRole = "<|assistant|>";
-          openAIRole = "assistant";
           nextRole = "<|user|>";
         }
         if (messageHistory.includes(currentRole)) {
-          // Removing previous messages
-          messageHistory = messageHistory.substring(messageHistory.indexOf(currentRole) + currentRole.length);
-          // Parsing a message
+          messageHistory = messageHistory.substring(
+              messageHistory.indexOf(currentRole) + currentRole.length
+          );
           nextRoleIndex = messageHistory.indexOf(nextRole);
           if (nextRoleIndex !== -1) {
-            currentMessage = messageHistory.substring(0, messageHistory.indexOf(nextRole));
+            currentMessage = messageHistory.substring(
+                0,
+                messageHistory.indexOf(nextRole)
+            );
           } else {
             currentMessage = messageHistory;
           }
           if (currentRole === "<|system|>") {
-            continue
+            continue;
           }
-          this.$emit("addMessage", this.currentTurn, currentMessage)
-          if (this.currentTurn === "user") {
-            this.currentTurn = "assistant"
-          } else {
-            this.currentTurn = "user"
-          }
+          this.$emit("addMessage", this.currentTurn, currentMessage);
+          this.currentTurn = this.currentTurn === "user" ? "assistant" : "user";
         } else {
           break;
         }
@@ -155,7 +170,9 @@ export default {
       this.$emit("setButtonLock", false)
     },
 
-    // Send a message in existing chat
+    /**
+     * Sends a user message to the AI server and processes the response.
+     */
     async sendMessage() {
       if (!this.userInput.trim()) {
         alert("Please enter a message!");
@@ -167,8 +184,8 @@ export default {
         return;
       }
 
+      this.$emit("addMessage", "user", this.userInput);
       this.$emit("setButtonLock", true)
-      this.$emit("addMessage", "user", this.userInput)
 
       const messageToSend = this.userInput.trim();
       this.userInput = "";
@@ -187,55 +204,21 @@ export default {
           throw new Error(`Unexpected response code: ${response.status}`);
         }
 
-        this.$emit("addMessage", "assistant", response.data)
+        this.$emit("addMessage", "assistant", response.data);
       } catch (error) {
         console.error("Error sending message:", error);
-
-        this.$emit("addMessage", "System", "Failed to send message. Please try again.")
+        this.$emit("addMessage", "System", "Failed to send message. Please try again.");
       }
       this.scrollToBottom();
       this.$emit("setButtonLock", false)
     },
-    applyTheme(themeName) {
-      const theme = getTheme(themeName);
-      Object.keys(theme).forEach((key) => {
-        document.documentElement.style.setProperty(`--${key}-color`, theme[key]);
-      });
-    },
-    scrollToBottom() {
-      const chatContainer = this.$el.querySelector(".messages-container");
-      if (chatContainer) {
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-      }
-    }
-  },
-
-    // TODO: Why is this here? We have Cookie.vue, right?
-    async getUserId() {
-      try {
-        const response = await axios.get(this.aiServerURL + "/signup", { withCredentials: true });
-        if (response.status === 200) {
-          this.userId = response.data;
-          localStorage.setItem("userId", this.userId);
-        } else {
-          console.error("Failed to get userId.");
-        }
-      } catch (error) {
-        console.error("Error fetching userId:", error);
-      }
-    },
-
-  async mounted() {
-    if (!this.userId) {
-      await this.getUserId();
-    }
-  },
-}
-;
+  }
+};
 </script>
 
 
 <style scoped>
+/* Adjust the main area height to make the chat window more compact */
 main {
   flex-grow: 1;
   padding: 20px;
@@ -243,7 +226,7 @@ main {
   color: var(--text-color);
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: calc(100vh - 40px);
 }
 
 .chat-area {
@@ -272,7 +255,6 @@ main {
   border-radius: 12px;
   border: 2px solid var(--border-color);
   background-color: var(--background-color);
-  max-height: calc(100vh - 180px);
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease-in-out;
 }
@@ -280,39 +262,73 @@ main {
 .messages-container::-webkit-scrollbar {
   width: 6px;
 }
-
 .messages-container::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 3px;
 }
-
 .messages-container::-webkit-scrollbar-track {
   background: transparent;
 }
 
+/* General message bubble style */
 .message {
   margin: 10px 0;
-  padding: 14px;
-  border-radius: 20px;
-  max-width: 75%;
+  padding: 12px 16px;
+  border-radius: 16px;
+  max-width: 60%;
   white-space: pre-wrap;
   word-wrap: break-word;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  position: relative;  /* For the chat bubble tail */
+  animation: fadeIn 0.3s forwards ease-in-out;
   opacity: 0;
   transform: translateY(10px);
-  animation: fadeIn 0.3s forwards ease-in-out;
 }
 
-.message:nth-child(odd) {
-  align-self: flex-start;
+/* User messages (right side) */
+.user-message {
+  align-self: flex-end;
   background-color: var(--primary-color);
   border: 1px solid var(--secondary-color);
+  margin-left: auto;
+}
+.user-message::after {
+  content: "";
+  position: absolute;
+  bottom: 10px;
+  right: -8px;
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+  border-left-color: var(--primary-color);
 }
 
-.message:nth-child(even) {
-  align-self: flex-end;
+/* AI messages (left side) */
+.assistant-message {
+  align-self: flex-start;
   background-color: var(--accent-color);
   border: 1px solid var(--border-color);
+  margin-right: auto;
+}
+.assistant-message::after {
+  content: "";
+  position: absolute;
+  bottom: 10px;
+  left: -8px;
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+  border-right-color: var(--accent-color);
+}
+
+/* System messages/errors */
+.system-message {
+  align-self: center;
+  background-color: var(--border-color);
+  border: 1px solid var(--secondary-color);
+  max-width: 40%;
+  margin: 5px auto;
+  text-align: center;
 }
 
 @keyframes fadeIn {
@@ -364,6 +380,18 @@ button {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
 }
 
+.button-container {
+  display: flex;
+  gap: 5px; /* Controls spacing between buttons */
+  padding: 10px 0;
+}
+
+.button-container button {
+  flex: 1; /* Makes buttons equal width */
+  max-width: 300px; /* Limits maximum width to prevent oversized buttons */
+  text-align: center;
+}
+
 button:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.18);
@@ -372,5 +400,4 @@ button:hover {
 button:active {
   transform: scale(0.96);
 }
-
 </style>
