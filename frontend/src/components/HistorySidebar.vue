@@ -11,14 +11,14 @@
       <div class="history-list">
       <ul>
         <li v-for="chat in this.chats" :key="chat.chatID">
-          <button :style="buttonStyles" @click="selectChat(chat.chatID)">
+          <button :style="buttonStyles" @click="selectChat(chat.chatID)" :disabled="chatInitButtonsDisabled">
             {{ chat.title }}
           </button>
         </li>
       </ul>
     </div>
       <!-- Button for adding a new conversation -->
-      <button class="new-conversation-btn" :style="buttonStyles" @click="addChat">
+      <button class="new-conversation-btn" :style="buttonStyles" @click="addChat" :disabled="chatInitButtonsDisabled">
         ➕ New Conversation
       </button>
     </div>
@@ -37,7 +37,7 @@ export default {
       themeStyles: {}, // Stores styles for the theme
     };
   },
-  props: ["chats", "currentChatID"],
+  props: ["chats", "currentChatID", "chatInitButtonsDisabled"],
   methods: {
     // Reverts the state of MainContent to initial state.
     async addChat() {

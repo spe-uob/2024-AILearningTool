@@ -32,7 +32,7 @@
               placeholder="Type your message..."
               @keypress.enter.prevent="sendMessage"
           ></textarea>
-          <button @click="sendMessage()">Send</button>
+          <button @click="sendMessage()" :disabled="chatInitButtonsDisabled">Send</button>
         </div>
       </div>
     </div>

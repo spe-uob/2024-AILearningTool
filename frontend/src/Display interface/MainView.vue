@@ -6,6 +6,7 @@
           @chatSelected="(id) => this.loadChat(id)"
           :currentChatID="this.currentChatID"
           :chats="this.chats"
+          :chatInitButtonsDisabled="this.chatInitButtonsDisabled"
       />
       <SettingSidebar @toggleSettings="toggleSettings" />
     </div>
