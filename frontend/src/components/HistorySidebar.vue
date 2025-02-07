@@ -35,7 +35,6 @@ export default {
       aiServerUrl: "http://localhost:8080",
       currentTheme: "default", // Tracks the current theme
       themeStyles: {}, // Stores dynamic styles
-      selectedChatID: null, // Tracks the currently selected chat
     };
   },
   methods: {
@@ -46,7 +45,6 @@ export default {
       this.isCollapsed = !this.isCollapsed;
     },
     selectChat(chatID) {
-      this.selectedChatID = chatID;
       this.$emit("chatSelected", chatID);
     },
     applyTheme(themeName) {
