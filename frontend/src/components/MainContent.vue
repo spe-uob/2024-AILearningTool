@@ -5,17 +5,13 @@
 
       <p v-if="this.currentChatID.length === 0">Select one of the topics below:</p>
 
-      <!-- Buttons for initiating a new chat -->
+      <!-- Buttons for chat initialisation -->
       <div v-if="this.currentChatID.length === 0" class="button-container">
-        <button @click="sendInitialMessage('I need help with choosing a course')">
+        <button @click="sendInitialMessage('I need help with choosing a course')" :disabled="chatInitButtonsDisabled">
           I need help with choosing a course
         </button>
-        <button @click="sendInitialMessage('I need help with IBM SkillsBuild platform')">
-          I need help with IBM SkillsBuild platform
-        </button>
-        <button @click="sendInitialMessage('I have questions about university life')">
-          I have questions about university life
-        </button>
+        <button @click="sendInitialMessage('I need help with IBM SkillsBuild platform')" :disabled="chatInitButtonsDisabled">I need help with IBM SkillsBuild platform</button>
+        <button @click="sendInitialMessage('I have questions about university life')" :disabled="chatInitButtonsDisabled">I have questions about university life</button>
       </div>
 
       <!-- Display all messages in the conversation -->
@@ -46,7 +42,7 @@
               placeholder="Type your message..."
               @keypress.enter.prevent="sendMessage"
           ></textarea>
-          <button @click="sendMessage">Send</button>
+          <button @click="sendMessage" :disabled="chatInitButtonsDisabled">Send</button>
         </div>
       </div>
     </div>
@@ -68,7 +64,7 @@ export default {
       currentTheme: "default", // Stores the current UI theme
     };
   },
-  props: ["messages", "chats", "currentChatID"],
+  props: ["messages", "chats", "currentChatID", "chatInitButtonsDisabled"],
   watch: {
     // Automatically scroll to the bottom when new messages arrive
     messages() {
@@ -86,13 +82,10 @@ export default {
      * Initializes a new chat with a predefined message.
      */
     async sendInitialMessage(message) {
-      let response = await fetch(
-          this.aiServerURL +
-          "/createChat?" +
-          new URLSearchParams({
-            initialMessage: message,
-          }),
-          {
+      this.$emit("setButtonLock", true)
+      let response = await fetch(this.aiServerURL + "/createChat?" + new URLSearchParams({
+        "initialMessage": message
+      }),{
             method: "GET",
             credentials: "include",
           }
@@ -174,6 +167,7 @@ export default {
           break;
         }
       }
+      this.$emit("setButtonLock", false)
     },
 
     /**
@@ -191,6 +185,7 @@ export default {
       }
 
       this.$emit("addMessage", "user", this.userInput);
+      this.$emit("setButtonLock", true)
 
       const messageToSend = this.userInput.trim();
       this.userInput = "";
@@ -215,6 +210,7 @@ export default {
         this.$emit("addMessage", "System", "Failed to send message. Please try again.");
       }
       this.scrollToBottom();
+      this.$emit("setButtonLock", false)
     },
   }
 };

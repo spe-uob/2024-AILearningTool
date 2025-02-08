@@ -8,14 +8,14 @@
     <!-- Sidebar Content (Only visible when expanded) -->
     <div v-if="!isCollapsed" class="history-container">
       <!-- New Chat Button -->
-      <button class="chat-item selectable-chat" @click="addChat" :style="newChatButtonStyles" title="New Chat">
+      <button class="chat-item selectable-chat" @click="addChat" :style="newChatButtonStyles" title="New Chat"  :disabled="chatInitButtonsDisabled">
         ➕ New Conversation
       </button>
 
       <!-- Chat History List -->
       <div class="history-list-wrapper">
         <div v-for="chat in chats" :key="chat.chatID">
-          <button class="chat-item selectable-chat" @click="selectChat(chat.chatID)" :class="{ 'selected': selectedChatID === chat.chatID }">
+          <button class="chat-item selectable-chat" @click="selectChat(chat.chatID)" :class="{ 'selected': currentChatID === chat.chatID }"  :disabled="chatInitButtonsDisabled">
             {{ chat.title }}
           </button>
         </div>
@@ -28,14 +28,13 @@
 import { getTheme } from "../assets/color.js";
 
 export default {
-  props: ["chats", "currentChatID"],
+  props: ["chats", "currentChatID", "chatInitButtonsDisabled"],
   data() {
     return {
       isCollapsed: false, // Controls sidebar visibility
       aiServerUrl: "http://localhost:8080",
       currentTheme: "default", // Tracks the current theme
       themeStyles: {}, // Stores dynamic styles
-      selectedChatID: null, // Tracks the currently selected chat
     };
   },
   methods: {
@@ -46,7 +45,6 @@ export default {
       this.isCollapsed = !this.isCollapsed;
     },
     selectChat(chatID) {
-      this.selectedChatID = chatID;
       this.$emit("chatSelected", chatID);
     },
     applyTheme(themeName) {

@@ -6,6 +6,7 @@
           @chatSelected="(id) => this.loadChat(id)"
           :currentChatID="this.currentChatID"
           :chats="this.chats"
+          :chatInitButtonsDisabled="this.chatInitButtonsDisabled"
       />
       <SettingSidebar @toggleSettings="toggleSettings" />
     </div>
@@ -13,9 +14,11 @@
         :messages="this.messages"
         :chats="this.chats"
         :currentChatID="this.currentChatID"
+        :chatInitButtonsDisabled="this.chatInitButtonsDisabled"
         @addMessage="(a, b) => this.addMessage(a, b)"
         @addChat="(a, b) => this.addChat(a, b)"
         @updateChatID="(id) => this.currentChatID = id"
+        @setButtonLock="(status) => this.chatInitButtonsDisabled = status"
     />
   </div>
 </template>
@@ -31,7 +34,8 @@ export default {
       messages: [],
       isSettingsOpen: false,
       chats: JSON.parse(localStorage.getItem("chats")) || [], // Stores id-title pair for every chat
-      currentChatID: ""
+      currentChatID: "",
+      chatInitButtonsDisabled: false
     };
   },
   methods: {
