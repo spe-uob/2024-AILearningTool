@@ -6,25 +6,26 @@
     <!-- Modal for settings -->
     <div v-if="isSettingsOpen" class="modal-overlay">
       <div class="modal-content">
-        <h3>Settings</h3>
+        <h3> {{ getTranslation(currentLanguage, "SETTINGS") }}</h3>
         <ul>
           <li>
-            <h4>1) Language</h4>
+            <h4>1) {{getTranslation(currentLanguage, "LANGUAGE")}}</h4>
             <div class="language-buttons">
               <button @click="changeLanguage('en')">English</button>
               <button @click="changeLanguage('zh')">Chinese</button>
+              <button @click="changeLanguage('ru')">Russian</button>
             </div>
           </li>
           <li>
-            <h4>2) High Contrast Mode</h4>
+            <h4>2) {{ getTranslation(currentLanguage, "HIGH_CONTRAST_MODE")}}</h4>
             <button @click="toggleHighContrastMode">
-              {{ isHighContrast ? 'Turn Off High Contrast Mode' : 'Turn On High Contrast Mode' }}
+              {{ this.isHighContrast ? getTranslation(currentLanguage, "TURN_OFF") : getTranslation(currentLanguage, "TURN_ON") }}
             </button>
           </li>
         </ul>
         <div class="action-buttons">
-          <button @click="Logout">Log out</button>
-          <button class="close-btn" @click="closeSettings">Close</button>
+          <button @click="Logout">{{ getTranslation(currentLanguage, "LOG_OUT") }}</button>
+          <button class="close-btn" @click="closeSettings">{{ getTranslation(currentLanguage, "CLOSE")}}</button>
         </div>
       </div>
     </div>
@@ -32,7 +33,8 @@
 </template>
 
 <script>
-import { getTheme } from "../assets/color.js";
+import { getTheme } from "@/assets/color";
+import { getTranslation } from "@/assets/language";
 
 export default {
   data() {
@@ -41,15 +43,18 @@ export default {
       isHighContrast: false,
     };
   },
+  props: ["currentLanguage"],
   methods: {
+    getTranslation,
     openSettings() {
       this.isSettingsOpen = true;
     },
     closeSettings() {
       this.isSettingsOpen = false;
     },
-    changeLanguage(language) {
-      alert(`Language changed to ${language === 'en' ? 'English' : 'Chinese'}`);
+    changeLanguage(langCode) {
+      this.$emit("updateLanguage", langCode);
+      console.log("lang changed to " + langCode);
     },
     toggleHighContrastMode() {
       this.isHighContrast = !this.isHighContrast;

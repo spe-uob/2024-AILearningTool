@@ -7,7 +7,11 @@
           :currentChatID="this.currentChatID"
           :chats="this.chats"
       />
-      <SettingSidebar @toggleSettings="toggleSettings" />
+      <SettingSidebar
+          @toggleSettings="toggleSettings"
+          @updateLanguage="changeLanguage"
+          :currentLanguage="this.currentLanguage"
+      />
     </div>
     <MainContent
         :messages="this.messages"
@@ -31,7 +35,8 @@ export default {
       messages: [],
       isSettingsOpen: false,
       chats: JSON.parse(localStorage.getItem("chats")) || [], // Stores id-title pair for every chat
-      currentChatID: ""
+      currentChatID: "",
+      currentLanguage: localStorage.getItem("langCode") || "en",
     };
   },
   methods: {
@@ -63,6 +68,12 @@ export default {
     toggleSettings(isOpen) {
       this.isSettingsOpen = isOpen;
     },
+    // TODO: This is never being executed
+    changeLanguage(langCode) {
+      this.currentLanguage = langCode
+      localStorage.setItem("langCode", langCode)
+      console.log("language updated to (mainview) " + this.currentLanguage)
+    }
   },
   components: {
     HistorySidebar,
