@@ -35,7 +35,7 @@ const translations = {
         LOGIN_FAILED: "Login failed!",
         COOKIE_DISCLAIMER: "Watsonx AI uses cookies. If you continue to use this site, you consent to the their storage in your browser.",
         I_UNDERSTAND: "I understand",
-        PLEASE_ENTER_A_MESSSAGE: "Please enter a message!",
+        PLEASE_ENTER_A_MESSAGE: "Please enter a message!",
         FAILED_TO_SEND_MESSAGE: "Failed to send message. Please try again."
     },
     zh: {
