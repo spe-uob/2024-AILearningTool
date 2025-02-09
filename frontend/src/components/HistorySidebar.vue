@@ -9,7 +9,7 @@
     <div v-if="!isCollapsed" class="history-container">
       <!-- New Chat Button -->
       <button class="chat-item selectable-chat" @click="addChat" :style="newChatButtonStyles" title="New Chat">
-        ➕ New Conversation
+        ➕ {{ getTranslation(currentLanguage, "NEW_CONVERSATION") }}
       </button>
 
       <!-- Chat History List -->
@@ -26,9 +26,10 @@
 
 <script>
 import { getTheme } from "../assets/color.js";
+import { getTranslation } from "@/assets/language";
 
 export default {
-  props: ["chats", "currentChatID"],
+  props: ["chats", "currentChatID", "currentLanguage"],
   data() {
     return {
       isCollapsed: false, // Controls sidebar visibility
@@ -39,6 +40,7 @@ export default {
     };
   },
   methods: {
+    getTranslation,
     addChat() {
       this.$emit("resetMainContent");
     },

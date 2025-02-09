@@ -6,17 +6,15 @@
           @chatSelected="(id) => this.loadChat(id)"
           :currentChatID="this.currentChatID"
           :chats="this.chats"
+          :currentLanguage="currentLanguage"
       />
-      <SettingSidebar
-          @toggleSettings="toggleSettings"
-          @updateLanguage="changeLanguage"
-          :currentLanguage="this.currentLanguage"
-      />
+      <SettingSidebar/>
     </div>
     <MainContent
         :messages="this.messages"
         :chats="this.chats"
         :currentChatID="this.currentChatID"
+        :currentLanguage="currentLanguage"
         @addMessage="(a, b) => this.addMessage(a, b)"
         @addChat="(a, b) => this.addChat(a, b)"
         @updateChatID="(id) => this.currentChatID = id"
@@ -35,10 +33,10 @@ export default {
       messages: [],
       isSettingsOpen: false,
       chats: JSON.parse(localStorage.getItem("chats")) || [], // Stores id-title pair for every chat
-      currentChatID: "",
-      currentLanguage: localStorage.getItem("langCode") || "en",
+      currentChatID: ""
     };
   },
+  props: ["currentLanguage"],
   methods: {
     // Used to reset MainContent component (e.g. when "Add chat" button is clicked)
     resetMainContent() {
@@ -65,15 +63,6 @@ export default {
       })
       localStorage.setItem("chats", JSON.stringify(this.chats))
     },
-    toggleSettings(isOpen) {
-      this.isSettingsOpen = isOpen;
-    },
-    // TODO: This is never being executed
-    changeLanguage(langCode) {
-      this.currentLanguage = langCode
-      localStorage.setItem("langCode", langCode)
-      console.log("language updated to (mainview) " + this.currentLanguage)
-    }
   },
   components: {
     HistorySidebar,

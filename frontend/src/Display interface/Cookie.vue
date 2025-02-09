@@ -2,17 +2,24 @@
   <div class="cookie-popup">
     <div class="cookie-content">
       <p>
-        Watsonx AI uses cookies serving systems and analytics. If you continue to use this site, you consent to
-        the collection and storage on your local machine.
+        {{ getTranslation(currentLanguage, "COOKIE_DISCLAIMER") }}
       </p>
-      <button class="accept-button" @click="handleConsent(true)">Allow all cookies</button>
+      <button class="accept-button" @click="handleConsent(true)">
+        {{ getTranslation(currentLanguage, "I_UNDERSTAND") }}
+      </button>
     </div>
   </div>
 </template>
 
+import {getTranslation} from "../assets/language";
+
 <script>
+import {getTranslation} from "../assets/language";
+
 export default {
+  props: ["currentLanguage"],
   methods: {
+    getTranslation,
     handleConsent(isConsent) {
       this.setConsentCookie(isConsent);
       this.$emit("consent-choice", isConsent); 

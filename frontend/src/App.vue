@@ -1,10 +1,15 @@
 <template>
   <div id="app">
     <div>
-      <router-view />
+      <router-view :currentLanguage="currentLanguage" />
     </div>
 
-    <SettingSidebar v-if="$route.path !== '/login'" @highContrastToggled="onHighContrastToggled" />
+    <SettingSidebar
+        v-if="$route.path !== '/login'"
+        @highContrastToggled="onHighContrastToggled"
+        @updateLanguage="changeLanguage"
+        :currentLanguage="currentLanguage"
+    />
   </div>
 </template>
 
@@ -32,9 +37,14 @@ export default {
   data() {
     return {
       currentTheme: "default",
+      currentLanguage: localStorage.getItem("langCode") || "en"
     };
   },
   methods: {
+    changeLanguage(langCode) {
+      this.currentLanguage = langCode
+      localStorage.setItem("langCode", langCode)
+    },
     onHighContrastToggled(isHighContrast) {
       this.currentTheme = isHighContrast ? "high_contrast" : "default";
       this.applyTheme(this.currentTheme);

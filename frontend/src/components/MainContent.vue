@@ -1,20 +1,24 @@
 <template>
   <main>
     <div class="chat-area">
-      <p>Welcome to Watsonx AI!</p>
+      <p>
+        {{ getTranslation(currentLanguage, 'WELCOME_TO_WATSONX_AI') }}
+      </p>
 
-      <p v-if="this.currentChatID.length === 0">Select one of the topics below:</p>
+      <p v-if="this.currentChatID.length === 0">
+        {{ getTranslation(currentLanguage, 'SELECT_INITIAL_TOPIC') }}
+      </p>
 
       <!-- Buttons for initiating a new chat -->
       <div v-if="this.currentChatID.length === 0" class="button-container">
-        <button @click="sendInitialMessage('I need help with choosing a course')">
-          I need help with choosing a course
+        <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_CHOOSING_A_COURSE'))">
+          {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_CHOOSING_A_COURSE") }}
         </button>
-        <button @click="sendInitialMessage('I need help with IBM SkillsBuild platform')">
-          I need help with IBM SkillsBuild platform
+        <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_CHOOSING_A_COURSE'))">
+          {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_CHOOSING_A_COURSE")}}
         </button>
-        <button @click="sendInitialMessage('I have questions about university life')">
-          I have questions about university life
+        <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_HAVE_QUESTIONS_ABOUT_UNI_LIFE'))">
+          {{getTranslation(currentLanguage, "I_HAVE_QUESTIONS_ABOUT_UNI_LIFE")}}
         </button>
       </div>
 
@@ -32,8 +36,8 @@
               'system-message': msg.sender === 'System'
             }"
           >
-            <strong v-if="msg.sender === 'user'">User</strong>
-            <strong v-else-if="msg.sender === 'assistant'">AI</strong>
+            <strong v-if="msg.sender === 'user'">{{ getTranslation(currentLanguage, "USER") }}</strong>
+            <strong v-else-if="msg.sender === 'assistant'">{{ getTranslation(currentLanguage, "AI") }}</strong>
             <strong v-else>{{ msg.sender }}</strong>
             <p>{{ msg.content }}</p>
           </div>
@@ -43,10 +47,12 @@
         <div class="input-area">
           <textarea
               v-model="userInput"
-              placeholder="Type your message..."
+              :placeholder="getTranslation(currentLanguage, 'TYPE_YOUR_MESSAGE')"
               @keypress.enter.prevent="sendMessage"
           ></textarea>
-          <button @click="sendMessage">Send</button>
+          <button @click="sendMessage">
+            {{ getTranslation(currentLanguage, "SEND") }}
+          </button>
         </div>
       </div>
     </div>
@@ -56,6 +62,7 @@
 <script>
 import axios from "axios";
 import { getTheme } from "../assets/color.js";
+import {getTranslation} from "../assets/language";
 
 export default {
   data() {
@@ -68,7 +75,7 @@ export default {
       currentTheme: "default", // Stores the current UI theme
     };
   },
-  props: ["messages", "chats", "currentChatID"],
+  props: ["messages", "chats", "currentChatID", "currentLanguage"],
   watch: {
     // Automatically scroll to the bottom when new messages arrive
     messages() {
@@ -82,6 +89,7 @@ export default {
     }
   },
   methods: {
+    getTranslation,
     /**
      * Initializes a new chat with a predefined message.
      */
@@ -181,10 +189,13 @@ export default {
      */
     async sendMessage() {
       if (!this.userInput.trim()) {
-        alert("Please enter a message!");
+        alert(
+            getTranslation(localStorage.getItem("langCode"), "PLEASE_ENTER_A_MESSAGE")
+        );
         return;
       }
 
+      // "if" below can be removed later
       if (!this.currentChatID) {
         alert("ChatId is not set. Please start a new chat.");
         return;
@@ -212,7 +223,8 @@ export default {
         this.$emit("addMessage", "assistant", response.data);
       } catch (error) {
         console.error("Error sending message:", error);
-        this.$emit("addMessage", "System", "Failed to send message. Please try again.");
+        this.$emit("addMessage", "System",
+        localStorage.getItem("langCode"), "FAILED_TO_SEND_MESSAGE");
       }
       this.scrollToBottom();
     },
