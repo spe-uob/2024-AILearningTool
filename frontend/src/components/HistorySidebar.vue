@@ -8,8 +8,8 @@
     <!-- Sidebar Content (Only visible when expanded) -->
     <div v-if="!isCollapsed" class="history-container">
       <!-- New Chat Button -->
-      <button class="chat-item selectable-chat" @click="addChat" :style="newChatButtonStyles" title="New Chat"  :disabled="chatInitButtonsDisabled">
-        ➕ New Conversation
+      <button class="chat-item selectable-chat" @click="addChat" :style="newChatButtonStyles" title="New Chat" :disabled="chatInitButtonsDisabled">
+        ➕ {{ getTranslation(currentLanguage, "NEW_CONVERSATION") }}
       </button>
 
       <!-- Chat History List -->
@@ -26,9 +26,10 @@
 
 <script>
 import { getTheme } from "../assets/color.js";
+import { getTranslation } from "@/assets/language";
 
 export default {
-  props: ["chats", "currentChatID", "chatInitButtonsDisabled"],
+  props: ["chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
   data() {
     return {
       isCollapsed: false, // Controls sidebar visibility
@@ -38,6 +39,7 @@ export default {
     };
   },
   methods: {
+    getTranslation,
     addChat() {
       this.$emit("resetMainContent");
     },
