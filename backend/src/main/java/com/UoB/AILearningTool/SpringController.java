@@ -129,4 +129,117 @@ public class SpringController {
             }
         }
     }
+
+    // Send a message to the chat and receive a response
+    @GetMapping("/sendMessage")
+    public void sendMessage(@CookieValue(value = "userID", defaultValue = "") String userID,
+                            @RequestParam(name = "newMessage") String newMessage,
+                           @RequestParam(name = "chatID") String chatID,
+                           HttpServletResponse response) {
+        response.setContentType("text/plain");
+        response.setStatus(401); // Default
+
+        // 1) Get the user
+        User user = DBC.getUser(userID);
+        // 2) get the chat
+        Chat chat = DBC.getChat(user, chatID);
+        if (chat == null) {
+            // null chat
+            return;
+        }
+
+        // 3) Get existing history
+        String inputString = chat.getMessageHistory(user);
+        if (inputString == null) {
+            return;
+        }
+
+        // 4) Try to add the new user message
+        boolean success = chat.addUserMessage(userID, newMessage);
+        if (success) {
+            // 5) Re-fetch history & call AI
+            inputString = chat.getMessageHistory(user);
+            WatsonxResponse wresponse = WXC.sendUserMessage(inputString);
+
+            // Update status from AI
+            response.setStatus(wresponse.statusCode);
+
+            try {
+                if (wresponse.statusCode == 200) {
+                    chat.addAIMessage(userID, wresponse.responseText);
+                }
+                response.getWriter().write(wresponse.responseText);
+            } catch (IOException e) {
+                log.warn(String.valueOf(e));
+                response.setStatus(500);
+            }
+        }
+    }
+
+    // Send a message history and receive a response from Watsonx.
+    // Used for users who declined optional cookies.
+    @GetMapping("/sendIncognitoMessage")
+    public void sendIncognitoMessage(@CookieValue(value = "userID") String userID,
+                                     @RequestParam(name = "inputString") String inputString,
+                                     HttpServletResponse response) {
+        log.warn("ID {}, newMessage: {}", userID, inputString);
+        User user = DBC.getUser(userID);
+        WatsonxResponse wresponse;
+        response.setContentType("text/plain");
+
+        if (user != null) {
+//            TODO: Revert wresponse when issue with Watsonx API quota will be resolved.
+            wresponse = WXC.sendUserMessage(inputString);
+//            wresponse = WXC.sendUserMessage(StringTools.messageHistoryPrepare(inputString));
+            response.setStatus(wresponse.statusCode);
+            try {
+                response.getWriter().write(wresponse.responseText);
+                log.warn(wresponse.responseText);
+            } catch (IOException e) {
+                log.warn(String.valueOf(e));
+                response.setStatus(500);
+            }
+        } else {
+            log.warn("else {}", DBC.getUser(userID) == null);
+            response.setStatus(401);
+        }
+    }
+
+    // Get message history from a chat
+    @GetMapping("/getChatHistory")
+    public void getChatHistory(@CookieValue(value = "userID", defaultValue = "") String userID,
+                               @RequestParam(name = "chatID") String chatID,
+                               HttpServletResponse response) {
+        User user = DBC.getUser(userID);
+        Chat chat = DBC.getChat(DBC.getUser(userID), chatID);
+        if (chat == null) {
+            response.setStatus(401);
+        try {
+            response.getWriter().write("");
+        } catch (IOException e) {
+            log.warn(String.valueOf(e));
+            }
+            return;
+        }
+
+        String messageHistory = chat.getMessageHistory(user);
+        if (messageHistory == null) {
+            response.setStatus(401);
+            try {
+                response.getWriter().write("");
+            } catch (IOException e) {
+                log.warn(String.valueOf(e));
+            }
+            return;
+
+        }
+        // If we reach here, chat != null and messageHistory != null
+        response.setStatus(200);
+        try {
+            response.getWriter().write(messageHistory);
+        } catch (IOException e) {
+            log.warn(String.valueOf(e));
+            response.setStatus(500);
+        }
+    }
 }
