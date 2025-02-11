@@ -1,31 +1,25 @@
 <template>
   <div class="login-container">
     <Cookie v-if="showCookiePopup" @consent-choice="handleConsent" />
-
     <div class="card">
       <h2>{{ isLoginMode ? 'Login' : 'Register' }}</h2>
-
       <form @submit.prevent="handleSubmit">
         <div class="form-group">
           <label for="username">Username</label>
           <input v-model="form.username" id="username" type="text" required />
         </div>
-
         <div class="form-group">
           <label for="password">Password</label>
           <input v-model="form.password" id="password" type="password" required />
         </div>
-
         <div v-if="!isLoginMode" class="form-group">
           <label for="confirmPassword">Confirm Password</label>
           <input v-model="form.confirmPassword" id="confirmPassword" type="password" required />
         </div>
-
         <button type="submit" :disabled="showCookiePopup">
           {{ isLoginMode ? 'Login' : 'Register' }}
         </button>
       </form>
-
       <p class="toggle-text">
         {{ isLoginMode ? "Don't have an account?" : "Already have an account?" }}
         <span @click="toggleMode">
@@ -56,11 +50,19 @@ export default {
     this.checkUserSession();
   },
   methods: {
-    checkUserSession() {
-      const userID = localStorage.getItem("userId");
-      if (userID) {
-        console.log("UserID found, redirecting to /main...");
-        this.$router.push("/main");
+    async checkUserSession() {
+      try {
+        const response = await fetch('http://localhost:8080/getUserById', {
+          method: 'GET',
+          credentials: 'include',
+        });
+        if (response.ok) {
+          const userData = await response.json();
+          console.log('User session found:', userData);
+          this.$router.push('/main');
+        }
+      } catch (error) {
+        console.error('Failed to check user session:', error);
       }
     },
 
@@ -72,13 +74,12 @@ export default {
 
     async handleSubmit() {
       if (this.showCookiePopup) {
-        alert("Please accept or reject cookies first.");
+        alert('Please accept or reject cookies first.');
         return;
       }
 
       if (this.isLoginMode) {
         this.login();
-        this.signUp();
       } else {
         if (this.form.password !== this.form.confirmPassword) {
           alert('Passwords do not match!');
@@ -88,96 +89,68 @@ export default {
       }
     },
 
-    async signUp() {
+    async login() {
       try {
-        const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
-          const [key, value] = cookie.split("=");
-          acc[key] = value;
-          return acc;
-        }, {});
+        const response = await fetch('http://localhost:8080/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: this.form.username,
+            password: this.form.password,
+          }),
+        });
 
-        if (!cookies.userID) {
-          console.log("No userID found in cookies. Signing up...");
-
-          const response = await fetch("http://localhost:8080/signup", {
-            method: "GET",
-            credentials: "include",
-          });
-
-          if (!response.ok) {
-            throw new Error(`Signup failed: ${response.status}`);
-          }
-
-          console.log("Signup successful! Checking cookies again...");
-          this.storeUserID();
+        const data = await response.json();
+        if (response.ok && data.success) {
+          console.log('Login successful. Redirecting to /main...');
+          this.$router.push('/main');
         } else {
-          console.log("User already signed up, skipping signup.");
+          alert(data.message || 'Login failed!');
         }
       } catch (error) {
-        console.error("Signup error:", error);
+        console.error('Login error:', error);
+        alert('An error occurred while trying to log in.');
       }
     },
 
-    storeUserID() {
-      const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
-        const [key, value] = cookie.split("=");
-        acc[key] = value;
-        return acc;
-      }, {});
+    async register() {
+      try {
+        const response = await fetch('http://localhost:8080/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: this.form.username,
+            password: this.form.password,
+          }),
+        });
 
-      if (cookies.userID) {
-        localStorage.setItem("userId", cookies.userID);
-        console.log("UserID stored in localStorage:", cookies.userID);
-        this.$router.push("/main");
+        const data = await response.json();
+        if (response.ok && data.success) {
+          alert('Registration successful! Please login.');
+          this.toggleMode();
+        } else {
+          alert(data.message || 'Registration failed!');
+        }
+      } catch (error) {
+        console.error('Registration error:', error);
+        alert('An error occurred while trying to register.');
       }
     },
 
-    login() {
-      fetch('/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: this.form.username,
-          password: this.form.password,
-        }),
-      })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.success) {
-              localStorage.setItem('token', data.token);
-              this.$router.push('/main');
-            } else {
-              alert(data.message || 'Login failed!');
-            }
-          })
-          .catch((err) => {
-            console.error('Login error:', err);
-            alert('An error occurred while trying to log in.');
-          });
-    },
+    async signUp() {
+      try {
+        const response = await fetch('http://localhost:8080/signup', {
+          method: 'GET',
+          credentials: 'include',
+        });
 
-    register() {
-      fetch('/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: this.form.username,
-          password: this.form.password,
-        }),
-      })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.success) {
-              alert('Registration successful! Please login.');
-              this.toggleMode();
-            } else {
-              alert(data.message || 'Registration failed!');
-            }
-          })
-          .catch((err) => {
-            console.error('Registration error:', err);
-            alert('An error occurred while trying to register.');
-          });
+        if (!response.ok) {
+          throw new Error(`Signup failed: ${response.status}`);
+        }
+        console.log('Signup successful! User session initialized.');
+      } catch (error) {
+        console.error('Signup error:', error);
+      }
     },
 
     handleConsent(consent) {
@@ -188,7 +161,6 @@ export default {
 </script>
 
 <style scoped>
-/* CSS code unchanged */
 .login-container {
   display: flex;
   justify-content: center;
@@ -233,14 +205,14 @@ button {
   padding: 0.75rem;
   border: none;
   border-radius: 4px;
-  background-color: #5C88DA;
+  background-color: #5c88da;
   color: white;
   font-size: 16px;
   cursor: pointer;
 }
 
 button:hover {
-  background-color: #5C88DA;
+  background-color: #3f70d1;
 }
 
 .toggle-text {
@@ -249,7 +221,7 @@ button:hover {
 }
 
 .toggle-text span {
-  color: #5C88DA;
+  color: #5c88da;
   cursor: pointer;
   font-weight: bold;
 }
