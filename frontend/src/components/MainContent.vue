@@ -3,10 +3,9 @@
     <div class="chat-area">
       <p>Welcome to Watsonx AI!</p>
 
-      <p v-if="this.currentChatID.length === 0">Select one of the topics below:</p>
+      <p v-if="!currentChatID">Select one of the topics below:</p>
 
-      <!-- Buttons for initiating a new chat -->
-      <div v-if="this.currentChatID.length === 0" class="button-container">
+      <div v-if="!currentChatID">
         <button @click="sendInitialMessage('I need help with choosing a course')">
           I need help with choosing a course
         </button>
@@ -18,28 +17,15 @@
         </button>
       </div>
 
-      <!-- Display all messages in the conversation -->
-      <div v-if="this.currentChatID.length > 0" class="chat-container">
-        <!-- Scrollable message area -->
+      <div v-if="currentChatID" class="chat-container">
         <div class="messages-container">
-          <div
-              v-for="(msg, index) in messages"
-              :key="index"
-              class="message"
-              :class="{
-              'user-message': msg.sender === 'user',
-              'assistant-message': msg.sender === 'assistant',
-              'system-message': msg.sender === 'System'
-            }"
-          >
+          <div v-for="msg in messages" :key="msg.id" class="message">
             <strong v-if="msg.sender === 'user'">User</strong>
-            <strong v-else-if="msg.sender === 'assistant'">AI</strong>
-            <strong v-else>{{ msg.sender }}</strong>
+            <strong v-else>AI</strong>
             <p>{{ msg.content }}</p>
           </div>
         </div>
 
-        <!-- Input area for user messages -->
         <div class="input-area">
           <textarea
               v-model="userInput"
@@ -62,123 +48,92 @@ export default {
     return {
       userInput: "",
       currentTopic: "",
-      currentTurn: "user", // Tracks conversation turn (user or AI)
-      userId: localStorage.getItem("userId") || "",
-      aiServerURL: "http://localhost:8080", // API endpoint for AI server
-      currentTheme: "default", // Stores the current UI theme
+      currentTurn: "user",
+      userId: "",
+      aiServerURL: "http://localhost:8080",
+      currentTheme: "default",
     };
   },
   props: ["messages", "chats", "currentChatID"],
   watch: {
-    // Automatically scroll to the bottom when new messages arrive
     messages() {
-      if (this.messages.length === 0 && this.currentChatID.length > 0) {
+      if (this.messages.length === 0 && this.currentChatID) {
         this.currentTurn = "user";
         this.requestChatHistory();
       }
-      this.$nextTick(() => {
-        this.scrollToBottom();
-      });
-    }
+    },
   },
   methods: {
-    /**
-     * Initializes a new chat with a predefined message.
-     */
     async sendInitialMessage(message) {
-      let response = await fetch(
-          this.aiServerURL +
-          "/createChat?" +
-          new URLSearchParams({
-            initialMessage: message,
-          }),
-          {
-            method: "GET",
-            credentials: "include",
-          }
-      );
+      try {
+        const response = await fetch(`${this.aiServerURL}/createChat?${new URLSearchParams({ initialMessage: message })}`, {
+          method: "GET",
+          credentials: "include",
+        });
 
-      if (!response.ok) {
-        throw new Error("Non-200 backend API response");
-      }
-
-      this.$emit("updateChatID", await response.text());
-      await this.$nextTick(() => {
-        this.$emit("addChat", this.currentChatID, message);
-        this.requestChatHistory();
-      });
-    },
-
-    /**
-     * Requests chat history from the server based on the current chat ID.
-     */
-    requestChatHistory() {
-      fetch(
-          this.aiServerURL +
-          "/getChatHistory?" +
-          new URLSearchParams({
-            chatID: this.currentChatID,
-          }),
-          {
-            method: "GET",
-            credentials: "include",
-          }
-      ).then(async (response) => {
         if (!response.ok) {
-          throw new Error("Non-200 backend API response");
-        } else {
-          this.processChatHistory(await response.text());
+          throw new Error("Failed to create chat.");
         }
-      });
+
+        this.$emit("updateChatID", await response.text());
+        await this.$nextTick(() => {
+          this.$emit("addChat", this.currentChatID, message);
+          this.requestChatHistory();
+        });
+      } catch (error) {
+        console.error("Error creating chat:", error);
+      }
     },
 
-    /**
-     * Processes retrieved chat history and structures it for display.
-     */
+    async requestChatHistory() {
+      try {
+        const response = await fetch(`${this.aiServerURL}/getChatHistory?${new URLSearchParams({ chatID: this.currentChatID })}`, {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch chat history.");
+        }
+
+        this.processChatHistory(await response.text());
+      } catch (error) {
+        console.error("Error fetching chat history:", error);
+      }
+    },
+
     async processChatHistory(messageHistory) {
-      messageHistory = String(messageHistory);
-      let currentRole;
-      let nextRole;
-      let nextRoleIndex;
-      let currentMessage;
+      let currentRole, openAIRole, nextRole, nextRoleIndex, currentMessage;
       for (let i = 0; ; i++) {
         if (i === 0) {
           currentRole = "<|system|>";
+          openAIRole = "system";
           nextRole = "<|user|>";
         } else if (i % 2 !== 0) {
           currentRole = "<|user|>";
+          openAIRole = "user";
           nextRole = "<|assistant|>";
         } else {
           currentRole = "<|assistant|>";
+          openAIRole = "assistant";
           nextRole = "<|user|>";
         }
+
         if (messageHistory.includes(currentRole)) {
-          messageHistory = messageHistory.substring(
-              messageHistory.indexOf(currentRole) + currentRole.length
-          );
+          messageHistory = messageHistory.substring(messageHistory.indexOf(currentRole) + currentRole.length);
           nextRoleIndex = messageHistory.indexOf(nextRole);
-          if (nextRoleIndex !== -1) {
-            currentMessage = messageHistory.substring(
-                0,
-                messageHistory.indexOf(nextRole)
-            );
-          } else {
-            currentMessage = messageHistory;
+          currentMessage = nextRoleIndex !== -1 ? messageHistory.substring(0, nextRoleIndex) : messageHistory;
+
+          if (currentRole !== "<|system|>") {
+            this.$emit("addMessage", this.currentTurn, currentMessage);
+            this.currentTurn = this.currentTurn === "user" ? "assistant" : "user";
           }
-          if (currentRole === "<|system|>") {
-            continue;
-          }
-          this.$emit("addMessage", this.currentTurn, currentMessage);
-          this.currentTurn = this.currentTurn === "user" ? "assistant" : "user";
         } else {
           break;
         }
       }
     },
 
-    /**
-     * Sends a user message to the AI server and processes the response.
-     */
     async sendMessage() {
       if (!this.userInput.trim()) {
         alert("Please enter a message!");
@@ -191,12 +146,11 @@ export default {
       }
 
       this.$emit("addMessage", "user", this.userInput);
-
       const messageToSend = this.userInput.trim();
       this.userInput = "";
 
       try {
-        const response = await axios.get(this.aiServerURL + "/sendMessage", {
+        const response = await axios.get(`${this.aiServerURL}/sendMessage`, {
           params: {
             userID: this.userId,
             chatID: this.currentChatID,
@@ -214,15 +168,48 @@ export default {
         console.error("Error sending message:", error);
         this.$emit("addMessage", "System", "Failed to send message. Please try again.");
       }
+
       this.scrollToBottom();
     },
-  }
+
+    applyTheme(themeName) {
+      const theme = getTheme(themeName);
+      Object.keys(theme).forEach((key) => {
+        document.documentElement.style.setProperty(`--${key}-color`, theme[key]);
+      });
+    },
+
+    scrollToBottom() {
+      const chatContainer = this.$el.querySelector(".messages-container");
+      if (chatContainer) {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+    },
+
+    async getUserId() {
+      try {
+        const response = await axios.get(`${this.aiServerURL}/signup`, { withCredentials: true });
+        if (response.status === 200) {
+          this.userId = response.data;
+        } else {
+          console.error("Failed to get userId.");
+        }
+      } catch (error) {
+        console.error("Error fetching userId:", error);
+      }
+    },
+  },
+
+  async mounted() {
+    if (!this.userId) {
+      await this.getUserId();
+    }
+  },
 };
 </script>
 
 
 <style scoped>
-/* Adjust the main area height to make the chat window more compact */
 main {
   flex-grow: 1;
   padding: 20px;
@@ -230,7 +217,7 @@ main {
   color: var(--text-color);
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 40px);
+  height: 100vh;
 }
 
 .chat-area {
@@ -259,6 +246,7 @@ main {
   border-radius: 12px;
   border: 2px solid var(--border-color);
   background-color: var(--background-color);
+  max-height: calc(100vh - 180px);
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease-in-out;
 }
@@ -266,73 +254,39 @@ main {
 .messages-container::-webkit-scrollbar {
   width: 6px;
 }
+
 .messages-container::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 3px;
 }
+
 .messages-container::-webkit-scrollbar-track {
   background: transparent;
 }
 
-/* General message bubble style */
 .message {
   margin: 10px 0;
-  padding: 12px 16px;
-  border-radius: 16px;
-  max-width: 60%;
+  padding: 14px;
+  border-radius: 20px;
+  max-width: 75%;
   white-space: pre-wrap;
   word-wrap: break-word;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
-  position: relative;  /* For the chat bubble tail */
-  animation: fadeIn 0.3s forwards ease-in-out;
   opacity: 0;
   transform: translateY(10px);
+  animation: fadeIn 0.3s forwards ease-in-out;
 }
 
-/* User messages (right side) */
-.user-message {
-  align-self: flex-end;
+.message:nth-child(odd) {
+  align-self: flex-start;
   background-color: var(--primary-color);
   border: 1px solid var(--secondary-color);
-  margin-left: auto;
-}
-.user-message::after {
-  content: "";
-  position: absolute;
-  bottom: 10px;
-  right: -8px;
-  width: 0;
-  height: 0;
-  border: 8px solid transparent;
-  border-left-color: var(--primary-color);
 }
 
-/* AI messages (left side) */
-.assistant-message {
-  align-self: flex-start;
+.message:nth-child(even) {
+  align-self: flex-end;
   background-color: var(--accent-color);
   border: 1px solid var(--border-color);
-  margin-right: auto;
-}
-.assistant-message::after {
-  content: "";
-  position: absolute;
-  bottom: 10px;
-  left: -8px;
-  width: 0;
-  height: 0;
-  border: 8px solid transparent;
-  border-right-color: var(--accent-color);
-}
-
-/* System messages/errors */
-.system-message {
-  align-self: center;
-  background-color: var(--border-color);
-  border: 1px solid var(--secondary-color);
-  max-width: 40%;
-  margin: 5px auto;
-  text-align: center;
 }
 
 @keyframes fadeIn {
@@ -384,18 +338,6 @@ button {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
 }
 
-.button-container {
-  display: flex;
-  gap: 5px; /* Controls spacing between buttons */
-  padding: 10px 0;
-}
-
-.button-container button {
-  flex: 1; /* Makes buttons equal width */
-  max-width: 300px; /* Limits maximum width to prevent oversized buttons */
-  text-align: center;
-}
-
 button:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.18);
@@ -404,4 +346,5 @@ button:hover {
 button:active {
   transform: scale(0.96);
 }
+
 </style>
