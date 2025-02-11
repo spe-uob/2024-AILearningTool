@@ -9,15 +9,15 @@
         {{ getTranslation(currentLanguage, 'SELECT_INITIAL_TOPIC') }}
       </p>
 
-      <!-- Buttons for initiating a new chat -->
+      <!-- Buttons for chat initialisation -->
       <div v-if="this.currentChatID.length === 0" class="button-container">
-        <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_CHOOSING_A_COURSE'))">
+        <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_CHOOSING_A_COURSE'))" :disabled="chatInitButtonsDisabled">
           {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_CHOOSING_A_COURSE") }}
         </button>
-        <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_CHOOSING_A_COURSE'))">
-          {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_CHOOSING_A_COURSE")}}
+        <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_PLATFORM'))" :disabled="chatInitButtonsDisabled">
+          {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_PLATFORM")}}
         </button>
-        <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_HAVE_QUESTIONS_ABOUT_UNI_LIFE'))">
+        <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_HAVE_QUESTIONS_ABOUT_UNI_LIFE'))" :disabled="chatInitButtonsDisabled">
           {{getTranslation(currentLanguage, "I_HAVE_QUESTIONS_ABOUT_UNI_LIFE")}}
         </button>
       </div>
@@ -50,7 +50,7 @@
               :placeholder="getTranslation(currentLanguage, 'TYPE_YOUR_MESSAGE')"
               @keypress.enter.prevent="sendMessage"
           ></textarea>
-          <button @click="sendMessage">
+          <button @click="sendMessage" :disabled="chatInitButtonsDisabled">
             {{ getTranslation(currentLanguage, "SEND") }}
           </button>
         </div>
@@ -75,7 +75,7 @@ export default {
       currentTheme: "default", // Stores the current UI theme
     };
   },
-  props: ["messages", "chats", "currentChatID", "currentLanguage"],
+  props: ["messages", "chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
   watch: {
     // Automatically scroll to the bottom when new messages arrive
     messages() {
@@ -94,13 +94,10 @@ export default {
      * Initializes a new chat with a predefined message.
      */
     async sendInitialMessage(message) {
-      let response = await fetch(
-          this.aiServerURL +
-          "/createChat?" +
-          new URLSearchParams({
-            initialMessage: message,
-          }),
-          {
+      this.$emit("setButtonLock", true)
+      let response = await fetch(this.aiServerURL + "/createChat?" + new URLSearchParams({
+        "initialMessage": message
+      }),{
             method: "GET",
             credentials: "include",
           }
@@ -182,6 +179,7 @@ export default {
           break;
         }
       }
+      this.$emit("setButtonLock", false)
     },
 
     /**
@@ -202,6 +200,7 @@ export default {
       }
 
       this.$emit("addMessage", "user", this.userInput);
+      this.$emit("setButtonLock", true)
 
       const messageToSend = this.userInput.trim();
       this.userInput = "";
@@ -227,6 +226,7 @@ export default {
         localStorage.getItem("langCode"), "FAILED_TO_SEND_MESSAGE");
       }
       this.scrollToBottom();
+      this.$emit("setButtonLock", false)
     },
   }
 };

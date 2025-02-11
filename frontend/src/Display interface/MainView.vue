@@ -7,6 +7,7 @@
           :currentChatID="this.currentChatID"
           :chats="this.chats"
           :currentLanguage="currentLanguage"
+          :chatInitButtonsDisabled="this.chatInitButtonsDisabled"
       />
       <SettingSidebar/>
     </div>
@@ -15,9 +16,11 @@
         :chats="this.chats"
         :currentChatID="this.currentChatID"
         :currentLanguage="currentLanguage"
+        :chatInitButtonsDisabled="this.chatInitButtonsDisabled"
         @addMessage="(a, b) => this.addMessage(a, b)"
         @addChat="(a, b) => this.addChat(a, b)"
         @updateChatID="(id) => this.currentChatID = id"
+        @setButtonLock="(status) => this.chatInitButtonsDisabled = status"
     />
   </div>
 </template>
@@ -33,7 +36,8 @@ export default {
       messages: [],
       isSettingsOpen: false,
       chats: JSON.parse(localStorage.getItem("chats")) || [], // Stores id-title pair for every chat
-      currentChatID: ""
+      currentChatID: "",
+      chatInitButtonsDisabled: false
     };
   },
   props: ["currentLanguage"],
