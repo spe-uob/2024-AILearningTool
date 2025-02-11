@@ -82,6 +82,7 @@
 					<execution>
 						<id>copy-frontend-to-static</id>
 						<!-- Bind this execution to the generate-resources phase -->
+
 						<phase>generate-resources</phase>
 						<goals>
 							<goal>copy-resources</goal>
