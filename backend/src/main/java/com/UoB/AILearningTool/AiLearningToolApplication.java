@@ -49,7 +49,7 @@ public class AiLearningToolApplication implements CommandLineRunner {
 		Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
 	}
 
-	void overwriteApplicationProperties(Path propsFile) throws IOException {
+	private void overwriteApplicationProperties(Path propsFile) throws IOException {
 		List<String> lines = Arrays.asList(
 				"spring.application.name=AILearningTool",
 				"server.port=8080",
