@@ -398,7 +398,7 @@ button {
 }
 
 .logo {
-  width: 160px;
+  width: 220px;
   height: auto;
   margin-bottom: 20px;
 }
