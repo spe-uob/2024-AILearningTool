@@ -1,25 +1,28 @@
 <template>
   <main>
     <div class="chat-area">
-      <p>
-        {{ getTranslation(currentLanguage, 'WELCOME_TO_WATSONX_AI') }}
-      </p>
+      <!-- Welcome Screen with Logo -->
+      <div v-if="this.currentChatID.length === 0" class="welcome-container">
+        <img src="../assets/logo.png" alt="Logo" class="logo" />
+        <p class="welcome-text">
+          {{ getTranslation(currentLanguage, 'WELCOME_TO_WATSONX_AI') }}
+        </p>
+        <p v-if="this.currentChatID.length === 0" class="instruction-text">
+          {{ getTranslation(currentLanguage, 'SELECT_INITIAL_TOPIC') }}
+        </p>
 
-      <p v-if="this.currentChatID.length === 0">
-        {{ getTranslation(currentLanguage, 'SELECT_INITIAL_TOPIC') }}
-      </p>
-
-      <!-- Buttons for chat initialisation -->
-      <div v-if="this.currentChatID.length === 0" class="button-container">
-        <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_CHOOSING_A_COURSE'))" :disabled="chatInitButtonsDisabled">
-          {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_CHOOSING_A_COURSE") }}
-        </button>
-        <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_PLATFORM'))" :disabled="chatInitButtonsDisabled">
-          {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_PLATFORM")}}
-        </button>
-        <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_HAVE_QUESTIONS_ABOUT_UNI_LIFE'))" :disabled="chatInitButtonsDisabled">
-          {{getTranslation(currentLanguage, "I_HAVE_QUESTIONS_ABOUT_UNI_LIFE")}}
-        </button>
+        <!-- Buttons for chat initialisation -->
+        <div v-if="this.currentChatID.length === 0" class="button-container">
+          <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_CHOOSING_A_COURSE'))" :disabled="chatInitButtonsDisabled">
+            {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_CHOOSING_A_COURSE") }}
+          </button>
+          <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_PLATFORM'))" :disabled="chatInitButtonsDisabled">
+            {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_PLATFORM")}}
+          </button>
+          <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_HAVE_QUESTIONS_ABOUT_UNI_LIFE'))" :disabled="chatInitButtonsDisabled">
+            {{getTranslation(currentLanguage, "I_HAVE_QUESTIONS_ABOUT_UNI_LIFE")}}
+          </button>
+        </div>
       </div>
 
       <!-- Display all messages in the conversation -->
@@ -396,24 +399,64 @@ button {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
 }
 
+.welcome-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+  height: 100vh;
+}
+
+.logo {
+  width: 220px;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.welcome-text {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.instruction-text {
+  font-size: 20px;
+  color: #666;
+  margin-bottom: 25px;
+}
+
 .button-container {
   display: flex;
-  gap: 5px; /* Controls spacing between buttons */
-  padding: 10px 0;
+  flex-direction: row;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 800px;
 }
 
 .button-container button {
-  flex: 1; /* Makes buttons equal width */
-  max-width: 300px; /* Limits maximum width to prevent oversized buttons */
-  text-align: center;
+  flex: 1;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: bold;
+  background-color: var(--button-color);
+  color: var(--text-color);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
 }
 
-button:hover {
+.button-container button:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.18);
 }
 
-button:active {
+.button-container button:active {
   transform: scale(0.96);
 }
+
 </style>

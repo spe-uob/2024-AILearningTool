@@ -1,4 +1,11 @@
 # 2024-AILearningTool
+
+<div align="center">
+
+![logo](frontend/src/assets/logo.png)
+
+</div>
+
 ## Table of Contents
 - [Project Brief](#project-brief)
 - [Stakeholders](#stakeholders)
