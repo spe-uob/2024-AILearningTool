@@ -28,7 +28,7 @@
       <!-- Display all messages in the conversation -->
       <div v-if="this.currentChatID.length > 0" class="chat-container">
         <!-- Scrollable message area -->
-        <div class="messages-container">
+        <div class="messages-container" ref="messagesContainer">
           <div
               v-for="(msg, index) in messages"
               :key="index"
@@ -92,6 +92,7 @@ export default {
     }
   },
   methods: {
+    getTheme,
     getTranslation,
     /**
      * Initializes a new chat with a predefined message.
@@ -226,10 +227,18 @@ export default {
       } catch (error) {
         console.error("Error sending message:", error);
         this.$emit("addMessage", "System",
-        localStorage.getItem("langCode"), "FAILED_TO_SEND_MESSAGE");
+            localStorage.getItem("langCode"), "FAILED_TO_SEND_MESSAGE");
       }
       this.scrollToBottom();
-      this.$emit("setButtonLock", false)
+    },
+    
+    scrollToBottom() {
+      this.$nextTick(() => {
+        const container = this.$refs.messagesContainer;
+        if (container) {
+          container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+        }
+      });
     },
   }
 };
