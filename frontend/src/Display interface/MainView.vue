@@ -6,16 +6,21 @@
           @chatSelected="(id) => this.loadChat(id)"
           :currentChatID="this.currentChatID"
           :chats="this.chats"
+          :currentLanguage="currentLanguage"
+          :chatInitButtonsDisabled="this.chatInitButtonsDisabled"
       />
-      <SettingSidebar @toggleSettings="toggleSettings" />
+      <SettingSidebar/>
     </div>
     <MainContent
         :messages="this.messages"
         :chats="this.chats"
         :currentChatID="this.currentChatID"
+        :currentLanguage="currentLanguage"
+        :chatInitButtonsDisabled="this.chatInitButtonsDisabled"
         @addMessage="(a, b) => this.addMessage(a, b)"
         @addChat="(a, b) => this.addChat(a, b)"
         @updateChatID="(id) => this.currentChatID = id"
+        @setButtonLock="(status) => this.chatInitButtonsDisabled = status"
     />
   </div>
 </template>
@@ -31,9 +36,11 @@ export default {
       messages: [],
       isSettingsOpen: false,
       chats: JSON.parse(localStorage.getItem("chats")) || [], // Stores id-title pair for every chat
-      currentChatID: ""
+      currentChatID: "",
+      chatInitButtonsDisabled: false
     };
   },
+  props: ["currentLanguage"],
   methods: {
     // Used to reset MainContent component (e.g. when "Add chat" button is clicked)
     resetMainContent() {
@@ -59,9 +66,6 @@ export default {
         title: title
       })
       localStorage.setItem("chats", JSON.stringify(this.chats))
-    },
-    toggleSettings(isOpen) {
-      this.isSettingsOpen = isOpen;
     },
   },
   components: {

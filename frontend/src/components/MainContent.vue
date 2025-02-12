@@ -4,21 +4,25 @@
       <!-- Welcome Screen with Logo -->
       <div v-if="this.currentChatID.length === 0" class="welcome-container">
         <img src="../assets/logo.png" alt="Logo" class="logo" />
-        <p class="welcome-text">Welcome to Watsonx AI!</p>
-        <p class="instruction-text">Select one of the topics below:</p>
+      <p class="welcome-text"> 
+        {{ getTranslation(currentLanguage, 'WELCOME_TO_WATSONX_AI') }}
+      </p>
 
-        <!-- Buttons for initiating a new chat -->
-        <div class="button-container">
-          <button @click="sendInitialMessage('I need help with choosing a course')">
-            I need help with choosing a course
-          </button>
-          <button @click="sendInitialMessage('I need help with IBM SkillsBuild platform')">
-            I need help with IBM SkillsBuild platform
-          </button>
-          <button @click="sendInitialMessage('I have questions about university life')">
-            I have questions about university life
-          </button>
-        </div>
+      <p v-if="this.currentChatID.length === 0" class="instruction-text">
+        {{ getTranslation(currentLanguage, 'SELECT_INITIAL_TOPIC') }}
+      </p>
+
+      <!-- Buttons for chat initialisation -->
+      <div v-if="this.currentChatID.length === 0" class="button-container">
+        <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_CHOOSING_A_COURSE'))" :disabled="chatInitButtonsDisabled">
+          {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_CHOOSING_A_COURSE") }}
+        </button>
+        <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_PLATFORM'))" :disabled="chatInitButtonsDisabled">
+          {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_PLATFORM")}}
+        </button>
+        <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_HAVE_QUESTIONS_ABOUT_UNI_LIFE'))" :disabled="chatInitButtonsDisabled">
+          {{getTranslation(currentLanguage, "I_HAVE_QUESTIONS_ABOUT_UNI_LIFE")}}
+        </button>
       </div>
 
       <!-- Display all messages in the conversation -->
@@ -35,8 +39,8 @@
               'system-message': msg.sender === 'System'
             }"
           >
-            <strong v-if="msg.sender === 'user'">User</strong>
-            <strong v-else-if="msg.sender === 'assistant'">AI</strong>
+            <strong v-if="msg.sender === 'user'">{{ getTranslation(currentLanguage, "USER") }}</strong>
+            <strong v-else-if="msg.sender === 'assistant'">{{ getTranslation(currentLanguage, "AI") }}</strong>
             <strong v-else>{{ msg.sender }}</strong>
             <p>{{ msg.content }}</p>
           </div>
@@ -46,10 +50,12 @@
         <div class="input-area">
           <textarea
               v-model="userInput"
-              placeholder="Type your message..."
+              :placeholder="getTranslation(currentLanguage, 'TYPE_YOUR_MESSAGE')"
               @keypress.enter.prevent="sendMessage"
           ></textarea>
-          <button @click="sendMessage">Send</button>
+          <button @click="sendMessage" :disabled="chatInitButtonsDisabled">
+            {{ getTranslation(currentLanguage, "SEND") }}
+          </button>
         </div>
       </div>
     </div>
@@ -59,6 +65,7 @@
 <script>
 import axios from "axios";
 import { getTheme } from "../assets/color.js";
+import {getTranslation} from "../assets/language";
 
 export default {
   data() {
@@ -71,7 +78,7 @@ export default {
       currentTheme: "default", // Stores the current UI theme
     };
   },
-  props: ["messages", "chats", "currentChatID"],
+  props: ["messages", "chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
   watch: {
     // Automatically scroll to the bottom when new messages arrive
     messages() {
@@ -85,17 +92,15 @@ export default {
     }
   },
   methods: {
+    getTranslation,
     /**
      * Initializes a new chat with a predefined message.
      */
     async sendInitialMessage(message) {
-      let response = await fetch(
-          this.aiServerURL +
-          "/createChat?" +
-          new URLSearchParams({
-            initialMessage: message,
-          }),
-          {
+      this.$emit("setButtonLock", true)
+      let response = await fetch(this.aiServerURL + "/createChat?" + new URLSearchParams({
+        "initialMessage": message
+      }),{
             method: "GET",
             credentials: "include",
           }
@@ -177,6 +182,7 @@ export default {
           break;
         }
       }
+      this.$emit("setButtonLock", false)
     },
 
     /**
@@ -184,16 +190,20 @@ export default {
      */
     async sendMessage() {
       if (!this.userInput.trim()) {
-        alert("Please enter a message!");
+        alert(
+            getTranslation(localStorage.getItem("langCode"), "PLEASE_ENTER_A_MESSAGE")
+        );
         return;
       }
 
+      // "if" below can be removed later
       if (!this.currentChatID) {
         alert("ChatId is not set. Please start a new chat.");
         return;
       }
 
       this.$emit("addMessage", "user", this.userInput);
+      this.$emit("setButtonLock", true)
 
       const messageToSend = this.userInput.trim();
       this.userInput = "";
@@ -215,9 +225,11 @@ export default {
         this.$emit("addMessage", "assistant", response.data);
       } catch (error) {
         console.error("Error sending message:", error);
-        this.$emit("addMessage", "System", "Failed to send message. Please try again.");
+        this.$emit("addMessage", "System",
+        localStorage.getItem("langCode"), "FAILED_TO_SEND_MESSAGE");
       }
       this.scrollToBottom();
+      this.$emit("setButtonLock", false)
     },
   }
 };

@@ -1,35 +1,65 @@
 <template>
   <div class="login-container">
-    <Cookie v-if="showCookiePopup" @consent-choice="handleConsent" />
+    <Cookie v-if="showCookiePopup" @consent-choice="handleConsent" :currentLanguage="currentLanguage"/>
 
     <div class="card">
-      <h2>{{ isLoginMode ? 'Login' : 'Register' }}</h2>
+      <h2>
+        {{
+          isLoginMode ?
+              getTranslation(currentLanguage, "LOG_IN") :
+              getTranslation(currentLanguage, "REGISTER")
+        }}
+      </h2>
 
       <form @submit.prevent="handleSubmit">
         <div class="form-group">
-          <label for="username">Username</label>
+          <label for="username">
+            {{
+              getTranslation(currentLanguage, "USERNAME")
+            }}
+          </label>
           <input v-model="form.username" id="username" type="text" required />
         </div>
 
         <div class="form-group">
-          <label for="password">Password</label>
+          <label for="password">
+            {{
+              getTranslation(currentLanguage, "PASSWORD")
+            }}
+          </label>
           <input v-model="form.password" id="password" type="password" required />
         </div>
 
         <div v-if="!isLoginMode" class="form-group">
-          <label for="confirmPassword">Confirm Password</label>
+          <label for="confirmPassword">
+            {{
+              getTranslation(currentLanguage, "CONFIRM_PASSWORD")
+            }}
+          </label>
           <input v-model="form.confirmPassword" id="confirmPassword" type="password" required />
         </div>
 
         <button type="submit" :disabled="showCookiePopup">
-          {{ isLoginMode ? 'Login' : 'Register' }}
+          {{
+            isLoginMode ?
+                getTranslation(currentLanguage, "LOG_IN") :
+                getTranslation(currentLanguage, "REGISTER")
+          }}
         </button>
       </form>
 
       <p class="toggle-text">
-        {{ isLoginMode ? "Don't have an account?" : "Already have an account?" }}
+        {{
+          isLoginMode ?
+              getTranslation(currentLanguage, "DONT_HAVE_AN_ACCOUNT") :
+              getTranslation(currentLanguage, "ALREADY_HAVE_AN_ACCOUNT")
+        }}
         <span @click="toggleMode">
-          {{ isLoginMode ? 'Register' : 'Login' }}
+          {{
+            isLoginMode ?
+                getTranslation(currentLanguage, "REGISTER") :
+                getTranslation(currentLanguage, "LOG_IN")
+          }}
         </span>
       </p>
     </div>
@@ -38,9 +68,11 @@
 
 <script>
 import Cookie from '../Display interface/Cookie.vue';
+import {getTranslation} from "../assets/language";
 
 export default {
   components: { Cookie },
+  props: ["currentLanguage"],
   data() {
     return {
       isLoginMode: true,
@@ -56,6 +88,7 @@ export default {
     this.checkUserSession();
   },
   methods: {
+    getTranslation,
     checkUserSession() {
       const userID = localStorage.getItem("userId");
       if (userID) {
@@ -72,7 +105,9 @@ export default {
 
     async handleSubmit() {
       if (this.showCookiePopup) {
-        alert("Please accept or reject cookies first.");
+        alert(
+            getTranslation(this.currentLanguage, "PLEASE_ACCEPT_COOKIES")
+        );
         return;
       }
 
@@ -81,7 +116,9 @@ export default {
         this.signUp();
       } else {
         if (this.form.password !== this.form.confirmPassword) {
-          alert('Passwords do not match!');
+          alert(
+              getTranslation(this.currentLanguage, "PASSWORDS_DO_NOT_MATCH")
+          );
           return;
         }
         this.register();
@@ -147,12 +184,16 @@ export default {
               localStorage.setItem('token', data.token);
               this.$router.push('/main');
             } else {
-              alert(data.message || 'Login failed!');
+              alert(
+                  getTranslation(this.currentLanguage, "LOGIN_FAILED")
+              );
             }
           })
           .catch((err) => {
             console.error('Login error:', err);
-            alert('An error occurred while trying to log in.');
+            alert(
+                getTranslation(this.currentLanguage, "LOGIN_FAILED")
+            );
           });
     },
 
@@ -168,15 +209,21 @@ export default {
           .then((res) => res.json())
           .then((data) => {
             if (data.success) {
-              alert('Registration successful! Please login.');
+              alert(
+                  getTranslation(this.currentLanguage, "REGISTRATION_SUCCESS")
+              );
               this.toggleMode();
             } else {
-              alert(data.message || 'Registration failed!');
+              alert(
+                  getTranslation(this.currentLanguage, "REGISTRATION_FAILED")
+              );
             }
           })
           .catch((err) => {
             console.error('Registration error:', err);
-            alert('An error occurred while trying to register.');
+            alert(
+                getTranslation(this.currentLanguage, "REGISTRATION_FAILED")
+            );
           });
     },
 
