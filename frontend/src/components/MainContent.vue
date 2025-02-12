@@ -1,9 +1,11 @@
 <template>
   <main>
     <div class="chat-area">
+      
       <!-- Welcome Screen with Logo -->
       <div v-if="this.currentChatID.length === 0" class="welcome-container">
         <img src="../assets/logo.png" alt="Logo" class="logo" />
+        
       <p class="welcome-text"> 
         {{ getTranslation(currentLanguage, 'WELCOME_TO_WATSONX_AI') }}
       </p>
