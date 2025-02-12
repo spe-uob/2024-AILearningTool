@@ -105,11 +105,9 @@ export default {
         throw new Error("Non-200 backend API response");
       }
 
-      const chatID = await response.text();  
-      this.$emit("updateChatID", chatID);
-      this.$nextTick(() => {
-        this.currentChatID = chatID;  // Manually update currentChatID
-        this.$emit("addChat", chatID, message);
+      this.$emit("updateChatID", await response.text());
+      await this.$nextTick(() => {
+        this.$emit("addChat", this.currentChatID, message);
         this.requestChatHistory();
       });
     },
