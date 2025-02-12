@@ -92,6 +92,7 @@ export default {
     }
   },
   methods: {
+    getTheme,
     getTranslation,
     /**
      * Initializes a new chat with a predefined message.
@@ -226,22 +227,21 @@ export default {
       } catch (error) {
         console.error("Error sending message:", error);
         this.$emit("addMessage", "System",
-        localStorage.getItem("langCode"), "FAILED_TO_SEND_MESSAGE");
+            localStorage.getItem("langCode"), "FAILED_TO_SEND_MESSAGE");
       }
       this.scrollToBottom();
-      this.$emit("setButtonLock", false)
+    },
+    
+    scrollToBottom() {
+      this.$nextTick(() => {
+        const container = this.$refs.messagesContainer;
+        if (container) {
+          container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+        }
+      });
     },
   }
 };
-
-scrollToBottom() {
-  this.$nextTick(() => {
-    const container = this.$refs.messagesContainer;
-    if (container) {
-      container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
-    }
-  });
-},
 </script>
 
 
