@@ -33,15 +33,8 @@ public class AiLearningToolApplication implements CommandLineRunner {
 			return;
 		}
 
-		// Otherwise, proceed with the copy and overwrite
-		Path resourcesDir = Paths.get("src","main","resources");
-		Path targetKeystore = resourcesDir.resolve("keystore.p12");
-		copyFile(keystorePath, targetKeystore);
-		System.out.println("keystore.p12 copied to src/main/resources successfully");
-
-		Path applicationProps = Paths.get("application.properties");
+		Path applicationProps = Paths.get("src", "main", "resources", "application.properties");
 		overwriteApplicationProperties(applicationProps);
-		System.out.println("application.properties has been updated successfully");
 	}
 
 
@@ -62,6 +55,7 @@ public class AiLearningToolApplication implements CommandLineRunner {
 				"server.ssl.key-store-type=PKCS12",
 				"server.ssl.key-alias=myalias"
 		);
+		System.out.println("application.properties has been updated successfully");
 		Files.write(propsFile, lines, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE );
 	}
 
