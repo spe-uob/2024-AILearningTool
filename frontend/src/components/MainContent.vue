@@ -28,7 +28,7 @@
       <!-- Display all messages in the conversation -->
       <div v-if="this.currentChatID.length > 0" class="chat-container">
         <!-- Scrollable message area -->
-        <div class="messages-container">
+        <div class="messages-container" ref="messagesContainer">
           <div
               v-for="(msg, index) in messages"
               :key="index"
@@ -233,6 +233,15 @@ export default {
     },
   }
 };
+
+scrollToBottom() {
+  this.$nextTick(() => {
+    const container = this.$refs.messagesContainer;
+    if (container) {
+      container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+    }
+  });
+},
 </script>
 
 
