@@ -18,6 +18,22 @@ class AiLearningToolApplicationTest {
         Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
     }
 
+    private void overwriteApplicationProperties(Path propsFile) throws IOException {
+        List<String> lines = Arrays.asList(
+                "spring.application.name=AILearningTool",
+                "server.port=8080",
+                "spring.servlet.multipart.max-file-size=50MB",
+                "spring.servlet.multipart.max-request-size=50MB",
+                "spring.web.resources.static-locations=classpath:/static/",
+                "",
+                "server.ssl.key-store=classpath:keystore.p12",
+                "server.ssl.key-store-password=ailearntool",
+                "server.ssl.key-store-type=PKCS12",
+                "server.ssl.key-alias=myalias"
+        );
+        Files.write(propsFile, lines, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE );
+    }
+
     // JUnit 5 will create a temporary directory for the test.
     @TempDir
     Path tempDir;
@@ -51,8 +67,7 @@ class AiLearningToolApplicationTest {
         // Create a temporary file to act as application.properties.
         Path propsFile = tempDir.resolve("application.properties");
 
-        AiLearningToolApplication app = new AiLearningToolApplication();
-        app.overwriteApplicationProperties(propsFile);
+        overwriteApplicationProperties(propsFile);
 
         // Verify that the properties file exists.
         assertTrue(Files.exists(propsFile), "Properties file should exist after writing.");
