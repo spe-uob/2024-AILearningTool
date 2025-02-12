@@ -1,228 +1,350 @@
 <template>
-  <div class="login-container">
-    <Cookie v-if="showCookiePopup" @consent-choice="handleConsent" />
-    <div class="card">
-      <h2>{{ isLoginMode ? 'Login' : 'Register' }}</h2>
-      <form @submit.prevent="handleSubmit">
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input v-model="form.username" id="username" type="text" required />
-        </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input v-model="form.password" id="password" type="password" required />
-        </div>
-        <div v-if="!isLoginMode" class="form-group">
-          <label for="confirmPassword">Confirm Password</label>
-          <input v-model="form.confirmPassword" id="confirmPassword" type="password" required />
-        </div>
-        <button type="submit" :disabled="showCookiePopup">
-          {{ isLoginMode ? 'Login' : 'Register' }}
+  <main>
+    <div class="chat-area">
+      <p>Welcome to Watsonx AI!</p>
+
+      <p v-if="!currentChatID">Select one of the topics below:</p>
+
+      <div v-if="!currentChatID">
+        <button @click="sendInitialMessage('I need help with choosing a course')">
+          I need help with choosing a course
         </button>
-      </form>
-      <p class="toggle-text">
-        {{ isLoginMode ? "Don't have an account?" : "Already have an account?" }}
-        <span @click="toggleMode">
-          {{ isLoginMode ? 'Register' : 'Login' }}
-        </span>
-      </p>
+        <button @click="sendInitialMessage('I need help with IBM SkillsBuild platform')">
+          I need help with IBM SkillsBuild platform
+        </button>
+        <button @click="sendInitialMessage('I have questions about university life')">
+          I have questions about university life
+        </button>
+      </div>
+
+      <div v-if="currentChatID" class="chat-container">
+        <div class="messages-container">
+          <div v-for="msg in messages" :key="msg.id" class="message">
+            <strong v-if="msg.sender === 'user'">User</strong>
+            <strong v-else>AI</strong>
+            <p>{{ msg.content }}</p>
+          </div>
+        </div>
+
+        <div class="input-area">
+          <textarea
+              v-model="userInput"
+              placeholder="Type your message..."
+              @keypress.enter.prevent="sendMessage"
+          ></textarea>
+          <button @click="sendMessage">Send</button>
+        </div>
+      </div>
     </div>
-  </div>
+  </main>
 </template>
 
 <script>
-import Cookie from '../Display interface/Cookie.vue';
+import axios from "axios";
+import { getTheme } from "../assets/color.js";
 
 export default {
-  components: { Cookie },
   data() {
     return {
-      isLoginMode: true,
-      form: {
-        username: '',
-        password: '',
-        confirmPassword: '',
-      },
-      showCookiePopup: true,
+      userInput: "",
+      currentTopic: "",
+      currentTurn: "user",
+      userId: "",
+      aiServerURL: "http://localhost:8080",
+      currentTheme: "default",
     };
   },
-  mounted() {
-    this.checkUserSession();
+  props: ["messages", "chats", "currentChatID"],
+  watch: {
+    messages() {
+      if (this.messages.length === 0 && this.currentChatID) {
+        this.currentTurn = "user";
+        this.requestChatHistory();
+      }
+    },
   },
   methods: {
-    async checkUserSession() {
+    async sendInitialMessage(message) {
       try {
-        const response = await fetch('http://localhost:8080/getUserById', {
-          method: 'GET',
-          credentials: 'include',
-        });
-        if (response.ok) {
-          const userData = await response.json();
-          console.log('User session found:', userData);
-          this.$router.push('/main');
-        }
-      } catch (error) {
-        console.error('Failed to check user session:', error);
-      }
-    },
-
-    toggleMode() {
-      this.isLoginMode = !this.isLoginMode;
-      this.form.password = '';
-      this.form.confirmPassword = '';
-    },
-
-    async handleSubmit() {
-      if (this.showCookiePopup) {
-        alert('Please accept or reject cookies first.');
-        return;
-      }
-
-      if (this.isLoginMode) {
-        this.login();
-      } else {
-        if (this.form.password !== this.form.confirmPassword) {
-          alert('Passwords do not match!');
-          return;
-        }
-        this.register();
-      }
-    },
-
-    async login() {
-      try {
-        const response = await fetch('http://localhost:8080/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: this.form.username,
-            password: this.form.password,
-          }),
-        });
-
-        const data = await response.json();
-        if (response.ok && data.success) {
-          console.log('Login successful. Redirecting to /main...');
-          this.$router.push('/main');
-        } else {
-          alert(data.message || 'Login failed!');
-        }
-      } catch (error) {
-        console.error('Login error:', error);
-        alert('An error occurred while trying to log in.');
-      }
-    },
-
-    async register() {
-      try {
-        const response = await fetch('http://localhost:8080/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: this.form.username,
-            password: this.form.password,
-          }),
-        });
-
-        const data = await response.json();
-        if (response.ok && data.success) {
-          alert('Registration successful! Please login.');
-          this.toggleMode();
-        } else {
-          alert(data.message || 'Registration failed!');
-        }
-      } catch (error) {
-        console.error('Registration error:', error);
-        alert('An error occurred while trying to register.');
-      }
-    },
-
-    async signUp() {
-      try {
-        const response = await fetch('http://localhost:8080/signup', {
-          method: 'GET',
-          credentials: 'include',
+        const response = await fetch(`${this.aiServerURL}/createChat?${new URLSearchParams({ initialMessage: message })}`, {
+          method: "GET",
+          credentials: "include",
         });
 
         if (!response.ok) {
-          throw new Error(`Signup failed: ${response.status}`);
+          throw new Error("Failed to create chat.");
         }
-        console.log('Signup successful! User session initialized.');
+
+        this.$emit("updateChatID", await response.text());
+        await this.$nextTick(() => {
+          this.$emit("addChat", this.currentChatID, message);
+          this.requestChatHistory();
+        });
       } catch (error) {
-        console.error('Signup error:', error);
+        console.error("Error creating chat:", error);
       }
     },
 
-    handleConsent(consent) {
-      this.showCookiePopup = false;
+    async requestChatHistory() {
+      try {
+        const response = await fetch(`${this.aiServerURL}/getChatHistory?${new URLSearchParams({ chatID: this.currentChatID })}`, {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch chat history.");
+        }
+
+        this.processChatHistory(await response.text());
+      } catch (error) {
+        console.error("Error fetching chat history:", error);
+      }
     },
+
+    async processChatHistory(messageHistory) {
+      let currentRole, openAIRole, nextRole, nextRoleIndex, currentMessage;
+      for (let i = 0; ; i++) {
+        if (i === 0) {
+          currentRole = "<|system|>";
+          openAIRole = "system";
+          nextRole = "<|user|>";
+        } else if (i % 2 !== 0) {
+          currentRole = "<|user|>";
+          openAIRole = "user";
+          nextRole = "<|assistant|>";
+        } else {
+          currentRole = "<|assistant|>";
+          openAIRole = "assistant";
+          nextRole = "<|user|>";
+        }
+
+        if (messageHistory.includes(currentRole)) {
+          messageHistory = messageHistory.substring(messageHistory.indexOf(currentRole) + currentRole.length);
+          nextRoleIndex = messageHistory.indexOf(nextRole);
+          currentMessage = nextRoleIndex !== -1 ? messageHistory.substring(0, nextRoleIndex) : messageHistory;
+
+          if (currentRole !== "<|system|>") {
+            this.$emit("addMessage", this.currentTurn, currentMessage);
+            this.currentTurn = this.currentTurn === "user" ? "assistant" : "user";
+          }
+        } else {
+          break;
+        }
+      }
+    },
+
+    async sendMessage() {
+      if (!this.userInput.trim()) {
+        alert("Please enter a message!");
+        return;
+      }
+
+      if (!this.currentChatID) {
+        alert("ChatId is not set. Please start a new chat.");
+        return;
+      }
+
+      this.$emit("addMessage", "user", this.userInput);
+      const messageToSend = this.userInput.trim();
+      this.userInput = "";
+
+      try {
+        const response = await axios.get(`${this.aiServerURL}/sendMessage`, {
+          params: {
+            userID: this.userId,
+            chatID: this.currentChatID,
+            newMessage: messageToSend,
+          },
+          withCredentials: true,
+        });
+
+        if (response.status !== 200) {
+          throw new Error(`Unexpected response code: ${response.status}`);
+        }
+
+        this.$emit("addMessage", "assistant", response.data);
+      } catch (error) {
+        console.error("Error sending message:", error);
+        this.$emit("addMessage", "System", "Failed to send message. Please try again.");
+      }
+
+      this.scrollToBottom();
+    },
+
+    applyTheme(themeName) {
+      const theme = getTheme(themeName);
+      Object.keys(theme).forEach((key) => {
+        document.documentElement.style.setProperty(`--${key}-color`, theme[key]);
+      });
+    },
+
+    scrollToBottom() {
+      const chatContainer = this.$el.querySelector(".messages-container");
+      if (chatContainer) {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+    },
+
+    async getUserId() {
+      try {
+        const response = await axios.get(`${this.aiServerURL}/signup`, { withCredentials: true });
+        if (response.status === 200) {
+          this.userId = response.data;
+        } else {
+          console.error("Failed to get userId.");
+        }
+      } catch (error) {
+        console.error("Error fetching userId:", error);
+      }
+    },
+  },
+
+  async mounted() {
+    if (!this.userId) {
+      await this.getUserId();
+    }
   },
 };
 </script>
 
+
 <style scoped>
-.login-container {
+main {
+  flex-grow: 1;
+  padding: 20px;
+  background-color: var(--background-color);
+  color: var(--text-color);
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
   height: 100vh;
-  background-color: #f4f4f4;
 }
 
-.card {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  width: 300px;
-  text-align: center;
+.chat-area {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  background-color: var(--background-color);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
-h2 {
-  margin-bottom: 1rem;
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  overflow: hidden;
 }
 
-.form-group {
-  margin-bottom: 1rem;
-  text-align: left;
+.messages-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid var(--border-color);
+  background-color: var(--background-color);
+  max-height: calc(100vh - 180px);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease-in-out;
 }
 
-label {
-  display: block;
-  font-size: 14px;
-  margin-bottom: 0.5rem;
+.messages-container::-webkit-scrollbar {
+  width: 6px;
 }
 
-input {
+.messages-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.messages-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.message {
+  margin: 10px 0;
+  padding: 14px;
+  border-radius: 20px;
+  max-width: 75%;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeIn 0.3s forwards ease-in-out;
+}
+
+.message:nth-child(odd) {
+  align-self: flex-start;
+  background-color: var(--primary-color);
+  border: 1px solid var(--secondary-color);
+}
+
+.message:nth-child(even) {
+  align-self: flex-end;
+  background-color: var(--accent-color);
+  border: 1px solid var(--border-color);
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.input-area {
+  display: flex;
+  flex-direction: column;
+  background: var(--background-color);
+  padding: 12px;
+  border-top: 2px solid var(--border-color);
+  box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+}
+
+textarea {
   width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  height: 80px;
+  resize: none;
+  padding: 12px;
+  box-sizing: border-box;
+  font-size: 14px;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  border-radius: 12px;
+  border: 2px solid var(--border-color);
+  transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 10px var(--accent-color);
 }
 
 button {
-  width: 100%;
-  padding: 0.75rem;
+  margin-top: 10px;
+  padding: 12px;
+  background-color: var(--button-color);
+  color: var(--text-color);
   border: none;
-  border-radius: 4px;
-  background-color: #5c88da;
-  color: white;
-  font-size: 16px;
+  border-radius: 10px;
   cursor: pointer;
+  font-weight: bold;
+  transition: transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
 }
 
 button:hover {
-  background-color: #3f70d1;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.18);
 }
 
-.toggle-text {
-  margin-top: 1rem;
-  font-size: 14px;
+button:active {
+  transform: scale(0.96);
 }
 
-.toggle-text span {
-  color: #5c88da;
-  cursor: pointer;
-  font-weight: bold;
-}
 </style>
