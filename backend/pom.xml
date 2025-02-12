@@ -90,7 +90,7 @@
 							<!-- Set the working directory to the frontend folder -->
 							<workingDirectory>../frontend</workingDirectory>
 							<!-- Explicitly install Node in the frontend folder -->
-							<installDirectory>../frontend/node</installDirectory>
+							<installDirectory>../frontend</installDirectory>
 						</configuration>
 					</execution>
 					<!-- Run npm install in the frontend directory -->
