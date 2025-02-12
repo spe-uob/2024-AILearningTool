@@ -1,30 +1,28 @@
 <template>
   <main>
     <div class="chat-area">
-      
       <!-- Welcome Screen with Logo -->
       <div v-if="this.currentChatID.length === 0" class="welcome-container">
         <img src="../assets/logo.png" alt="Logo" class="logo" />
-        
-      <p class="welcome-text"> 
-        {{ getTranslation(currentLanguage, 'WELCOME_TO_WATSONX_AI') }}
-      </p>
+        <p class="welcome-text">
+          {{ getTranslation(currentLanguage, 'WELCOME_TO_WATSONX_AI') }}
+        </p>
+        <p v-if="this.currentChatID.length === 0" class="instruction-text">
+          {{ getTranslation(currentLanguage, 'SELECT_INITIAL_TOPIC') }}
+        </p>
 
-      <p v-if="this.currentChatID.length === 0" class="instruction-text">
-        {{ getTranslation(currentLanguage, 'SELECT_INITIAL_TOPIC') }}
-      </p>
-
-      <!-- Buttons for chat initialisation -->
-      <div v-if="this.currentChatID.length === 0" class="button-container">
-        <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_CHOOSING_A_COURSE'))" :disabled="chatInitButtonsDisabled">
-          {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_CHOOSING_A_COURSE") }}
-        </button>
-        <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_PLATFORM'))" :disabled="chatInitButtonsDisabled">
-          {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_PLATFORM")}}
-        </button>
-        <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_HAVE_QUESTIONS_ABOUT_UNI_LIFE'))" :disabled="chatInitButtonsDisabled">
-          {{getTranslation(currentLanguage, "I_HAVE_QUESTIONS_ABOUT_UNI_LIFE")}}
-        </button>
+        <!-- Buttons for chat initialisation -->
+        <div v-if="this.currentChatID.length === 0" class="button-container">
+          <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_CHOOSING_A_COURSE'))" :disabled="chatInitButtonsDisabled">
+            {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_CHOOSING_A_COURSE") }}
+          </button>
+          <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_PLATFORM'))" :disabled="chatInitButtonsDisabled">
+            {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_PLATFORM")}}
+          </button>
+          <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_HAVE_QUESTIONS_ABOUT_UNI_LIFE'))" :disabled="chatInitButtonsDisabled">
+            {{getTranslation(currentLanguage, "I_HAVE_QUESTIONS_ABOUT_UNI_LIFE")}}
+          </button>
+        </div>
       </div>
 
       <!-- Display all messages in the conversation -->
