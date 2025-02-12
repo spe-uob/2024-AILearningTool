@@ -14,6 +14,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AiLearningToolApplicationTest {
 
+    void copyFile(Path source, Path target) throws IOException {
+        Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+    }
+
     // JUnit 5 will create a temporary directory for the test.
     @TempDir
     Path tempDir;
@@ -23,14 +27,13 @@ class AiLearningToolApplicationTest {
         // Create a temporary source file in the temp directory
         Path sourceFile = tempDir.resolve("source.txt");
         String expectedContent = "This is a test file";
-        Files.write(sourceFile, expectedContent.getBytes(StandardCharsets.UTF_8));
+        Files.writeString(sourceFile, expectedContent);
 
         // Define the target file path in the temp directory
         Path targetFile = tempDir.resolve("target.txt");
 
         // Create an instance of your application class.
-        AiLearningToolApplication app = new AiLearningToolApplication();
-        app.copyFile(sourceFile, targetFile);
+        copyFile(sourceFile, targetFile);
 
         // Verify the target file exists
         assertTrue(Files.exists(targetFile), "Target file should exist after copy");

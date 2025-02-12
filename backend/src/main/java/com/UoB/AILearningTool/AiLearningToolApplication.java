@@ -45,7 +45,7 @@ public class AiLearningToolApplication implements CommandLineRunner {
 	}
 
 
-	static void copyFile(Path source, Path target) throws IOException {
+	void copyFile(Path source, Path target) throws IOException {
 		Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
 	}
 
