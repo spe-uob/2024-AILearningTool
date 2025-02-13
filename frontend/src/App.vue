@@ -1,62 +1,92 @@
 <template>
   <div id="app">
-    <!-- If user is not logged in, show the login screen -->
-    <Login v-if="!isLoggedIn" @login-success="handleLoginSuccess" />
-
-    <!-- If user is logged in, show the main content -->
-    <div v-else class="app-container">
-      <div class="left-sidebar-container">
-        <HistorySidebar />
-        <SettingSidebar @toggleSettings="toggleSettings" />
-      </div>
-      <MainContent />
-      <ImportantSidebar :isDisabled="isSettingsOpen" />
+    <div>
+      <router-view :currentLanguage="currentLanguage" />
     </div>
+
+    <SettingSidebar
+        v-if="$route.path !== '/login'"
+        @highContrastToggled="onHighContrastToggled"
+        @updateLanguage="changeLanguage"
+        :currentLanguage="currentLanguage"
+    />
   </div>
 </template>
 
 <script>
-import Login from './components/Login.vue';
-import HistorySidebar from './components/HistorySidebar.vue';
-import MainContent from './components/MainContent.vue';
-import ImportantSidebar from './components/ImportantSidebar.vue';
-import SettingSidebar from './components/SettingSidebar.vue';
+import SettingSidebar from "./components/SettingSidebar.vue";
+import { getTheme } from "./assets/color.js";
+import { useRouter } from "vue-router";
 
 export default {
+  name: "App",
+  components: {
+    SettingSidebar,
+  },
+  setup() {
+    const router = useRouter();
+    router.beforeEach((to, from, next) => {
+      const isAuthenticated = localStorage.getItem("token"); 
+      if (to.path !== "/login" && !isAuthenticated) {
+        next("/login"); 
+      } else {
+        next(); 
+      }
+    });
+  },
   data() {
     return {
-      isLoggedIn: false,  // Controls login state
-      isSettingsOpen: false,  // Controls if settings are open
+      currentTheme: "default",
+      currentLanguage: localStorage.getItem("langCode") || "en"
     };
   },
   methods: {
-    handleLoginSuccess() {
-      this.isLoggedIn = true;  // Set to true on successful login
+    changeLanguage(langCode) {
+      this.currentLanguage = langCode
+      localStorage.setItem("langCode", langCode)
     },
-    toggleSettings(isOpen) {
-      this.isSettingsOpen = isOpen;
+    onHighContrastToggled(isHighContrast) {
+      this.currentTheme = isHighContrast ? "high_contrast" : "default";
+      this.applyTheme(this.currentTheme);
+    },
+    applyTheme(themeName) {
+      const theme = getTheme(themeName);
+      Object.keys(theme).forEach((key) => {
+        document.documentElement.style.setProperty(`--${key}-color`, theme[key]);
+      });
     },
   },
-  components: {
-    Login,
-    HistorySidebar,
-    MainContent,
-    ImportantSidebar,
-    SettingSidebar,
+  mounted() {
+    this.applyTheme("default");
   },
 };
 </script>
 
 <style>
-.app-container {
-  display: flex;
-  height: 100vh;
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+button {
+  background-color: var(--button-color);
+  color: white;
+}
+.success {
+  color: var(--success-color);
+}
+.error {
+  color: var(--error-color);
+}
+.border {
+  border-color: var(--border-color);
 }
 
-.left-sidebar-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100vh;
+a {
+  color: var(--accent-color);
+}
+header,
+footer {
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
 }
 </style>

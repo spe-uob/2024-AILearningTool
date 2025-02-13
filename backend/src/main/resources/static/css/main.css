@@ -1,0 +1,16 @@
+#cookiePopUp {
+    border: 5px solid grey;
+    display: block;
+}
+
+.userMessage {
+    background-color: #8dff6e;
+}
+
+.assistantMessage {
+    background-color: #a496ff;
+}
+
+#chatContainer {
+    margin: 3rem 1rem 3rem 1rem;
+}

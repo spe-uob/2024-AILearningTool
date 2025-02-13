@@ -1,0 +1,41 @@
+# Deploy the Docker image to GHCR
+name: CD Deployment
+
+on:
+  push:
+    branches:
+      - dev
+      - build-system-overhaul
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Java 21
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'  
+          distribution: 'temurin'
+
+      # Step 3: Build the JAR file with Maven
+      - name: Build JAR
+        run: mvn clean package
+        working-directory: backend
+
+      # Step 4: Log in to GitHub Container Registry
+      - name: Log in to GHCR
+        run: echo "${{ secrets.CONTAINER_REGISTRY_PAT }}" | docker login ghcr.io -u GerardChabaBristol --password-stdin
+
+      # Step 5: Build and push the Docker image
+      - name: Publish Docker image to GHCR
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ghcr.io/spe-uob/2024-ailearningtool:latest
