@@ -9,4 +9,5 @@ frontend/node_modules
 .idea
 .env
 keystore.p12
+target
 
