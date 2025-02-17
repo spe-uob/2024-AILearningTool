@@ -7,19 +7,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
 
+import com.UoB.AILearningTool.model.ChatEntity;
+import com.UoB.AILearningTool.model.UserEntity;
+import com.UoB.AILearningTool.repository.UserRepository;
+import com.UoB.AILearningTool.repository.ChatRepository;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Optional;
 
-@RestController
+
+@RestController  // Use RestController for handling HTTP requests
 public class SpringController {
-
     private final Logger log = LoggerFactory.getLogger(SpringController.class);
     private final DatabaseController DBC;
+    //    TODO: Replace with OpenAIAPIController with WatsonxAPIController when API quota issue will be resolved.
+    //    private final WatsonxAPIController WXC = new WatsonxAPIController();
     private final OpenAIAPIController WXC;
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     public SpringController(DatabaseController DBC, OpenAIAPIController WXC) {
@@ -27,57 +34,56 @@ public class SpringController {
         this.WXC = WXC;
     }
 
-    @GetMapping("/getUserById")
-    public ResponseEntity<User> getUserById(@RequestParam String userID) {
-        User user = DBC.getUserById(userID);
-        if (user != null) {
-            return ResponseEntity.ok(user);
+    @PostMapping("/register")
+    public ResponseEntity<Map<String, Object>> registerUser(@RequestBody Map<String, String> credentials) {
+        String username = credentials.get("username");
+        String password = credentials.get("password");
+
+        if (userRepository.findByUsername(username).isPresent()) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Username already exists"));
         } else {
-            log.warn("User not found with ID: {}", userID);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            DBC.addUser(username, password, true); 
+            return ResponseEntity.ok(Collections.singletonMap("success", true));
         }
     }
-
-    private final Map<String, String> userStore = new ConcurrentHashMap<>();
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> loginUser(@RequestBody Map<String, String> credentials) {
         String username = credentials.get("username");
         String password = credentials.get("password");
-        if (userStore.containsKey(username) && userStore.get(username).equals(password)) {
+
+        Optional<UserEntity> userOptional = userRepository.findByUsername(username);
+
+        if (userOptional.isPresent() && userOptional.get().getPassword().equals(password)) {
             return ResponseEntity.ok(Collections.singletonMap("success", true));
         } else {
             return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Invalid username or password"));
         }
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<Map<String, Object>> registerUser(@RequestBody Map<String, String> credentials) {
-        String username = credentials.get("username");
-        String password = credentials.get("password");
-        if (userStore.containsKey(username)) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Username already exists"));
-        } else {
-            userStore.put(username, password);
-            return ResponseEntity.ok(Collections.singletonMap("success", true));
-        }
-    }
-
+    // Assign a unique user ID for the user.
     @GetMapping("/signup")
     public void signup(@CookieValue(value = "optionalConsent", defaultValue = "false") boolean optionalConsent,
                        HttpServletResponse response) {
-        String userID = DBC.addUser(optionalConsent);
+        String username = "defaultUser";
+        String password = "defaultPass";
+        String userID = DBC.addUser(username, password, optionalConsent);
         Cookie userIDCookie = new Cookie("userID", userID);
-        userIDCookie.setMaxAge(30 * 24 * 60 * 60);
+        
+        userIDCookie.setMaxAge(30 * 24 * 60 * 60); // Cookie will expire in 30 days
         userIDCookie.setSecure(false);
         userIDCookie.setPath("/");
         response.addCookie(userIDCookie);
+        
         log.info("Assigned a new userID: {}", userID);
     }
 
+
+    // If user revokes their consent for data storage / optional cookies,
+    // remove all data stored about them.
     @GetMapping("/revokeConsent")
     public void revokeConsent(@CookieValue(value = "userID", defaultValue = "") String userID,
-                              HttpServletResponse response) {
+                                 HttpServletResponse response) {
         if (DBC.removeUser(userID)) {
             response.setStatus(200);
             Cookie cookie = new Cookie("userID", "");
@@ -86,47 +92,19 @@ public class SpringController {
             log.info("Revoked consent for user, ID: {}", userID);
         } else {
             response.setStatus(400);
-            log.warn("Failed to revoke consent for user, ID: {}", userID);
         }
+
     }
 
+    // Create a new chat session with Watsonx
     @GetMapping("/createChat")
-    public void createChat(@CookieValue(value = "userID", defaultValue = "") String userID,
-                           @RequestParam(name = "initialMessage") String initialMessage,
-                           HttpServletResponse response) {
-        response.setContentType("text/plain");
-
-        User user = DBC.getUserById(userID);
+    public ResponseEntity<Map<String, Object>> createChat(@RequestParam String userID, @RequestParam String initialMessage) {
+        UserEntity user = DBC.getUser(userID);
         if (user != null) {
             String chatID = DBC.createChat(user, initialMessage);
-            try {
-                Chat chat = DBC.getChat(user, chatID);
-                if (chat != null) {
-                    String messageHistory = chat.getMessageHistory(user);
-                    WatsonxResponse wresponse = WXC.sendUserMessage(messageHistory);
-                    response.getWriter().write(chatID);
-                    response.setStatus(wresponse.statusCode);
-
-                    if (wresponse.statusCode == 200) {
-                        chat.addAIMessage(userID, wresponse.responseText);
-                        log.info("AI response added to chat, ID: {}", chatID);
-                    }
-                } else {
-                    response.getWriter().write("null");
-                    response.setStatus(400);
-                    log.warn("Chat not found for user ID: {}", userID);
-                }
-            } catch (IOException e) {
-                log.error("IOException occurred while creating chat: {}", e.getMessage(), e);
-            }
+            return ResponseEntity.ok(Collections.singletonMap("chatID", chatID));
         } else {
-            try {
-                response.getWriter().write("null");
-                response.setStatus(401);
-                log.warn("User not found while creating chat, ID: {}", userID);
-            } catch (IOException e) {
-                log.error("IOException while sending response: {}", e.getMessage(), e);
-            }
+            return ResponseEntity.status(401).body(Collections.singletonMap("message", "User not found"));
         }
     }
 
@@ -134,47 +112,38 @@ public class SpringController {
     @GetMapping("/sendMessage")
     public void sendMessage(@CookieValue(value = "userID", defaultValue = "") String userID,
                             @RequestParam(name = "newMessage") String newMessage,
-                           @RequestParam(name = "chatID") String chatID,
-                           HttpServletResponse response) {
+                            @RequestParam(name = "chatID") String chatID,
+                            HttpServletResponse response) {
         response.setContentType("text/plain");
-        response.setStatus(401); // Default
+        response.setStatus(401);
 
-        // 1) Get the user
-        User user = DBC.getUser(userID);
-        // 2) get the chat
-        Chat chat = DBC.getChat(user, chatID);
+        UserEntity user = DBC.getUser(userID);
+        ChatEntity chat = DBC.getChat(user, chatID);
         if (chat == null) {
-            // null chat
             return;
         }
 
-        // 3) Get existing history
-        String inputString = chat.getMessageHistory(user);
+        String inputString = chat.getMessageHistory();
         if (inputString == null) {
             return;
         }
 
-        // 4) Try to add the new user message
-        boolean success = chat.addUserMessage(userID, newMessage);
-        if (success) {
-            // 5) Re-fetch history & call AI
-            inputString = chat.getMessageHistory(user);
-            WatsonxResponse wresponse = WXC.sendUserMessage(inputString);
+        chat.addUserMessage(newMessage); 
+        inputString = chat.getMessageHistory();
+        WatsonxResponse wresponse = WXC.sendUserMessage(inputString);
 
-            // Update status from AI
-            response.setStatus(wresponse.statusCode);
-
-            try {
-                if (wresponse.statusCode == 200) {
-                    chat.addAIMessage(userID, wresponse.responseText);
-                }
-                response.getWriter().write(wresponse.responseText);
-            } catch (IOException e) {
-                log.warn(String.valueOf(e));
-                response.setStatus(500);
+        response.setStatus(wresponse.statusCode);
+        try {
+            if (wresponse.statusCode == 200) {
+                chat.addAIMessage(wresponse.responseText);
             }
+            response.getWriter().write(wresponse.responseText);
+        } catch (IOException e) {
+            log.warn(String.valueOf(e));
+            response.setStatus(500);
         }
     }
+
 
     // Send a message history and receive a response from Watsonx.
     // Used for users who declined optional cookies.
@@ -183,14 +152,13 @@ public class SpringController {
                                      @RequestParam(name = "inputString") String inputString,
                                      HttpServletResponse response) {
         log.warn("ID {}, newMessage: {}", userID, inputString);
-        User user = DBC.getUser(userID);
+        UserEntity user = DBC.getUser(userID);
+
         WatsonxResponse wresponse;
         response.setContentType("text/plain");
 
         if (user != null) {
-//            TODO: Revert wresponse when issue with Watsonx API quota will be resolved.
             wresponse = WXC.sendUserMessage(inputString);
-//            wresponse = WXC.sendUserMessage(StringTools.messageHistoryPrepare(inputString));
             response.setStatus(wresponse.statusCode);
             try {
                 response.getWriter().write(wresponse.responseText);
@@ -207,39 +175,14 @@ public class SpringController {
 
     // Get message history from a chat
     @GetMapping("/getChatHistory")
-    public void getChatHistory(@CookieValue(value = "userID", defaultValue = "") String userID,
-                               @RequestParam(name = "chatID") String chatID,
-                               HttpServletResponse response) {
-        User user = DBC.getUser(userID);
-        Chat chat = DBC.getChat(DBC.getUser(userID), chatID);
+    public ResponseEntity<Map<String, Object>> getChatHistory(@RequestParam(name = "userID") String userID,
+                                                              @RequestParam(name = "chatID") String chatID) {
+        UserEntity user = DBC.getUser(userID);
+        ChatEntity chat = DBC.getChat(user, chatID);
         if (chat == null) {
-            response.setStatus(401);
-        try {
-            response.getWriter().write("");
-        } catch (IOException e) {
-            log.warn(String.valueOf(e));
-            }
-            return;
+            return ResponseEntity.status(401).body(Collections.singletonMap("message", "Chat not found"));
         }
 
-        String messageHistory = chat.getMessageHistory(user);
-        if (messageHistory == null) {
-            response.setStatus(401);
-            try {
-                response.getWriter().write("");
-            } catch (IOException e) {
-                log.warn(String.valueOf(e));
-            }
-            return;
-
-        }
-        // If we reach here, chat != null and messageHistory != null
-        response.setStatus(200);
-        try {
-            response.getWriter().write(messageHistory);
-        } catch (IOException e) {
-            log.warn(String.valueOf(e));
-            response.setStatus(500);
-        }
+        return ResponseEntity.ok(Collections.singletonMap("history", chat.getMessageHistory()));
     }
 }
