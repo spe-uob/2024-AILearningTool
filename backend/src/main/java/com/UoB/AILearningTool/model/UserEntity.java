@@ -3,53 +3,49 @@ package com.UoB.AILearningTool.model;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
 import java.util.UUID;
 
 @Entity
-@Table(name = "users")
-public class UserEntity {
+@Table(name = "chats")
+public class ChatEntity {
     @Id
-    private String id;
-    private String username;
-    private String password;
-    private boolean optionalConsent;
+    private String chatID;
 
-    public UserEntity() {
-        this.id = UUID.randomUUID().toString();
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity owner;
+
+    private String messageHistory;
+
+    public ChatEntity() {
     }
 
-    public UserEntity(String username, String password, boolean optionalConsent) {
-        this.id = UUID.randomUUID().toString();
-        this.username = username;
-        this.password = password;
-        this.optionalConsent = optionalConsent;
+    public ChatEntity(UserEntity owner, String initialMessage) {
+        this.chatID = UUID.randomUUID().toString();
+        this.owner = owner;
+        this.messageHistory = "<|system|>\n" + initialMessage;
     }
 
-    public String getId() {
-        return id;
+    public String getChatID() {
+        return chatID;
     }
 
-    public String getUsername() {
-        return username;
+    public UserEntity getOwner() {
+        return owner;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public String getMessageHistory() {
+        return messageHistory;
     }
 
-    public String getPassword() {
-        return password;
+    public void addUserMessage(String message) {
+        this.messageHistory += "\n<|user|>\n" + message;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public boolean getOptionalConsent() {
-        return optionalConsent;
-    }
-
-    public void setOptionalConsent(boolean optionalConsent) {
-        this.optionalConsent = optionalConsent;
+    public void addAIMessage(String message) {
+        this.messageHistory += "\n<|assistant|>\n" + message;
     }
 }
+
