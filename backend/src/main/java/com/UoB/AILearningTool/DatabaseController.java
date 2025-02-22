@@ -25,9 +25,16 @@ public class DatabaseController {
     }
 
     public String addUser(String username, String password, boolean optionalConsent) {
+        if (userRepository.findByUsername(username).isPresent()) {
+            return null;
+        }
         UserEntity user = new UserEntity(username, password, optionalConsent);
-        userRepository.save(user);
-        return user.getId();
+        UserEntity savedUser = userRepository.save(user);
+        if (savedUser != null && savedUser.getId() != null) {
+            return savedUser.getId();
+        } else {
+            return null; 
+        }
     }
 
     public boolean removeUser(String id) {
