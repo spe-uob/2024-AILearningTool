@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
-
 @RestController  // Use RestController for handling HTTP requests
 public class SpringController {
     private final Logger log = LoggerFactory.getLogger(SpringController.class);
@@ -38,23 +37,34 @@ public class SpringController {
     public ResponseEntity<Map<String, Object>> registerUser(@RequestBody Map<String, String> credentials) {
         String username = credentials.get("username");
         String password = credentials.get("password");
-
+        if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Username or password cannot be empty"));
+        }
         if (userRepository.findByUsername(username).isPresent()) {
             return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Username already exists"));
-        } else {
-            DBC.addUser(username, password, true); 
+        }
+        String userId = DBC.addUser(username, password, true);
+    
+        if (userId != null) {
             return ResponseEntity.ok(Collections.singletonMap("success", true));
+        } else {
+            return ResponseEntity.status(500).body(Collections.singletonMap("message", "Internal server error: Could not create user"));
         }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody Map<String, String> credentials, HttpServletResponse response) {
         String username = credentials.get("username");
         String password = credentials.get("password");
 
         Optional<UserEntity> userOptional = userRepository.findByUsername(username);
 
         if (userOptional.isPresent() && userOptional.get().getPassword().equals(password)) {
+            Cookie userIDCookie = new Cookie("userID", userOptional.get().getId());
+            userIDCookie.setMaxAge(30 * 24 * 60 * 60);
+            userIDCookie.setPath("/");
+            response.addCookie(userIDCookie);
+
             return ResponseEntity.ok(Collections.singletonMap("success", true));
         } else {
             return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Invalid username or password"));
