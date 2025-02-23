@@ -140,7 +140,7 @@ public class SpringController {
                             @RequestParam(name = "newMessage") String newMessage,
                            @RequestParam(name = "chatID") String chatID,
                            HttpServletResponse response) {
-        response.setContentType("text/plain");
+        response.setContentType("text/plain; charset=utf-8");
         response.setStatus(401); // Default
 
         // 1) Get the user
