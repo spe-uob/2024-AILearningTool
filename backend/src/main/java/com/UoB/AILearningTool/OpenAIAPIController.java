@@ -1,6 +1,6 @@
 package com.UoB.AILearningTool;
 
-import org.json.JSONObject;
+import org.json.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +17,40 @@ public class OpenAIAPIController {
 
     public OpenAIAPIController() {
         this.authenticator = new OpenAIAuthenticator();
+    }
+
+    // Creates a thread
+    public String createThread() {
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("assistant_id", "asst_bVvnON3FADuXiLKbnihGY1iH");
+
+        HttpRequest request = HttpRequest
+                .newBuilder(URI.create("https://api.openai.com/v1/threads/runs"))
+                .headers("Content-Type", "application/json",
+                         "OpenAI-Beta", "assistants=v2",
+                        "Authorization", "Bearer " + authenticator.getBearerToken())
+                .POST(HttpRequest.BodyPublishers.noBody())
+                .build();
+
+        try {
+            HttpResponse<String> response = HttpClient
+                    .newBuilder()
+                    .build()
+                    .send(request, HttpResponse.BodyHandlers.ofString());
+            int statusCode = response.statusCode();
+
+            if (statusCode == 200) {
+                log.info("New OpenAI thread created.");
+                return new JSONObject(response.body()).getString("id");
+            } else {
+                // If OpenAI API request returned a status code other than 200, return error 500 and error message.
+                log.warn("Unable to create OpenAI thread.");
+                return null;
+            }
+        } catch (Exception e) {
+            log.error("Exception {}\nHTTP status code: {}", e, 500);
+            return null;
+        }
     }
 
     // Sends a message to OpenAI's ChatGPT API.
