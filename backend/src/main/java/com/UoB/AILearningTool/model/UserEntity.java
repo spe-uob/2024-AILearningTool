@@ -1,19 +1,23 @@
 package com.UoB.AILearningTool.model;
 
 import jakarta.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
 public class UserEntity {
     @Id
-    private String username;
+    @Column(name = "username", unique = true, nullable = false)
+    private String username; 
 
-    @Column(nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column(name = "optional_consent")
     private boolean optionalConsent;
 
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatEntity> chats;  
     public UserEntity() {}
 
     public UserEntity(String username, String password, boolean optionalConsent) {
@@ -32,9 +36,5 @@ public class UserEntity {
 
     public boolean getOptionalConsent() {
         return optionalConsent;
-    }
-
-    public void setOptionalConsent(boolean optionalConsent) {
-        this.optionalConsent = optionalConsent;
     }
 }
