@@ -3,8 +3,6 @@
     <div>
       <router-view />
     </div>
-
-    <!-- 🔹 只要不是 `/login` 页面，就显示侧边栏 -->
     <SettingSidebar v-if="$route.path !== '/login'" @highContrastToggled="onHighContrastToggled" />
   </div>
 </template>
