@@ -4,6 +4,7 @@
       <router-view />
     </div>
 
+    <!-- 🔹 只要不是 `/login` 页面，就显示侧边栏 -->
     <SettingSidebar v-if="$route.path !== '/login'" @highContrastToggled="onHighContrastToggled" />
   </div>
 </template>
@@ -11,23 +12,11 @@
 <script>
 import SettingSidebar from "./components/SettingSidebar.vue";
 import { getTheme } from "./assets/color.js";
-import { useRouter } from "vue-router";
 
 export default {
   name: "App",
   components: {
     SettingSidebar,
-  },
-  setup() {
-    const router = useRouter();
-    router.beforeEach((to, from, next) => {
-      const isAuthenticated = localStorage.getItem("token"); 
-      if (to.path !== "/login" && !isAuthenticated) {
-        next("/login"); 
-      } else {
-        next(); 
-      }
-    });
   },
   data() {
     return {
