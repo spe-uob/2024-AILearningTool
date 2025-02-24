@@ -1,41 +1,52 @@
 package com.UoB.AILearningTool.model;
 
 import jakarta.persistence.*;
-import java.util.List;
+import java.util.UUID;
 
 @Entity
-@Table(name = "users")
-public class UserEntity {
+@Table(name = "chats")
+public class ChatEntity {
     @Id
-    @Column(name = "username", unique = true, nullable = false)
-    private String username; 
+    @Column(name = "chatid", unique = true, nullable = false)
+    private String chatID;
 
-    @Column(name = "password", nullable = false)
-    private String password;
+    @ManyToOne
+    @JoinColumn(name = "username", nullable = false) 
+    private UserEntity owner;
 
-    @Column(name = "optional_consent")
-    private boolean optionalConsent;
+    @Column(name = "message_history", columnDefinition = "TEXT")
+    private String messageHistory;
 
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ChatEntity> chats;  
+    public ChatEntity() {} 
 
-    public UserEntity() {}
-
-    public UserEntity(String username, String password, boolean optionalConsent) {
-        this.username = username;
-        this.password = password;
-        this.optionalConsent = optionalConsent;
+   
+    public ChatEntity(UserEntity owner, String initialMessage) {
+        this.chatID = UUID.randomUUID().toString();  
+        this.owner = owner;
+        this.messageHistory = "<|system|>\n" + initialMessage;
     }
 
-    public String getUsername() {
-        return username;
+    public String getChatID() {
+        return chatID;
     }
 
-    public String getPassword() {
-        return password;
+    public UserEntity getOwner() {
+        return owner;
     }
 
-    public boolean getOptionalConsent() {
-        return optionalConsent;
+    public String getMessageHistory() {
+        return messageHistory;
+    }
+
+    public void setMessageHistory(String newHistory) {
+        this.messageHistory = newHistory;
+    }
+
+    public void addUserMessage(String message) {
+        this.messageHistory += "\n<|user|>\n" + message;
+    }
+
+    public void addAIMessage(String message) {
+        this.messageHistory += "\n<|assistant|>\n" + message;
     }
 }
