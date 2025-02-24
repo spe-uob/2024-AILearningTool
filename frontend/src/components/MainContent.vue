@@ -19,7 +19,7 @@
 
       <div v-if="currentChatID" class="chat-container">
         <div class="messages-container">
-          <div v-for="msg in messages" :key="msg.id" class="message">
+          <div v-for="(msg, index) in messages" :key="index" class="message">
             <strong v-if="msg.sender === 'user'">User</strong>
             <strong v-else>AI</strong>
             <p>{{ msg.content }}</p>
@@ -41,173 +41,163 @@
 
 <script>
 import axios from "axios";
-import { getTheme } from "../assets/color.js";
 
 export default {
   data() {
     return {
       userInput: "",
-      currentTopic: "",
-      currentTurn: "user",
-      userId: "",
+      userId: "", // ✅ 获取当前用户的 username
+      currentChatID: "",
+      messages: [],
       aiServerURL: "http://localhost:8080",
-      currentTheme: "default",
     };
   },
-  props: ["messages", "chats", "currentChatID"],
-  watch: {
-    messages() {
-      if (this.messages.length === 0 && this.currentChatID) {
-        this.currentTurn = "user";
-        this.requestChatHistory();
-      }
-    },
+  mounted() {
+    this.getUserId();
   },
   methods: {
+    async getUserId() {
+      try {
+        const storedUsername = sessionStorage.getItem("username");
+        if (!storedUsername) {
+          console.error("⚠️ No username found in sessionStorage, redirecting to login.");
+          this.$router.push("/login");
+          return;
+        }
+
+        const response = await axios.get(`${this.aiServerURL}/getUserID`, {
+          params: { username: storedUsername },
+        });
+
+        if (response.status === 200) {
+          this.userId = response.data.userID;
+          console.log("✅ User ID:", this.userId);
+        } else {
+          console.error("❌ User not found, redirecting to login.");
+          this.$router.push("/login");
+        }
+      } catch (error) {
+        console.error("❌ Error fetching user ID:", error);
+      }
+    },
+
     async sendInitialMessage(message) {
       try {
-        const response = await fetch(`${this.aiServerURL}/createChat?${new URLSearchParams({ initialMessage: message })}`, {
-          method: "GET",
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to create chat.");
+        if (!this.userId) {
+          console.error("❌ User ID is missing, cannot create chat.");
+          return;
         }
 
-        this.$emit("updateChatID", await response.text());
-        await this.$nextTick(() => {
-          this.$emit("addChat", this.currentChatID, message);
-          this.requestChatHistory();
+        const response = await axios.post(`${this.aiServerURL}/createChat`, {
+          username: this.userId,
+          initialMessage: message,
         });
+
+        if (response.status !== 200) {
+          throw new Error("❌ Failed to create chat.");
+        }
+
+        this.currentChatID = response.data.chatID;
+        console.log("✅ New Chat Created, Chat ID:", this.currentChatID);
+
+        this.messages = [{ sender: "user", content: message }];
+        await this.requestChatHistory();
       } catch (error) {
-        console.error("Error creating chat:", error);
-      }
-    },
-
-    async requestChatHistory() {
-      try {
-        const response = await fetch(`${this.aiServerURL}/getChatHistory?${new URLSearchParams({ chatID: this.currentChatID })}`, {
-          method: "GET",
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch chat history.");
-        }
-
-        this.processChatHistory(await response.text());
-      } catch (error) {
-        console.error("Error fetching chat history:", error);
-      }
-    },
-
-    async processChatHistory(messageHistory) {
-      let currentRole, openAIRole, nextRole, nextRoleIndex, currentMessage;
-      for (let i = 0; ; i++) {
-        if (i === 0) {
-          currentRole = "<|system|>";
-          openAIRole = "system";
-          nextRole = "<|user|>";
-        } else if (i % 2 !== 0) {
-          currentRole = "<|user|>";
-          openAIRole = "user";
-          nextRole = "<|assistant|>";
-        } else {
-          currentRole = "<|assistant|>";
-          openAIRole = "assistant";
-          nextRole = "<|user|>";
-        }
-
-        if (messageHistory.includes(currentRole)) {
-          messageHistory = messageHistory.substring(messageHistory.indexOf(currentRole) + currentRole.length);
-          nextRoleIndex = messageHistory.indexOf(nextRole);
-          currentMessage = nextRoleIndex !== -1 ? messageHistory.substring(0, nextRoleIndex) : messageHistory;
-
-          if (currentRole !== "<|system|>") {
-            this.$emit("addMessage", this.currentTurn, currentMessage);
-            this.currentTurn = this.currentTurn === "user" ? "assistant" : "user";
-          }
-        } else {
-          break;
-        }
+        console.error("❌ Error creating chat:", error);
       }
     },
 
     async sendMessage() {
       if (!this.userInput.trim()) {
-        alert("Please enter a message!");
+        alert("⚠️ Please enter a message!");
         return;
       }
 
-      if (!this.currentChatID) {
-        alert("ChatId is not set. Please start a new chat.");
+      if (!this.currentChatID || !this.userId) {
+        alert("⚠️ Chat ID or User ID is missing. Please start a new chat.");
         return;
       }
 
-      this.$emit("addMessage", "user", this.userInput);
       const messageToSend = this.userInput.trim();
       this.userInput = "";
+      this.messages.push({ sender: "user", content: messageToSend });
 
       try {
-        const response = await axios.get(`${this.aiServerURL}/sendMessage`, {
-          params: {
-            userID: this.userId,
-            chatID: this.currentChatID,
-            newMessage: messageToSend,
-          },
-          withCredentials: true,
+        const response = await axios.post(`${this.aiServerURL}/sendMessage`, {
+          username: this.userId,
+          chatID: this.currentChatID,
+          newMessage: messageToSend,
         });
 
         if (response.status !== 200) {
-          throw new Error(`Unexpected response code: ${response.status}`);
+          throw new Error("❌ Unexpected response code: " + response.status);
         }
 
-        this.$emit("addMessage", "assistant", response.data);
+        console.log("✅ AI Response:", response.data.response);
+        this.messages.push({ sender: "assistant", content: response.data.response });
+
+        await this.requestChatHistory();
       } catch (error) {
-        console.error("Error sending message:", error);
-        this.$emit("addMessage", "System", "Failed to send message. Please try again.");
+        console.error("❌ Error sending message:", error);
+        this.messages.push({ sender: "System", content: "⚠️ Failed to send message. Please try again." });
       }
 
       this.scrollToBottom();
     },
 
-    applyTheme(themeName) {
-      const theme = getTheme(themeName);
-      Object.keys(theme).forEach((key) => {
-        document.documentElement.style.setProperty(`--${key}-color`, theme[key]);
-      });
+    async requestChatHistory() {
+      try {
+        const response = await axios.get(`${this.aiServerURL}/getChatHistory`, {
+          params: {
+            username: this.userId,
+            chatID: this.currentChatID,
+          },
+        });
+
+        console.log("📢 API Response:", response.data);
+
+        if (response.status !== 200) {
+          throw new Error("❌ Failed to fetch chat history.");
+        }
+
+        this.processChatHistory(response.data.history);
+      } catch (error) {
+        console.error("❌ Error fetching chat history:", error);
+      }
+    },
+
+    async processChatHistory(messageHistory) {
+      this.messages = [];
+      console.log("📢 Processing history:", messageHistory);
+
+      let lines = messageHistory.split("\n");
+      let sender = "assistant";
+
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].trim() === "<|user|>") {
+          sender = "user";
+        } else if (lines[i].trim() === "<|assistant|>") {
+          sender = "assistant";
+        } else if (lines[i].trim()) {
+          this.messages.push({ sender, content: lines[i].trim() });
+        }
+      }
+
+      console.log("✅ Parsed Messages:", this.messages);
+      this.$forceUpdate(); // 🔥 强制 Vue 重新渲染
     },
 
     scrollToBottom() {
-      const chatContainer = this.$el.querySelector(".messages-container");
-      if (chatContainer) {
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-      }
-    },
-
-    async getUserId() {
-      try {
-        const response = await axios.get(`${this.aiServerURL}/signup`, { withCredentials: true });
-        if (response.status === 200) {
-          this.userId = response.data;
-        } else {
-          console.error("Failed to get userId.");
+      this.$nextTick(() => {
+        const chatContainer = this.$el.querySelector(".messages-container");
+        if (chatContainer) {
+          chatContainer.scrollTop = chatContainer.scrollHeight;
         }
-      } catch (error) {
-        console.error("Error fetching userId:", error);
-      }
+      });
     },
-  },
-
-  async mounted() {
-    if (!this.userId) {
-      await this.getUserId();
-    }
   },
 };
 </script>
-
 
 <style scoped>
 main {
