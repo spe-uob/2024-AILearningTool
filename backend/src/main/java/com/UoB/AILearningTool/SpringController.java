@@ -29,7 +29,7 @@ public class SpringController {
         this.WXC = WXC;
     }
 
-
+    // User registration
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> registerUser(@RequestBody Map<String, String> credentials) {
         String username = credentials.get("username");
@@ -43,7 +43,7 @@ public class SpringController {
         return ResponseEntity.ok(Collections.singletonMap("success", true));
     }
 
-
+    // User Login
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> loginUser(@RequestBody Map<String, String> credentials) {
         String username = credentials.get("username");
@@ -58,14 +58,14 @@ public class SpringController {
         }
     }
 
-
+    // Check if the user exists
     @GetMapping("/checkSession")
     public ResponseEntity<Map<String, Boolean>> checkSession(@RequestParam String username) {
         boolean isLoggedIn = userRepository.existsById(username);
         return ResponseEntity.ok(Collections.singletonMap("loggedIn", isLoggedIn));
     }
 
-
+    // Delete user
     @GetMapping("/revokeConsent")
     public ResponseEntity<Map<String, Object>> revokeConsent(@RequestParam String username) {
         if (DBC.removeUser(username)) {
@@ -75,7 +75,7 @@ public class SpringController {
         }
     }
 
-
+    // Get user's ID
     @GetMapping("/getUserID")
     public ResponseEntity<Map<String, Object>> getUserID(@RequestParam String username) {
         if (userRepository.existsById(username)) {
@@ -85,7 +85,7 @@ public class SpringController {
         }
     }
 
-
+    // Create a new chat session with Watsonx
     @PostMapping("/createChat")
     public ResponseEntity<Map<String, Object>> createChat(@RequestBody Map<String, String> payload) {
         String username = payload.get("username");
@@ -96,10 +96,28 @@ public class SpringController {
         }
 
         String chatID = DBC.createChat(username, initialMessage);
-        return ResponseEntity.ok(Collections.singletonMap("chatID", chatID));
+
+        ChatEntity chat = chatRepository.findById(chatID).orElse(null);
+        if (chat == null) {
+            return ResponseEntity.status(400).body(Collections.singletonMap("message", "Chat creation failed"));
+        }
+
+        String messageHistory = chat.getMessageHistory();
+        WatsonxResponse wresponse = WXC.sendUserMessage(messageHistory);
+
+        if (wresponse.statusCode == 200) {
+            chat.addAIMessage(wresponse.responseText);
+            chatRepository.save(chat);
+        }
+
+        return ResponseEntity.ok(Map.of(
+            "chatID", chatID,
+            "aiResponse", wresponse.responseText
+        ));
     }
 
 
+    // Send a message to the chat and receive a response
     @PostMapping("/sendMessage")
     public ResponseEntity<Map<String, Object>> sendMessage(@RequestBody Map<String, String> payload) {
         String username = payload.get("username");
@@ -112,7 +130,7 @@ public class SpringController {
             return ResponseEntity.status(400).body(Collections.singletonMap("message", "Chat not found or access denied"));
         }
 
-
+        // store user's messages
         chat.addUserMessage(newMessage);
         chatRepository.save(chat);
 
@@ -127,7 +145,7 @@ public class SpringController {
         return ResponseEntity.ok(Collections.singletonMap("response", wresponse.responseText));
     }
 
-
+    // Send a message history and receive a response from Watsonx.
     @PostMapping("/sendIncognitoMessage")
     public ResponseEntity<Map<String, Object>> sendIncognitoMessage(@RequestBody Map<String, String> payload) {
         String inputString = payload.get("inputString");
@@ -136,7 +154,7 @@ public class SpringController {
         return ResponseEntity.ok(Collections.singletonMap("response", wresponse.responseText));
     }
 
-
+    // Get message history from a chat
     @GetMapping("/getChatHistory")
     public ResponseEntity<Map<String, Object>> getChatHistory(@RequestParam String username, @RequestParam String chatID) {
         ChatEntity chat = chatRepository.findById(chatID).orElse(null);
@@ -145,6 +163,12 @@ public class SpringController {
             return ResponseEntity.status(401).body(Collections.singletonMap("message", "Chat not found or access denied"));
         }
 
-        return ResponseEntity.ok(Collections.singletonMap("history", chat.getMessageHistory()));
+        String chatHistory = chat.getMessageHistory();
+        if (chatHistory.startsWith("<|system|>")) {
+            chatHistory = chatHistory.replace("<|system|>\n", ""); 
+        }
+
+        return ResponseEntity.ok(Collections.singletonMap("history", chatHistory));
     }
+
 }
