@@ -46,7 +46,7 @@ export default {
   data() {
     return {
       userInput: "",
-      userId: "", // ✅ 获取当前用户的 username
+      userId: "", 
       currentChatID: "",
       messages: [],
       aiServerURL: "http://localhost:8080",
@@ -71,20 +71,20 @@ export default {
 
         if (response.status === 200) {
           this.userId = response.data.userID;
-          console.log("✅ User ID:", this.userId);
+          console.log("User ID:", this.userId);
         } else {
-          console.error("❌ User not found, redirecting to login.");
+          console.error("User not found, redirecting to login.");
           this.$router.push("/login");
         }
       } catch (error) {
-        console.error("❌ Error fetching user ID:", error);
+        console.error("Error fetching user ID:", error);
       }
     },
 
     async sendInitialMessage(message) {
       try {
         if (!this.userId) {
-          console.error("❌ User ID is missing, cannot create chat.");
+          console.error("User ID is missing, cannot create chat.");
           return;
         }
 
@@ -94,16 +94,16 @@ export default {
         });
 
         if (response.status !== 200) {
-          throw new Error("❌ Failed to create chat.");
+          throw new Error("Failed to create chat.");
         }
 
         this.currentChatID = response.data.chatID;
-        console.log("✅ New Chat Created, Chat ID:", this.currentChatID);
+        console.log("New Chat Created, Chat ID:", this.currentChatID);
 
         this.messages = [{ sender: "user", content: message }];
         await this.requestChatHistory();
       } catch (error) {
-        console.error("❌ Error creating chat:", error);
+        console.error("Error creating chat:", error);
       }
     },
 
@@ -130,15 +130,15 @@ export default {
         });
 
         if (response.status !== 200) {
-          throw new Error("❌ Unexpected response code: " + response.status);
+          throw new Error("Unexpected response code: " + response.status);
         }
 
-        console.log("✅ AI Response:", response.data.response);
+        console.log("AI Response:", response.data.response);
         this.messages.push({ sender: "assistant", content: response.data.response });
 
         await this.requestChatHistory();
       } catch (error) {
-        console.error("❌ Error sending message:", error);
+        console.error("Error sending message:", error);
         this.messages.push({ sender: "System", content: "⚠️ Failed to send message. Please try again." });
       }
 
@@ -157,21 +157,21 @@ export default {
         console.log("📢 API Response:", response.data);
 
         if (response.status !== 200) {
-          throw new Error("❌ Failed to fetch chat history.");
+          throw new Error("Failed to fetch chat history.");
         }
 
         this.processChatHistory(response.data.history);
       } catch (error) {
-        console.error("❌ Error fetching chat history:", error);
+        console.error("Error fetching chat history:", error);
       }
     },
 
     async processChatHistory(messageHistory) {
-      this.messages = [];
-      console.log("📢 Processing history:", messageHistory);
-
-      let lines = messageHistory.split("\n");
+      let parsedMessages = [];
       let sender = "assistant";
+
+      console.log("Processing history:", messageHistory);
+      let lines = messageHistory.split("\n");
 
       for (let i = 0; i < lines.length; i++) {
         if (lines[i].trim() === "<|user|>") {
@@ -179,12 +179,22 @@ export default {
         } else if (lines[i].trim() === "<|assistant|>") {
           sender = "assistant";
         } else if (lines[i].trim()) {
-          this.messages.push({ sender, content: lines[i].trim() });
+          parsedMessages.push({ sender, content: lines[i].trim() });
         }
       }
 
-      console.log("✅ Parsed Messages:", this.messages);
-      this.$forceUpdate(); // 🔥 强制 Vue 重新渲染
+      console.log("Parsed Messages:", parsedMessages);
+      if (
+        parsedMessages.length > 1 &&
+        parsedMessages[0].sender === "user" &&
+        parsedMessages[1].sender === "assistant" &&
+        parsedMessages[0].content === parsedMessages[1].content
+      ) {
+        console.warn("⚠️ Duplicate message detected, removing AI's duplicated user message.");
+        parsedMessages.splice(1, 1); 
+      }
+      this.messages = parsedMessages;
+      this.$forceUpdate();
     },
 
     scrollToBottom() {
@@ -336,5 +346,4 @@ button:hover {
 button:active {
   transform: scale(0.96);
 }
-
 </style>
