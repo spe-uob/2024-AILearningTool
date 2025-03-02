@@ -1,38 +1,61 @@
 <template>
   <main>
     <div class="chat-area">
-      <p>Welcome to Watsonx AI!</p>
+      <!-- Welcome Screen with Logo -->
+      <div v-if="this.currentChatID.length === 0" class="welcome-container">
+        <img src="../assets/logo.png" alt="Logo" class="logo" />
+        <p class="welcome-text">
+          {{ getTranslation(currentLanguage, 'WELCOME_TO_WATSONX_AI') }}
+        </p>
+        <p v-if="this.currentChatID.length === 0" class="instruction-text">
+          {{ getTranslation(currentLanguage, 'SELECT_INITIAL_TOPIC') }}
+        </p>
 
-      <p v-if="!currentChatID">Select one of the topics below:</p>
-
-      <div v-if="!currentChatID">
-        <button @click="sendInitialMessage('I need help with choosing a course')">
-          I need help with choosing a course
-        </button>
-        <button @click="sendInitialMessage('I need help with IBM SkillsBuild platform')">
-          I need help with IBM SkillsBuild platform
-        </button>
-        <button @click="sendInitialMessage('I have questions about university life')">
-          I have questions about university life
-        </button>
+        <!-- Buttons for chat initialisation -->
+        <div v-if="this.currentChatID.length === 0" class="button-container">
+          <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_CHOOSING_A_COURSE'))" :disabled="chatInitButtonsDisabled">
+            {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_CHOOSING_A_COURSE") }}
+          </button>
+          <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_PLATFORM'))" :disabled="chatInitButtonsDisabled">
+            {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_PLATFORM")}}
+          </button>
+          <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_HAVE_QUESTIONS_ABOUT_UNI_LIFE'))" :disabled="chatInitButtonsDisabled">
+            {{getTranslation(currentLanguage, "I_HAVE_QUESTIONS_ABOUT_UNI_LIFE")}}
+          </button>
+        </div>
       </div>
 
-      <div v-if="currentChatID" class="chat-container">
-        <div class="messages-container">
-          <div v-for="(msg, index) in messages" :key="index" class="message">
-            <strong v-if="msg.sender === 'user'">User</strong>
-            <strong v-else>AI</strong>
+      <!-- Display all messages in the conversation -->
+      <div v-if="this.currentChatID.length > 0" class="chat-container">
+        <!-- Scrollable message area -->
+        <div class="messages-container" ref="messagesContainer">
+          <div
+              v-for="(msg, index) in messages"
+              :key="index"
+              class="message"
+              :class="{
+              'user-message': msg.sender === 'user',
+              'assistant-message': msg.sender === 'assistant',
+              'system-message': msg.sender === 'System'
+            }"
+          >
+            <strong v-if="msg.sender === 'user'">{{ getTranslation(currentLanguage, "USER") }}</strong>
+            <strong v-else-if="msg.sender === 'assistant'">{{ getTranslation(currentLanguage, "AI") }}</strong>
+            <strong v-else>{{ msg.sender }}</strong>
             <p>{{ msg.content }}</p>
           </div>
         </div>
 
+        <!-- Input area for user messages -->
         <div class="input-area">
           <textarea
               v-model="userInput"
-              placeholder="Type your message..."
+              :placeholder="getTranslation(currentLanguage, 'TYPE_YOUR_MESSAGE')"
               @keypress.enter.prevent="sendMessage"
           ></textarea>
-          <button @click="sendMessage">Send</button>
+          <button @click="sendMessage" :disabled="chatInitButtonsDisabled">
+            {{ getTranslation(currentLanguage, "SEND") }}
+          </button>
         </div>
       </div>
     </div>
@@ -41,175 +64,152 @@
 
 <script>
 import axios from "axios";
+import { getTheme } from "../assets/color.js";
+import { getTranslation } from "../assets/language";
 
 export default {
   data() {
     return {
       userInput: "",
-      userId: "", 
-      currentChatID: "",
-      messages: [],
-      aiServerURL: "http://localhost:8080",
+      userId: localStorage.getItem("username") || "",  // username
+      aiServerURL: "http://localhost:8080", // API address
     };
   },
-  mounted() {
-    this.getUserId();
+  props: ["messages", "chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
+  watch: {
+    messages() {
+      if (this.messages.length === 0 && this.currentChatID.length > 0) {
+        this.requestChatHistory();
+      }
+      this.$nextTick(() => {
+        this.scrollToBottom();
+      });
+    }
   },
   methods: {
-    async getUserId() {
-      try {
-        const storedUsername = sessionStorage.getItem("username");
-        if (!storedUsername) {
-          console.error("⚠️ No username found in sessionStorage, redirecting to login.");
-          this.$router.push("/login");
-          return;
-        }
+    getTheme,
+    getTranslation,
 
-        const response = await axios.get(`${this.aiServerURL}/getUserID`, {
-          params: { username: storedUsername },
-        });
-
-        if (response.status === 200) {
-          this.userId = response.data.userID;
-          console.log("User ID:", this.userId);
-        } else {
-          console.error("User not found, redirecting to login.");
-          this.$router.push("/login");
-        }
-      } catch (error) {
-        console.error("Error fetching user ID:", error);
-      }
-    },
-
+    /**
+     * Initializes a new chat with a predefined message.
+     */
     async sendInitialMessage(message) {
+      if (!this.userId) {
+        alert("Please login!");
+        return;
+      }
+
       try {
-        if (!this.userId) {
-          console.error("User ID is missing, cannot create chat.");
-          return;
-        }
-
-        const response = await axios.post(`${this.aiServerURL}/createChat`, {
-          username: this.userId,
-          initialMessage: message,
+        const response = await fetch(`${this.aiServerURL}/createChat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: this.userId, initialMessage: message })
         });
+        if (!response.ok) {throw new Error("Fail to create chat");}
 
-        if (response.status !== 200) {
-          throw new Error("Failed to create chat.");
-        }
-
-        this.currentChatID = response.data.chatID;
-        console.log("New Chat Created, Chat ID:", this.currentChatID);
-
-        this.messages = [{ sender: "user", content: message }];
-        await this.requestChatHistory();
+        const data = await response.json();
+        this.$emit("updateChatID", data.chatID);
+        this.$emit("addChat", data.chatID, data.initialMessage || message);
+        this.requestChatHistory();
       } catch (error) {
-        console.error("Error creating chat:", error);
+        console.error("error:", error);
       }
     },
 
+    /**
+     * Requests chat history from the server based on the current chat ID.
+     */
+    async requestChatHistory() {
+      if (!this.userId || !this.currentChatID) return;
+
+      try {
+        const response = await fetch(`${this.aiServerURL}/getChatHistory?` + new URLSearchParams({
+          username: this.userId,
+          chatID: this.currentChatID
+        }), {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!response.ok) throw new Error("Fail to reload chathistory");
+
+        const data = await response.json();
+        this.processChatHistory(data.history);
+      } catch (error) {
+        console.error("Fail to reload chathistory:", error);
+      }
+    },
+
+    /**
+     * Processes retrieved chat history and structures it for display.
+     */
+    processChatHistory(history) {
+      const messages = history.split("\n").map(line => {
+        if (line.startsWith("<|user|>")) return { sender: "user", content: line.replace("<|user|>", "").trim() };
+        if (line.startsWith("<|assistant|>")) return { sender: "assistant", content: line.replace("<|assistant|>", "").trim() };
+        return { sender: "system", content: line };
+      });
+
+      messages.forEach(msg => {
+        this.$emit("addMessage", msg.sender, msg.content);
+      });
+    },
+
+    /**
+     * Sends a user message to the AI server and processes the response.
+     */
     async sendMessage() {
       if (!this.userInput.trim()) {
-        alert("⚠️ Please enter a message!");
+        alert("Please enter messages");
         return;
       }
 
-      if (!this.currentChatID || !this.userId) {
-        alert("⚠️ Chat ID or User ID is missing. Please start a new chat.");
+      if (!this.userId) {
+        alert("logon failed, please login again！");
         return;
       }
 
-      const messageToSend = this.userInput.trim();
-      this.userInput = "";
-      this.messages.push({ sender: "user", content: messageToSend });
-
       try {
-        const response = await axios.post(`${this.aiServerURL}/sendMessage`, {
-          username: this.userId,
-          chatID: this.currentChatID,
-          newMessage: messageToSend,
-        });
+        this.$emit("addMessage", "user", this.userInput.trim());
 
-        if (response.status !== 200) {
-          throw new Error("Unexpected response code: " + response.status);
-        }
-
-        console.log("AI Response:", response.data.response);
-        this.messages.push({ sender: "assistant", content: response.data.response });
-
-        await this.requestChatHistory();
-      } catch (error) {
-        console.error("Error sending message:", error);
-        this.messages.push({ sender: "System", content: "⚠️ Failed to send message. Please try again." });
-      }
-
-      this.scrollToBottom();
-    },
-
-    async requestChatHistory() {
-      try {
-        const response = await axios.get(`${this.aiServerURL}/getChatHistory`, {
-          params: {
+        const response = await fetch(`${this.aiServerURL}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
             username: this.userId,
             chatID: this.currentChatID,
-          },
+            newMessage: this.userInput.trim(),
+          }),
         });
 
-        console.log("📢 API Response:", response.data);
-
-        if (response.status !== 200) {
-          throw new Error("Failed to fetch chat history.");
+        const data = await response.json();
+        if (response.ok) {
+          this.$emit("addMessage", "assistant", data.response);
+        } else {
+          alert("Fail to send messages");
         }
-
-        this.processChatHistory(response.data.history);
       } catch (error) {
-        console.error("Error fetching chat history:", error);
-      }
-    },
-
-    async processChatHistory(messageHistory) {
-      let parsedMessages = [];
-      let sender = "assistant";
-
-      console.log("Processing history:", messageHistory);
-      let lines = messageHistory.split("\n");
-
-      for (let i = 0; i < lines.length; i++) {
-        if (lines[i].trim() === "<|user|>") {
-          sender = "user";
-        } else if (lines[i].trim() === "<|assistant|>") {
-          sender = "assistant";
-        } else if (lines[i].trim()) {
-          parsedMessages.push({ sender, content: lines[i].trim() });
-        }
+        console.error("error:", error);
       }
 
-      console.log("Parsed Messages:", parsedMessages);
-      if (
-        parsedMessages.length > 1 &&
-        parsedMessages[0].sender === "user" &&
-        parsedMessages[1].sender === "assistant" &&
-        parsedMessages[0].content === parsedMessages[1].content
-      ) {
-        console.warn("⚠️ Duplicate message detected, removing AI's duplicated user message.");
-        parsedMessages.splice(1, 1); 
-      }
-      this.messages = parsedMessages;
-      this.$forceUpdate();
+      this.userInput = "";
     },
 
     scrollToBottom() {
       this.$nextTick(() => {
-        const chatContainer = this.$el.querySelector(".messages-container");
-        if (chatContainer) {
-          chatContainer.scrollTop = chatContainer.scrollHeight;
+        const container = this.$refs.messagesContainer;
+        if (container) {
+          container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
         }
       });
     },
-  },
+  }
 };
 </script>
 
+
 <style scoped>
+/* Adjust the main area height to make the chat window more compact */
 main {
   flex-grow: 1;
   padding: 20px;
@@ -217,7 +217,7 @@ main {
   color: var(--text-color);
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: calc(100vh - 40px);
 }
 
 .chat-area {
@@ -246,7 +246,6 @@ main {
   border-radius: 12px;
   border: 2px solid var(--border-color);
   background-color: var(--background-color);
-  max-height: calc(100vh - 180px);
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease-in-out;
 }
@@ -254,39 +253,73 @@ main {
 .messages-container::-webkit-scrollbar {
   width: 6px;
 }
-
 .messages-container::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 3px;
 }
-
 .messages-container::-webkit-scrollbar-track {
   background: transparent;
 }
 
+/* General message bubble style */
 .message {
   margin: 10px 0;
-  padding: 14px;
-  border-radius: 20px;
-  max-width: 75%;
+  padding: 12px 16px;
+  border-radius: 16px;
+  max-width: 60%;
   white-space: pre-wrap;
   word-wrap: break-word;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  position: relative;  /* For the chat bubble tail */
+  animation: fadeIn 0.3s forwards ease-in-out;
   opacity: 0;
   transform: translateY(10px);
-  animation: fadeIn 0.3s forwards ease-in-out;
 }
 
-.message:nth-child(odd) {
-  align-self: flex-start;
+/* User messages (right side) */
+.user-message {
+  align-self: flex-end;
   background-color: var(--primary-color);
   border: 1px solid var(--secondary-color);
+  margin-left: auto;
+}
+.user-message::after {
+  content: "";
+  position: absolute;
+  bottom: 10px;
+  right: -8px;
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+  border-left-color: var(--primary-color);
 }
 
-.message:nth-child(even) {
-  align-self: flex-end;
+/* AI messages (left side) */
+.assistant-message {
+  align-self: flex-start;
   background-color: var(--accent-color);
   border: 1px solid var(--border-color);
+  margin-right: auto;
+}
+.assistant-message::after {
+  content: "";
+  position: absolute;
+  bottom: 10px;
+  left: -8px;
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+  border-right-color: var(--accent-color);
+}
+
+/* System messages/errors */
+.system-message {
+  align-self: center;
+  background-color: var(--border-color);
+  border: 1px solid var(--secondary-color);
+  max-width: 40%;
+  margin: 5px auto;
+  text-align: center;
 }
 
 @keyframes fadeIn {
@@ -338,12 +371,64 @@ button {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
 }
 
-button:hover {
+.welcome-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+  height: 100vh;
+}
+
+.logo {
+  width: 220px;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.welcome-text {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.instruction-text {
+  font-size: 20px;
+  color: #666;
+  margin-bottom: 25px;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.button-container button {
+  flex: 1;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: bold;
+  background-color: var(--button-color);
+  color: var(--text-color);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.button-container button:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.18);
 }
 
-button:active {
+.button-container button:active {
   transform: scale(0.96);
 }
+
 </style>
