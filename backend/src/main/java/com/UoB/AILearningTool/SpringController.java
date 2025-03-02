@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+import java.util.ArrayList;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -52,11 +55,22 @@ public class SpringController {
         Optional<UserEntity> userOptional = userRepository.findById(username);
 
         if (userOptional.isPresent() && userOptional.get().getPassword().equals(password)) {
-            return ResponseEntity.ok(Collections.singletonMap("success", true));
+            List<ChatEntity> chats = chatRepository.findByOwner(userOptional.get());
+            List<String> chatIDs = new ArrayList<>();
+
+            for (ChatEntity chat : chats) {
+                chatIDs.add(chat.getChatID());
+            }
+
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "chatIDs", chatIDs
+            ));
         } else {
             return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Invalid username or password"));
         }
     }
+
 
     // Check if the user exists
     @GetMapping("/checkSession")
@@ -91,6 +105,15 @@ public class SpringController {
         String username = payload.get("username");
         String initialMessage = payload.get("initialMessage");
 
+        if (username == null || username.isEmpty()) {
+            System.out.println("username is empty");
+            return ResponseEntity.status(400).body(Collections.singletonMap("message", "Username cannot be null"));
+        }
+        if (initialMessage == null || initialMessage.isEmpty()) {
+            System.out.println("initialMessage is empty");
+            return ResponseEntity.status(400).body(Collections.singletonMap("message", "Initial message cannot be null"));
+        
+        }
         if (!userRepository.existsById(username)) {
             return ResponseEntity.status(401).body(Collections.singletonMap("message", "User not found"));
         }
@@ -112,6 +135,7 @@ public class SpringController {
 
         return ResponseEntity.ok(Map.of(
             "chatID", chatID,
+            "initialMessage", initialMessage,
             "aiResponse", wresponse.responseText
         ));
     }
@@ -169,6 +193,34 @@ public class SpringController {
         }
 
         return ResponseEntity.ok(Collections.singletonMap("history", chatHistory));
+    }
+
+    @GetMapping("/getUserChats")
+    public ResponseEntity<Map<String, Object>> getUserChats(@RequestParam String username) {
+        Optional<UserEntity> user = userRepository.findById(username);
+        if (user.isEmpty()) {
+            return ResponseEntity.status(404).body(Collections.singletonMap("message", "User not found"));
+        }
+
+        List<ChatEntity> chats = chatRepository.findByOwner(user.get());
+        List<Map<String, String>> chatList = new ArrayList<>();
+
+        for (ChatEntity chat : chats) {
+            String[] lines = chat.getMessageHistory().split("\n");
+            String title = "New Chat";
+
+            for (String line : lines) {
+                if (!line.startsWith("<|")) {
+                    title = line.trim(); 
+                    break;
+                }
+            }
+
+            chatList.add(Map.of("chatID", chat.getChatID(), "title", title));
+        }
+
+        System.out.println("Returning chat history: " + chatList);
+        return ResponseEntity.ok(Collections.singletonMap("chats", chatList));
     }
 
 }
