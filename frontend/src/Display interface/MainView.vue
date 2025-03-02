@@ -1,65 +1,127 @@
 <template>
-  <div class="main-view">
-    <div class="left-sidebar-container">
+  <div className="main-view">
+    <div className="left-sidebar-container">
       <HistorySidebar
-          @resetMainContent="this.resetMainContent"
-          @chatSelected="(id) => this.loadChat(id)"
-          :currentChatID="this.currentChatID"
-          :chats="this.chats"
+          @resetMainContent="resetMainContent"
+          @chatSelected="(id) => loadChat(id)"
+          :currentChatID="currentChatID"
+          :chats="chats"
+          @updateChats="updateChatList"
       />
-      <SettingSidebar @toggleSettings="toggleSettings" />
+      <SettingSidebar @toggleSettings="toggleSettings"/>
     </div>
     <MainContent
-        :messages="this.messages"
-        :chats="this.chats"
-        :currentChatID="this.currentChatID"
-        @addMessage="(a, b) => this.addMessage(a, b)"
-        @addChat="(a, b) => this.addChat(a, b)"
-        @updateChatID="(id) => this.currentChatID = id"
+        :messages="messages"
+        :chats="chats"
+        :currentChatID="currentChatID"
+        @addMessage="(a, b) => addMessage(a, b)"
+        @addChat="(a, b) => addChat(a, b)"
+        @updateChatID="(id) => currentChatID = id"
     />
   </div>
 </template>
 
 <script>
-import HistorySidebar from '../components/HistorySidebar.vue';
-import MainContent from '../components/MainContent.vue';
-import SettingSidebar from '../components/SettingSidebar.vue';
+import axios from "axios";
+import HistorySidebar from "../components/HistorySidebar.vue";
+import MainContent from "../components/MainContent.vue";
+import SettingSidebar from "../components/SettingSidebar.vue";
+
 export default {
-  name: 'MainView',
+  name: "MainView",
   data() {
     return {
       messages: [],
       isSettingsOpen: false,
-      chats: JSON.parse(localStorage.getItem("chats")) || [], // Stores id-title pair for every chat
-      currentChatID: ""
+      chats: [], // Stores id-title pair for every chat
+      currentChatID: "",
+      aiServerUrl: "http://localhost:8080",
     };
   },
   methods: {
-    // Used to reset MainContent component (e.g. when "Add chat" button is clicked)
+    updateChatList(newChats) {
+        this.chats = newChats;
+    },
+  
     resetMainContent() {
       this.currentChatID = "";
       this.messages = [];
     },
-    // Load existing chat
-    loadChat(id) {
-      this.resetMainContent()
-      this.currentChatID = id
+
+    async loadChat(chatID) {
+      if (!chatID) return;
+
+      this.resetMainContent();
+      this.currentChatID = chatID;
+
+      try {
+        const response = await axios.get(`${this.aiServerUrl}/getChatHistory`, {
+          params: {
+            username: sessionStorage.getItem("username"),
+            chatID: chatID
+          },
+        });
+
+        if (response.status === 200) {
+          this.messages = this.processChatHistory(response.data.history);
+        } else {
+          console.error("Failed to fetch chat history.");
+        }
+      } catch (error) {
+        console.error("Error fetching chat history:", error);
+      }
     },
-    // Add message to "message" variable in MainView
+
+    processChatHistory(messageHistory) {
+      let messages = [];
+      let lines = messageHistory.split("\n");
+
+      for (let i = 0; i < lines.length; i++) {
+        let sender = "assistant";
+        if (lines[i].startsWith("<|user|>")) sender = "user";
+        else if (lines[i].startsWith("<|assistant|>")) sender = "assistant";
+        else continue;
+
+        let message = lines[i + 1] || "";
+        if (message.trim()) {
+          messages.push({sender, content: message});
+        }
+      }
+      return messages;
+    },
+
     addMessage(senderArg, contentArg) {
       this.messages.push({
         sender: senderArg,
-        content: contentArg
-      })
+        content: contentArg,
+      });
     },
-    // Add a new chat to chat list (used in HistorySidebar) + save to localStorage
-    addChat(chatID, title) {
-      this.chats.push({
-        chatID: chatID,
-        title: title
-      })
-      localStorage.setItem("chats", JSON.stringify(this.chats))
+
+    async addChat() {
+      try {
+        const response = await axios.post(`${this.aiServerUrl}/createChat`, {
+          username: sessionStorage.getItem("username"),
+          initialMessage: "Hello, how can I help?",
+        });
+
+        if (response.status === 200) {
+          const newChat = {
+            chatID: response.data.chatID,
+            title: "New Chat",
+          };
+
+          this.chats.push(newChat);
+          localStorage.setItem("chats", JSON.stringify(this.chats));
+
+          this.loadChat(newChat.chatID);
+        } else {
+          console.error("Failed to create chat.");
+        }
+      } catch (error) {
+        console.error("Error creating chat:", error);
+      }
     },
+
     toggleSettings(isOpen) {
       this.isSettingsOpen = isOpen;
     },
