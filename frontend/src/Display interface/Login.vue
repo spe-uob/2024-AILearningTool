@@ -1,7 +1,8 @@
 <template>
   <div class="login-container">
+    <Cookie v-if="showCookiePopup" @consent-choice="handleConsent" />
     <div class="card">
-      <h2>{{ isLoginMode ? "Login" : "Register" }}</h2>
+      <h2>{{ isLoginMode ? 'Login' : 'Register' }}</h2>
       <form @submit.prevent="handleSubmit">
         <div class="form-group">
           <label for="username">Username</label>
@@ -15,24 +16,26 @@
           <label for="confirmPassword">Confirm Password</label>
           <input v-model="form.confirmPassword" id="confirmPassword" type="password" required />
         </div>
-        <button type="submit">
-          {{ isLoginMode ? "Login" : "Register" }}
+        <button type="submit" :disabled="showCookiePopup">
+          {{ isLoginMode ? 'Login' : 'Register' }}
         </button>
       </form>
       <p class="toggle-text">
         {{ isLoginMode ? "Don't have an account?" : "Already have an account?" }}
         <span @click="toggleMode">
-          {{ isLoginMode ? "Register" : "Login" }}
+          {{ isLoginMode ? 'Register' : 'Login' }}
         </span>
-      </p>
+      </p >
     </div>
   </div>
 </template>
 
 <script>
 import { useRouter } from "vue-router";
+import Cookie from '../Display interface/Cookie.vue';
 
 export default {
+  components: { Cookie },
   setup() {
     const router = useRouter();
     return { router };
@@ -45,6 +48,7 @@ export default {
         password: "",
         confirmPassword: "",
       },
+      showCookiePopup: true,
     };
   },
   methods: {
@@ -52,6 +56,11 @@ export default {
       this.isLoginMode = !this.isLoginMode;
       this.form.password = "";
       this.form.confirmPassword = "";
+    },
+
+    async handleConsent(consent) {
+      console.log("User consented:", consent);
+      this.showCookiePopup = false;
     },
 
     async handleSubmit() {
@@ -100,6 +109,7 @@ export default {
             password: this.form.password,
           }),
         });
+        sessionStorage.setItem("username", this.form.username);
 
         const data = await response.json();
         if (response.ok && data.success) {
