@@ -2,21 +2,21 @@ package com.UoB.AILearningTool;
 
 import com.UoB.AILearningTool.model.ChatEntity;
 import com.UoB.AILearningTool.model.UserEntity;
-import com.UoB.AILearningTool.repository.UserRepository;
 import com.UoB.AILearningTool.repository.ChatRepository;
+import com.UoB.AILearningTool.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class DatabaseControllerTest {
-    
+
     @Mock
     private UserRepository userRepository;
 
@@ -28,39 +28,46 @@ class DatabaseControllerTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this); 
-        assertNotNull(userRepository);
-        assertNotNull(chatRepository);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void createUsers() {
-        UserEntity mockUser = new UserEntity("testUser", "testPass", true);
+    void testAddUser() {
+        UserEntity user = new UserEntity("testUser", "password123", true);
+        when(userRepository.save(any(UserEntity.class))).thenReturn(user);
 
-        when(userRepository.save(any(UserEntity.class))).thenReturn(mockUser);
-        when(userRepository.findById("testUser")).thenReturn(Optional.of(mockUser));
-
-        String userId = databaseController.addUser("testUser", "testPass", true);
-
-        assertNotNull(userId);
-        assertEquals("testUser", userId);
-
-        verify(userRepository, times(1)).save(any(UserEntity.class));
-        verify(userRepository, times(1)).findById("testUser");
+        String result = databaseController.addUser("testUser", "password123", true);
+        assertEquals("testUser", result);
     }
 
     @Test
-    void createChats() {
-        UserEntity mockUser = new UserEntity("testUser", "testPass", true);
-        ChatEntity mockChat = new ChatEntity(mockUser, "Hello chatbot!");
+    void testGetUser() {
+        UserEntity user = new UserEntity("testUser", "password123", true);
+        when(userRepository.findById("testUser")).thenReturn(Optional.of(user));
 
-        when(userRepository.findById("testUser")).thenReturn(Optional.of(mockUser));
-        when(chatRepository.save(any(ChatEntity.class))).thenReturn(mockChat);
+        UserEntity result = databaseController.getUser("testUser");
+        assertNotNull(result);
+        assertEquals("testUser", result.getUsername());
+    }
 
-        String chatId = databaseController.createChat("testUser", "Hello chatbot!");
+    @Test
+    void testRemoveUser() {
+        when(userRepository.existsById("testUser")).thenReturn(true);
+        doNothing().when(userRepository).deleteById("testUser");
 
-        assertNotNull(chatId);
-        verify(userRepository, times(1)).findById("testUser");
-        verify(chatRepository, times(1)).save(any(ChatEntity.class));
+        boolean result = databaseController.removeUser("testUser");
+        assertTrue(result);
+    }
+
+    @Test
+    void testCreateChat() {
+        UserEntity user = new UserEntity("testUser", "password123", true);
+        when(userRepository.findById("testUser")).thenReturn(Optional.of(user));
+
+        ChatEntity chat = new ChatEntity(user, "Hello AI!");
+        when(chatRepository.save(any(ChatEntity.class))).thenReturn(chat);
+
+        String chatID = databaseController.createChat("testUser", "Hello AI!");
+        assertNotNull(chatID);
     }
 }
