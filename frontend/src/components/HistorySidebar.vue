@@ -1,23 +1,31 @@
 <template>
-  <aside class="history-sidebar" :class="{ collapsed: isCollapsed }" :style="asideStyles">
-    <!-- Toggle Button (Always in Top Left) -->
-    <button class="toggle-btn" @click="toggleSidebar" :title="isCollapsed ? 'Open History' : 'Close History'">
-      ☰
-    </button>
+  <aside>
+    <!-- Setting button at the bottom -->
+    <button @click="openSettings">⚙️ Setting</button>
 
-    <!-- Sidebar Content (Only visible when expanded) -->
-    <div v-if="!isCollapsed" class="history-container">
-      <!-- New Chat Button -->
-      <button class="chat-item selectable-chat" @click="addChat" :style="newChatButtonStyles" title="New Chat" :disabled="chatInitButtonsDisabled">
-        ➕ {{ getTranslation(currentLanguage, "NEW_CONVERSATION") }}
-      </button>
-
-      <!-- Chat History List -->
-      <div class="history-list-wrapper">
-        <div v-for="chat in chats" :key="chat.chatID">
-          <button class="chat-item selectable-chat" @click="selectChat(chat.chatID)" :class="{ 'selected': currentChatID === chat.chatID }"  :disabled="chatInitButtonsDisabled">
-            {{ chat.title }}
-          </button>
+    <!-- Modal for settings -->
+    <div v-if="isSettingsOpen" class="modal-overlay">
+      <div class="modal-content">
+        <h3>Settings</h3>
+        <ul>
+          <li>
+            <h4>1) Language</h4>
+            <div class="language-buttons">
+              <button @click="changeLanguage('en')">English</button>
+              <button @click="changeLanguage('zh')">Chinese</button>
+            </div>
+          </li>
+          <li>
+            <h4>2) High Contrast Mode</h4>
+            <!-- Button to toggle high contrast mode -->
+            <button @click="toggleHighContrastMode">
+              {{ isHighContrast ? 'Turn Off High Contrast Mode' : 'Turn On High Contrast Mode' }}
+            </button>
+          </li>
+        </ul>
+        <div class="action-buttons">
+          <button @click="Logout">Log out</button>
+          <button class="close-btn" @click="closeSettings">Close</button>
         </div>
       </div>
     </div>
@@ -26,197 +34,160 @@
 
 <script>
 import { getTheme } from "../assets/color.js";
-import { getTranslation } from "@/assets/language";
 
 export default {
-  props: ["chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
   data() {
     return {
-      isCollapsed: false, // Controls sidebar visibility
-      aiServerUrl: "http://localhost:8080",
-      currentTheme: "default", // Tracks the current theme
-      themeStyles: {}, // Stores dynamic styles
+      isSettingsOpen: false,
+      isHighContrast: false, // Tracks the toggle state for high contrast mode
     };
   },
   methods: {
-    getTranslation,
-    async fetchChatHistory() {
-        const username = localStorage.getItem("username");
-        if (!username) {
-            console.error("No username found in localStorage.");
-            return;
-        }
-
-        try {
-            const response = await fetch(`${this.aiServerUrl}/getUserChats?username=${username}`);
-            if (!response.ok) throw new Error("Failed to load chat history.");
-
-            const data = await response.json();
-            console.log("Chat history loaded:", data);
-
-            if (data.chats && data.chats.length > 0) {
-                this.$emit("updateChats", data.chats);
-            } else {
-                console.warn("⚠No chat history found.");
-            }
-        } catch (error) {
-            console.error("Error loading chat history:", error);
-        }
+    openSettings() {
+      this.isSettingsOpen = true;
+      this.$emit("toggleSettings", true); // Notify parent that settings are open
     },
-    addChat() {
-      this.$emit("resetMainContent");
+    closeSettings() {
+      this.isSettingsOpen = false;
+      this.$emit("toggleSettings", false); // Notify parent that settings are closed
     },
-    toggleSidebar() {
-      this.isCollapsed = !this.isCollapsed;
+    changeLanguage(language) {
+      if (language === "en") {
+        alert("Language changed to English");
+      } else if (language === "zh") {
+        alert("Language changed to Chinese");
+      }
     },
-    selectChat(chatID) {
-      this.$emit("chatSelected", chatID);
+    toggleHighContrastMode() {
+      this.isHighContrast = !this.isHighContrast; // Toggle high contrast mode on/off
+      const themeName = this.isHighContrast ? "high_contrast" : "default";
+      this.applyTheme(themeName);
+      this.$emit("highContrastToggled", this.isHighContrast); // Notify parent
+      const event = new CustomEvent("themeChange", { detail: { themeName } });
+      window.dispatchEvent(event);
     },
     applyTheme(themeName) {
       const theme = getTheme(themeName);
-      this.themeStyles = {
-        aside: {
-          backgroundColor: theme.background,
-          color: theme.text,
-          border: `1px solid ${theme.border}`,
-        },
-        button: {
-          backgroundColor: theme.button,
-          color: theme.text,
-          border: `2px solid ${theme.border}`,
-        },
-      };
-    },
-    listenForThemeChange() {
-      window.addEventListener("themeChange", (event) => {
-        this.applyTheme(event.detail.themeName);
+      Object.keys(theme).forEach((key) => {
+        document.documentElement.style.setProperty(`--${key}-color`, theme[key]);
       });
     },
-  },
-  computed: {
-    asideStyles() {
-      return this.themeStyles.aside;
-    },
-    buttonStyles() {
-      return this.themeStyles.button;
-    },
-    newChatButtonStyles() {
-      return {
-        ...this.buttonStyles,
-        backgroundColor: "var(--button-color)",
-      };
+    Logout() {
+      localStorage.clear();
+      document.cookie.split(";").forEach((cookie) => {
+        const name = cookie.split("=")[0].trim();
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+      });
+      this.$router.push("/"); // Redirect to the /cookie page
     },
   },
   mounted() {
+    // Apply default theme on mount
     this.applyTheme("default");
-    this.listenForThemeChange();
-    this.fetchChatHistory();
   },
 };
 </script>
 
-
 <style scoped>
-/* Sidebar Layout */
-.history-sidebar {
-  width: 240px;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  border-right: 2px solid var(--border-color);
-  padding: 12px;
-  background-color: var(--background-color);
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-  transition: width 0.3s ease-in-out;
-  overflow: hidden;
-  position: relative;
-}
-
-/* Fully Collapsed Sidebar */
-.history-sidebar.collapsed {
-  width: 60px;
-  padding: 0;
-  border-right: none;
-}
-
-/* Toggle Button (☰ in Top Left) */
-.toggle-btn {
+/* Sidebar settings button */
+aside {
   position: absolute;
-  top: 10px;
+  bottom: 10px;
   left: 10px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 22px;
-  font-weight: bold;
-  padding: 8px;
-  transition: opacity 0.3s ease-in-out;
-  color: black;
 }
 
-/* Lower the "New Conversation" button */
-.chat-item:first-of-type {
-  margin-top: 40px;
-}
-
-/* Sidebar Content */
-.history-container {
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  padding-top: 12px;
-  max-height: calc(100vh - 150px);
+  justify-content: center;
+  align-items: center;
 }
 
-/* Chat History List - No Bullet Points */
-.history-list-wrapper {
-  flex-grow: 1;
-  overflow-y: auto;
-  padding: 10px;
-  border-radius: 12px;
+.modal-content {
   background-color: var(--background-color);
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  border-radius: 12px;
+  width: 300px;
+  max-width: 90%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
-.chat-item {
-  width: 100%;
-  padding: 14px;
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  margin-bottom: 20px;
+}
+
+.language-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
-  text-align: center;
+  background-color: var(--button-color);
+  color: var(--text-color);
   font-weight: bold;
   transition: background-color 0.3s ease-in-out, transform 0.2s;
-  margin: 10px 0;
-  color: var(--text-color);
-  border-radius: 10px;
-  border: 2px solid var(--border-color);
 }
 
-/* Centered Chat Bubbles */
-.history-list-wrapper .chat-item {
-  width: 100%;
-  padding: 12px;
-  cursor: pointer;
-  text-align: center;
-  font-weight: bold;
-  transition: background-color 0.3s ease-in-out, transform 0.2s;
-  margin: 4px 0;
-  color: var(--text-color);
-  border-radius: 10px;
-  border: 2px solid var(--border-color);
-}
-
-/* Default transparency except for New Conversation */
-.selectable-chat {
-  background-color: transparent;
-}
-
-/* Hover effect - Light Blue */
-.selectable-chat:hover {
-  background-color: lightblue;
-  opacity: 1;
-}
-
-/* Clicked (Selected) effect - Original color */
-.selectable-chat.selected {
+button:hover {
   background-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.18);
+}
+
+.close-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+.close-btn:hover {
+  background-color: #d32f2f;
+}
+
+button:focus {
+  outline: none;
+}
+
+button:active {
+  transform: scale(0.96);
+}
+
+/* Use CSS variables for theming */
+:root {
+  --primary-color: #000000;
+  --secondary-color: #ffffff;
+  --accent-color: #b0b0b0;
+  --background-color: #f4f4f4;
+  --text-color: #2e2e2e;
+  --border-color: #d3d3d3;
+  --button-color: #4caf50;
+  --error-color: #e74c3c;
+  --success-color: #27ae60;
+}
+
+body {
+  color: var(--text-color);
+  background-color: var(--background-color);
 }
 </style>
