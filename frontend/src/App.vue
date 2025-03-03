@@ -3,6 +3,7 @@
     <div>
       <router-view />
     </div>
+
     <SettingSidebar v-if="$route.path !== '/login'" @highContrastToggled="onHighContrastToggled" />
   </div>
 </template>
