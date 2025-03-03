@@ -34,6 +34,7 @@ public class AiLearningToolApplication implements CommandLineRunner {
             return;
         }
 
+
         // Otherwise, proceed with the copy and overwrite
         Path resourcesDir = Paths.get("src", "main", "resources");
         Path targetKeystore = resourcesDir.resolve("keystore.p12");
@@ -44,6 +45,7 @@ public class AiLearningToolApplication implements CommandLineRunner {
         overwriteApplicationProperties(applicationProps);
         System.out.println("application.properties has been updated successfully");
     }
+
 
     private void copyFile(Path source, Path target) throws IOException {
         Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
@@ -57,11 +59,14 @@ public class AiLearningToolApplication implements CommandLineRunner {
                 "spring.servlet.multipart.max-request-size=50MB",
                 "spring.web.resources.static-locations=classpath:/static/",
                 "",
+                "spring.http.encoding.charset=UTF-8",
+                "spring.http.encoding.enabled=true",
+                "spring.http.encoding.force=true",
+                "",
                 "server.ssl.key-store=classpath:keystore.p12",
                 "server.ssl.key-store-password=ailearntool",
                 "server.ssl.key-store-type=PKCS12",
                 "server.ssl.key-alias=myalias",
-                "",
 				
                 "spring.datasource.url=jdbc:sqlite:database.db",
                 "spring.datasource.driver-class-name=org.sqlite.JDBC",

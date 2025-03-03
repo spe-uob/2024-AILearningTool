@@ -99,6 +99,7 @@ public class SpringController {
         }
     }
 
+
     // Create a new chat session with Watsonx
     @PostMapping("/createChat")
     public ResponseEntity<Map<String, Object>> createChat(@RequestBody Map<String, String> payload) {

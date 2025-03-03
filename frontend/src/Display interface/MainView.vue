@@ -17,6 +17,7 @@
         @addMessage="(a, b) => addMessage(a, b)"
         @addChat="(a, b) => addChat(a, b)"
         @updateChatID="(id) => currentChatID = id"
+        @setButtonLock="(status) => this.chatInitButtonsDisabled = status"
     />
   </div>
 </template>
@@ -38,6 +39,7 @@ export default {
       aiServerUrl: "http://localhost:8080",
     };
   },
+  props: ["currentLanguage"],
   methods: {
     updateChatList(newChats) {
         this.chats = newChats;
@@ -125,6 +127,7 @@ export default {
     toggleSettings(isOpen) {
       this.isSettingsOpen = isOpen;
     },
+
   },
   components: {
     HistorySidebar,

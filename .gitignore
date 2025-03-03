@@ -1,7 +1,7 @@
 backend/target
 backend/.idea
 backend/src/main/resources/keystore.p12
-backend/src/main/resources/static
+backend/src/main/resources/static/*
 
 frontend/dist
 frontend/node_modules
@@ -9,4 +9,5 @@ frontend/node_modules
 .idea
 .env
 keystore.p12
+target
 

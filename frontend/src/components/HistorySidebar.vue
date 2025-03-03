@@ -40,10 +40,11 @@ export default {
   },
   methods: {
     getTranslation,
+
     async fetchChatHistory() {
         const username = localStorage.getItem("username");
         if (!username) {
-            console.error("❌ No username found in localStorage.");
+            console.error("No username found in localStorage.");
             return;
         }
 
@@ -52,17 +53,18 @@ export default {
             if (!response.ok) throw new Error("Failed to load chat history.");
 
             const data = await response.json();
-            console.log("✅ Chat history loaded:", data);
+            console.log("Chat history loaded:", data);
 
             if (data.chats && data.chats.length > 0) {
                 this.$emit("updateChats", data.chats);
             } else {
-                console.warn("⚠️ No chat history found.");
+                console.warn("No chat history found.");
             }
         } catch (error) {
-            console.error("❌ Error loading chat history:", error);
+            console.error("Error loading chat history:", error);
         }
     },
+
     addChat() {
       this.$emit("resetMainContent");
     },

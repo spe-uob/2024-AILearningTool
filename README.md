@@ -1,4 +1,11 @@
 # 2024-AILearningTool
+
+<div align="center">
+
+![logo](frontend/src/assets/logo.png)
+
+</div>
+
 ## Table of Contents
 - [Project Brief](#project-brief)
 - [Stakeholders](#stakeholders)
@@ -179,7 +186,7 @@ To get started with developing or contributing to this project, follow the steps
 6. **Open the Project in Your IDE**:
    Open the cloned repository in your preferred Integrated Development Environment (IDE) (we recommend IntelliJ) for further development.
 
-7. **Add keystore.p12 file to the root of the cloned repository**:
+7. **Add keystore.p12 file to backend/src/main/resources in the cloned repository**:
     Keystore has to contain both private key and full certificate chain files.
     Not adding the keystore file will result in unencrypted (non-HTTPS) connection.
 

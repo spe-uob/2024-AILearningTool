@@ -1,29 +1,62 @@
 <template>
   <div class="login-container">
-    <Cookie v-if="showCookiePopup" @consent-choice="handleConsent" />
+    <Cookie v-if="showCookiePopup" @consent-choice="handleConsent" :currentLanguage="currentLanguage"/>
+
     <div class="card">
-      <h2>{{ isLoginMode ? 'Login' : 'Register' }}</h2>
+      <h2>
+        {{
+          isLoginMode ?
+              getTranslation(currentLanguage, "LOG_IN") :
+              getTranslation(currentLanguage, "REGISTER")
+        }}
+      </h2>
+
+
       <form @submit.prevent="handleSubmit">
         <div class="form-group">
-          <label for="username">Username</label>
+          <label for="username">
+            {{
+              getTranslation(currentLanguage, "USERNAME")
+            }}
+          </label>
           <input v-model="form.username" id="username" type="text" required />
         </div>
         <div class="form-group">
-          <label for="password">Password</label>
+          <label for="password">
+            {{
+              getTranslation(currentLanguage, "PASSWORD")
+            }}
+          </label>
           <input v-model="form.password" id="password" type="password" required />
         </div>
         <div v-if="!isLoginMode" class="form-group">
-          <label for="confirmPassword">Confirm Password</label>
+          <label for="confirmPassword">
+            {{
+              getTranslation(currentLanguage, "CONFIRM_PASSWORD")
+            }}
+          </label>
           <input v-model="form.confirmPassword" id="confirmPassword" type="password" required />
         </div>
         <button type="submit" :disabled="showCookiePopup">
-          {{ isLoginMode ? 'Login' : 'Register' }}
+          {{
+            isLoginMode ?
+                getTranslation(currentLanguage, "LOG_IN") :
+                getTranslation(currentLanguage, "REGISTER")
+          }}
         </button>
       </form>
       <p class="toggle-text">
-        {{ isLoginMode ? "Don't have an account?" : "Already have an account?" }}
+        {{
+          isLoginMode ?
+              getTranslation(currentLanguage, "DONT_HAVE_AN_ACCOUNT") :
+              getTranslation(currentLanguage, "ALREADY_HAVE_AN_ACCOUNT")
+        }}
         <span @click="toggleMode">
-          {{ isLoginMode ? 'Register' : 'Login' }}
+          {{
+            isLoginMode ?
+                getTranslation(currentLanguage, "REGISTER") :
+                getTranslation(currentLanguage, "LOG_IN")
+          }}
         </span>
       </p >
     </div>
@@ -33,6 +66,7 @@
 <script>
 import { useRouter } from "vue-router";
 import Cookie from '../Display interface/Cookie.vue';
+import {getTranslation} from "../assets/language";
 
 export default {
   components: { Cookie },
@@ -40,6 +74,8 @@ export default {
     const router = useRouter();
     return { router };
   },
+  props: ["currentLanguage"],
+
   data() {
     return {
       isLoginMode: true,
@@ -52,11 +88,20 @@ export default {
     };
   },
   methods: {
+    getTranslation,
+    checkUserSession() {
+      const userID = localStorage.getItem("userId");
+      if (userID) {
+        console.log("UserID found, redirecting to /main...");
+        this.$router.push("/main");
+      }
+    },
     toggleMode() {
       this.isLoginMode = !this.isLoginMode;
       this.form.password = "";
       this.form.confirmPassword = "";
     },
+
 
     async handleConsent(consent) {
       console.log("User consented:", consent);
@@ -68,7 +113,9 @@ export default {
         this.login();
       } else {
         if (this.form.password !== this.form.confirmPassword) {
-          alert("Passwords do not match!");
+          alert(
+              getTranslation(this.currentLanguage, "PASSWORDS_DO_NOT_MATCH")
+          );
           return;
         }
         this.register();

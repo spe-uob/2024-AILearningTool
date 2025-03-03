@@ -37,6 +37,7 @@ public class ChatTest {
         String initialMessage = "This is a first message.";
         String expectedMessageHistory = "<|system|>\nYour name is AI Learning Tool, and you are an assistant for IBM SkillsBuild..."
                 + "<|user|>\nThis is a first message.\n<|user|>\nTell me a joke.";
+
         String extraUserMessage = "Tell me a joke.";
 
         // Create a chat
