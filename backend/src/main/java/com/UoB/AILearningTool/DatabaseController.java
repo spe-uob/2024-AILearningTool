@@ -6,8 +6,8 @@ import com.UoB.AILearningTool.repository.ChatRepository;
 import com.UoB.AILearningTool.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class DatabaseController {
@@ -20,45 +20,55 @@ public class DatabaseController {
         this.chatRepository = chatRepository;
     }
 
-    public UserEntity getUser(String userID) {
-        return userRepository.findById(userID).orElse(null);
+
+    public UserEntity getUser(String username) {
+        return userRepository.findById(username).orElse(null);
     }
 
     public String addUser(String username, String password, boolean optionalConsent) {
-        if (userRepository.findByUsername(username).isPresent()) {
-            return null;
-        }
         UserEntity user = new UserEntity(username, password, optionalConsent);
-        UserEntity savedUser = userRepository.save(user);
-        if (savedUser != null && savedUser.getId() != null) {
-            return savedUser.getId();
-        } else {
-            return null; 
-        }
+        userRepository.save(user);
+        return username; 
     }
 
-    public boolean removeUser(String id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
+  
+    public boolean removeUser(String username) {
+        if (userRepository.existsById(username)) {
+            userRepository.deleteById(username);
             return true;
         }
         return false;
     }
 
-    public String createChat(UserEntity user, String initialMessage) {
+  
+    public String createChat(String username, String initialMessage) {
+        
+        UserEntity user = userRepository.findById(username).orElse(null);
+        if (user == null) {
+            return null; 
+        }
+
+        
         ChatEntity chat = new ChatEntity(user, initialMessage);
-        chatRepository.save(chat);
-        return chat.getChatID();
+        chatRepository.save(chat); 
+        return chat.getChatID(); 
     }
 
-    public ChatEntity getChat(UserEntity user, String chatID) {
-        Optional<ChatEntity> chat = chatRepository.findById(chatID);
-        return chat.orElse(null);
+    
+    public ChatEntity getChat(String username, String chatID) {
+        
+        Optional<UserEntity> userOpt = userRepository.findById(username);
+        if (userOpt.isEmpty()) {
+            return null;
+        }
+
+        Optional<ChatEntity> chatOpt = chatRepository.findById(chatID);
+        return chatOpt.filter(chat -> chat.getOwner().getUsername().equals(username)).orElse(null);
     }
 
-    public Boolean deleteChat(UserEntity user, String chatID) {
-        Optional<ChatEntity> chat = chatRepository.findById(chatID);
-        if (chat.isPresent() && chat.get().getOwner().equals(user)) {
+    public boolean deleteChat(String username, String chatID) {
+        Optional<ChatEntity> chatOpt = chatRepository.findById(chatID);
+        if (chatOpt.isPresent() && chatOpt.get().getOwner().getUsername().equals(username)) {
             chatRepository.deleteById(chatID);
             return true;
         }
