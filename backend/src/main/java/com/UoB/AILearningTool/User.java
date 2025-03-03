@@ -21,17 +21,9 @@ public class User {
         this.lastActivityTime = LocalDateTime.now();
     }
 
-    // Existing constructor
-    public User(boolean optionalConsent) {
+    public User(String username, boolean optionalConsent) {
         updateLastActivityTime();
-        this.id = StringTools.RandomString(25);
-        this.optionalConsent = optionalConsent;
-    }
-
-    // New constructor for creating User with specific ID and consent status
-    public User(String id, boolean optionalConsent) {
-        updateLastActivityTime();
-        this.id = id;
+        this.id = username;
         this.optionalConsent = optionalConsent;
     }
 }
