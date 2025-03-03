@@ -89,7 +89,8 @@ export default {
         const data = await response.json();
         if (response.ok && data.success) {
           console.log("Login successful. Redirecting to /main...");
-          this.router.push(`/main?username=${this.form.username}`); // ✅ 登录后带 `username`
+          localStorage.setItem("username", this.form.username);
+          this.router.push(`/main?username=${this.form.username}`); 
         } else {
           alert(data.message || "Login failed!");
         }
