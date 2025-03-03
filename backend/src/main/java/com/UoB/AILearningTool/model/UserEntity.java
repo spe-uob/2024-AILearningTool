@@ -9,7 +9,6 @@ public class UserEntity {
     @Id
     @Column(name = "username", unique = true, nullable = false)
     private String username; 
-
     @Column(name = "password", nullable = false)
     private String password;
 
@@ -18,6 +17,7 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatEntity> chats;  
+
     public UserEntity() {}
 
     public UserEntity(String username, String password, boolean optionalConsent) {
