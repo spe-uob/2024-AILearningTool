@@ -23,7 +23,7 @@ public class ChatEntity {
     public ChatEntity(UserEntity owner, String initialMessage) {
         this.chatID = UUID.randomUUID().toString();  
         this.owner = owner;
-        this.messageHistory = "<|user|>\n" + initialMessage;
+        this.messageHistory = "<|system|>\n" + initialMessage;
     }
 
     public String getChatID() {
