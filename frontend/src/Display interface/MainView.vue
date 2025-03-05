@@ -6,6 +6,7 @@
           @chatSelected="(id) => loadChat(id)"
           :currentChatID="currentChatID"
           :chats="chats"
+          :currentLanguage="currentLanguage"
           @updateChats="updateChatList"
       />
       <SettingSidebar @toggleSettings="toggleSettings"/>
@@ -13,6 +14,7 @@
     <MainContent
         :messages="messages"
         :chats="chats"
+        :currentLanguage="currentLanguage"
         :currentChatID="currentChatID"
         @addMessage="(a, b) => addMessage(a, b)"
         @addChat="(a, b) => addChat(a, b)"
