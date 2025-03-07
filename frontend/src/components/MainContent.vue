@@ -42,7 +42,7 @@
             <strong v-if="msg.sender === 'user'">{{ getTranslation(currentLanguage, "USER") }}</strong>
             <strong v-else-if="msg.sender === 'assistant'">{{ getTranslation(currentLanguage, "AI") }}</strong>
             <strong v-else>{{ msg.sender }}</strong>
-            <p>{{ msg.content }}</p>
+            <p v-html="formatMessage(msg.content)"></p>
           </div>
         </div>
 
@@ -64,6 +64,7 @@
 
 <script>
 import axios from "axios";
+import { marked } from "marked";
 import { getTheme } from "../assets/color.js";
 import {getTranslation} from "../assets/language";
 
@@ -94,6 +95,14 @@ export default {
   methods: {
     getTheme,
     getTranslation,
+
+    /** 
+     * Converts markdown format to HTML. 
+     */
+    formatMessage(message) {
+      // Use marked to convert markdown to HTML.
+      return marked(message);
+    },
     /**
      * Initializes a new chat with a predefined message.
      */
