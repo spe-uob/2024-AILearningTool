@@ -48,7 +48,7 @@
           @click="speakMessage(msg.content)"
           class="tts-button"
           >
-          Speak
+          <i class="fas fa-volume-up"></i>
           </button>
           </div>
         </div>
