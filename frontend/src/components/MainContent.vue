@@ -43,6 +43,13 @@
             <strong v-else-if="msg.sender === 'assistant'">{{ getTranslation(currentLanguage, "AI") }}</strong>
             <strong v-else>{{ msg.sender }}</strong>
             <p v-html="formatMessage(msg.content)"></p>
+            <button
+          v-if="msg.sender === 'assistant'"
+          @click="speakMessage(msg.content)"
+          class="tts-button"
+          >
+          Speak
+          </button>
           </div>
         </div>
 
@@ -117,7 +124,7 @@ export default {
         console.warn("Speech synthesis is not supported in this browser.");
       }
     },
-    
+
     /**
      * Initializes a new chat with a predefined message.
      */
