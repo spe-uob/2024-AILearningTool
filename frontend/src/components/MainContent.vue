@@ -177,20 +177,21 @@ export default {
       this.userInput = "";
 
       try {
-        const response = await axios.get(this.aiServerURL + "/sendMessage", {
-          params: {
-            userID: this.userId,
-            chatID: this.currentChatID,
-            newMessage: messageToSend,
-          },
-          withCredentials: true,
-        });
+        let response = await fetch(this.aiServerURL + "/sendMessage?" + new URLSearchParams({
+          "userID": this.userId,
+          "chatID": this.currentChatID,
+          "newMessage": messageToSend,
+        }),{
+              method: "GET",
+              credentials: "include",
+            }
+        );
 
-        if (response.status !== 200) {
+        if (! response.ok) {
           throw new Error(`Unexpected response code: ${response.status}`);
         }
-        let responseMessage = (JSON.parse(response.data))["content"];
-        this.$emit("addMessage", "assistant", responseMessage);
+        let responseJSON = await response.json();
+        this.$emit("addMessage", "assistant", (responseJSON["content"]));
       } catch (error) {
         console.error("Error sending message:", error);
         this.$emit("addMessage", "System",
