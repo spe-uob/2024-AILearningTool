@@ -499,17 +499,4 @@ button {
   transform: scale(0.96);
 }
 
-.tts-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.5em;
-  color: var(--accent-color);
-  margin-top: 8px;
-}
-
-.tts-button:hover {
-  color: var(--button-color);
-}
-
 </style>
