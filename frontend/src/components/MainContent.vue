@@ -124,7 +124,7 @@ export default {
         console.warn("Speech synthesis is not supported in this browser.");
       }
     },
-
+    
     /**
      * Initializes a new chat with a predefined message.
      */
@@ -497,6 +497,19 @@ button {
 
 .button-container button:active {
   transform: scale(0.96);
+}
+
+.tts-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5em;
+  color: var(--accent-color);
+  margin-top: 8px;
+}
+
+.tts-button:hover {
+  color: var(--button-color);
 }
 
 </style>
