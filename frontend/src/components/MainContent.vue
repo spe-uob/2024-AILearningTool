@@ -43,13 +43,9 @@
             <strong v-else-if="msg.sender === 'assistant'">{{ getTranslation(currentLanguage, "AI") }}</strong>
             <strong v-else>{{ msg.sender }}</strong>
             <p v-html="formatMessage(msg.content)"></p>
-            <button
-          v-if="msg.sender === 'assistant'"
-          @click="speakMessage(msg.content)"
-          class="tts-button"
-          >
-          <i class="fas fa-volume-up"></i>
-          </button>
+            <button v-if="msg.sender === 'assistant'" @click="speakMessage(msg.content)" class="tts-button">
+              <i class="fa-solid fa-volume-up"></i>
+            </button>
           </div>
         </div>
 
