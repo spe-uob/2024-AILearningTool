@@ -252,7 +252,6 @@ public class SpringController {
         }
 
         JSONArray messageHistory = chat.getMessageHistory(user);
-        log.warn("History: {}", messageHistory.toString());
 
         // If we reach here, chat != null and messageHistory != null
         response.setStatus(200);
