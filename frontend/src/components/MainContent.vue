@@ -63,7 +63,6 @@
 </template>
 
 <script>
-import axios from "axios";
 import { getTheme } from "../assets/color.js";
 import {getTranslation} from "../assets/language";
 
