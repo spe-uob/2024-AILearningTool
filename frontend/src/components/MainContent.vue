@@ -103,6 +103,21 @@ export default {
       // Use marked to convert markdown to HTML.
       return marked(message);
     },
+
+        /**
+     * Uses the Web Speech API to speak the given text.
+     */
+     speakMessage(text) {
+      if ("speechSynthesis" in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        // Optional: Configure properties like voice, pitch, rate, and volume.
+        utterance.lang = "en-US"; // Change if necessary
+        window.speechSynthesis.speak(utterance);
+      } else {
+        console.warn("Speech synthesis is not supported in this browser.");
+      }
+    },
+    
     /**
      * Initializes a new chat with a predefined message.
      */
