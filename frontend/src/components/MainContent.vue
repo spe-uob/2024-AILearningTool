@@ -44,7 +44,9 @@
             <strong v-else>{{ msg.sender }}</strong>
             <p v-html="formatMessage(msg.content)"></p>
             <button v-if="msg.sender === 'assistant'" @click="speakMessage(msg.content)" class="tts-button">
-              <i class="fa-solid fa-volume-up"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="24" height="24">
+             <path fill="currentColor" d="M215.03 71.05L88.03 160H24C10.75 160 0 170.8 0 184v144c0 13.25 10.75 24 24 24h64.03l127-88.96C229.1 327.3 240 314.2 240 298V214c0-16.25-10.88-29.3-24.97-42.95zM552 246.6v-35.22c0-19.57-21.54-29.33-34.12-16.12L448 277.3v-42.54c0-19.57-21.54-29.33-34.12-16.12l-32 32c-12.5 12.5-12.5 32.75 0 45.25l32 32c12.59 12.21 34.12 3.45 34.12-16.12V277.3l69.88 71.1c12.58 13.21 34.12 3.45 34.12-16.12v-35.22c0-10.5-7.25-19.8-17.12-22.9z"/>
+            </svg>
             </button>
           </div>
         </div>
