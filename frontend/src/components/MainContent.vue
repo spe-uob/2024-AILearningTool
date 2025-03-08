@@ -136,7 +136,7 @@ export default {
         if (!response.ok) {
           throw new Error("Non-200 backend API response");
         } else {
-          this.processChatHistory(await response.text());
+          await this.processChatHistory(await response.json());
         }
       });
     },
@@ -145,44 +145,11 @@ export default {
      * Processes retrieved chat history and structures it for display.
      */
     async processChatHistory(messageHistory) {
-      messageHistory = String(messageHistory);
-      let currentRole;
-      let nextRole;
-      let nextRoleIndex;
-      let currentMessage;
-      for (let i = 0; ; i++) {
-        if (i === 0) {
-          currentRole = "<|system|>";
-          nextRole = "<|user|>";
-        } else if (i % 2 !== 0) {
-          currentRole = "<|user|>";
-          nextRole = "<|assistant|>";
-        } else {
-          currentRole = "<|assistant|>";
-          nextRole = "<|user|>";
-        }
-        if (messageHistory.includes(currentRole)) {
-          messageHistory = messageHistory.substring(
-              messageHistory.indexOf(currentRole) + currentRole.length
-          );
-          nextRoleIndex = messageHistory.indexOf(nextRole);
-          if (nextRoleIndex !== -1) {
-            currentMessage = messageHistory.substring(
-                0,
-                messageHistory.indexOf(nextRole)
-            );
-          } else {
-            currentMessage = messageHistory;
-          }
-          if (currentRole === "<|system|>") {
-            continue;
-          }
-          this.$emit("addMessage", this.currentTurn, currentMessage);
-          this.currentTurn = this.currentTurn === "user" ? "assistant" : "user";
-        } else {
-          break;
-        }
+      // New code starts here
+      for (let i = 0; i < messageHistory.length; i++) {
+        this.$emit("addMessage", ((i % 2 === 0) ? "user" : "assistant"), messageHistory[i]["content"]);
       }
+      // New code ends here
       this.$emit("setButtonLock", false)
     },
 
@@ -222,14 +189,15 @@ export default {
         if (response.status !== 200) {
           throw new Error(`Unexpected response code: ${response.status}`);
         }
-
-        this.$emit("addMessage", "assistant", response.data);
+        let responseMessage = (JSON.parse(response.data))["content"];
+        this.$emit("addMessage", "assistant", responseMessage);
       } catch (error) {
         console.error("Error sending message:", error);
         this.$emit("addMessage", "System",
             localStorage.getItem("langCode"), "FAILED_TO_SEND_MESSAGE");
       }
       this.scrollToBottom();
+      this.$emit("setButtonLock", false)
     },
     
     scrollToBottom() {
