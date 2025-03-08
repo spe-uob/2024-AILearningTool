@@ -118,7 +118,7 @@ export default {
       if ("speechSynthesis" in window) {
         const utterance = new SpeechSynthesisUtterance(text);
         // Optional: Configure properties like voice, pitch, rate, and volume.
-        utterance.lang = "en-US"; // Change if necessary
+        utterance.lang = "en-UK"; // Change if necessary
         window.speechSynthesis.speak(utterance);
       } else {
         console.warn("Speech synthesis is not supported in this browser.");
