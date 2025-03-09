@@ -43,13 +43,13 @@
             <strong v-else-if="msg.sender === 'assistant'">{{ getTranslation(currentLanguage, "AI") }}</strong>
             <strong v-else>{{ msg.sender }}</strong>
             <p v-html="formatMessage(msg.content)"></p>
-            <button
-              v-if="msg.sender === 'assistant'"
-              @click="speakMessage(msg.content)"
-              class="tts-button"
-            >
-               Speak
-            </button>
+            
+            <!-- Add TTS button below the message -->
+             <div v-if="msg.sender === 'assistant'" class="tts-button-wrapper">
+              <button @click="speakMessage(msg.content)" class="tts-button">
+                <i class="fas fa-volume-up"></i>
+              </button>
+             </div>
           </div>
         </div>
 
@@ -117,8 +117,9 @@ export default {
      speakMessage(text) {
       if ("speechSynthesis" in window) {
         const utterance = new SpeechSynthesisUtterance(text);
-        // Optional: Configure properties like voice, pitch, rate, and volume.
-        utterance.lang = "en-UK"; // Change if necessary
+        utterance.rate = 1.1
+        utterance.pitch = 1.0
+        utterance.lang = "en-UK";
         window.speechSynthesis.speak(utterance);
       } else {
         console.warn("Speech synthesis is not supported in this browser.");
@@ -499,4 +500,21 @@ button {
   transform: scale(0.96);
 }
 
+.tts-button-wrapper {
+  margin-top: 5px;
+  text-align: left;
+}
+
+.tts-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2em;
+  color: var(--accent-color);
+  padding: 2px;
+}
+
+.tts-button:hover {
+color: var(--accent-color);
+}
 </style>
