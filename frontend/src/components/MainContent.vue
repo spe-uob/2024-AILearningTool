@@ -47,7 +47,7 @@
             <!-- Add TTS button below the message -->
              <div v-if="msg.sender === 'assistant'" class="tts-button-wrapper">
               <button @click="speakMessage(msg.content)" class="tts-button">
-                <i class="fas fa-volume-up"></i>
+                <font-awesome-icon :icon="['fas', 'volume-up']" />
               </button>
              </div>
           </div>
@@ -115,14 +115,14 @@ export default {
      * Uses the Web Speech API to speak the given text.
      */
      speakMessage(text) {
-      if ("speechSynthesis" in window) {
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel
+      } else {
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.rate = 1.1
         utterance.pitch = 1.0
         utterance.lang = "en-UK";
         window.speechSynthesis.speak(utterance);
-      } else {
-        console.warn("Speech synthesis is not supported in this browser.");
       }
     },
     
