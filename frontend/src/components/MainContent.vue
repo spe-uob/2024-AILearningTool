@@ -29,9 +29,8 @@
       <div v-if="this.currentChatID.length > 0" class="chat-container">
         <!-- Scrollable message area -->
         <div class="messages-container" ref="messagesContainer">
-          <div
-              v-for="(msg, index) in messages"
-              :key="index"
+          <div v-for="(msg, index) in messages">
+             <div :key="index"
               class="message"
               :class="{
               'user-message': msg.sender === 'user',
@@ -43,11 +42,12 @@
             <strong v-else-if="msg.sender === 'assistant'">{{ getTranslation(currentLanguage, "AI") }}</strong>
             <strong v-else>{{ msg.sender }}</strong>
             <p v-html="formatMessage(msg.content)"></p>
-            
+            </div>
             <!-- Add TTS button below the message -->
              <div v-if="msg.sender === 'assistant'" class="tts-button-wrapper">
               <button @click="speakMessage(msg.content)" class="tts-button">
-                <font-awesome-icon :icon="['fas', 'volume-up']" />
+                <i class="fa fa-volume-up" aria-hidden="true"></i>
+
               </button>
              </div>
           </div>
