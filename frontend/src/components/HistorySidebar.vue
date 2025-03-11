@@ -42,27 +42,27 @@ export default {
     getTranslation,
 
     async fetchChatHistory() {
-        const username = localStorage.getItem("username");
-        if (!username) {
-            console.error("No username found in localStorage.");
-            return;
+      const username = localStorage.getItem("username");
+      if (!username) {
+        console.error("No username found in localStorage.");
+        return;
+      }
+
+      try {
+        const response = await fetch(`${this.aiServerUrl}/getUserChats?username=${username}`);
+        if (!response.ok) throw new Error("Failed to load chat history.");
+
+        const data = await response.json();
+        console.log("Chat history loaded:", data);
+
+        if (data.chats && data.chats.length > 0) {
+          this.$emit("updateChats", data.chats);
+        } else {
+          console.warn("No chat history found.");
         }
-
-        try {
-            const response = await fetch(`${this.aiServerUrl}/getUserChats?username=${username}`);
-            if (!response.ok) throw new Error("Failed to load chat history.");
-
-            const data = await response.json();
-            console.log("Chat history loaded:", data);
-
-            if (data.chats && data.chats.length > 0) {
-                this.$emit("updateChats", data.chats);
-            } else {
-                console.warn("No chat history found.");
-            }
-        } catch (error) {
-            console.error("Error loading chat history:", error);
-        }
+      } catch (error) {
+        console.error("Error loading chat history:", error);
+      }
     },
 
     addChat() {
