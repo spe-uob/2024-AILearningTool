@@ -7,6 +7,7 @@ import com.UoB.AILearningTool.repository.ChatRepository;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import com.UoB.AILearningTool.StringTools;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -41,9 +42,17 @@ public class SpringController {
         if (userRepository.existsById(username)) {
             return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Username already exists"));
         }
+        
+        String sessionID = StringTools.generateSessionID();
 
-        DBC.addUser(username, password, true);
-        return ResponseEntity.ok(Collections.singletonMap("success", true));
+        UserEntity newUser = new UserEntity(username, password, true);
+        newUser.setSessionID(sessionID); 
+        userRepository.save(newUser);
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "sessionID", sessionID 
+        ));
     }
 
     // User Login
@@ -55,7 +64,10 @@ public class SpringController {
         Optional<UserEntity> userOptional = userRepository.findById(username);
 
         if (userOptional.isPresent() && userOptional.get().getPassword().equals(password)) {
-            List<ChatEntity> chats = chatRepository.findByOwner(userOptional.get());
+            UserEntity user = userOptional.get();
+            String sessionID = user.getSessionID();
+
+            List<ChatEntity> chats = chatRepository.findByOwner(user);
             List<String> chatIDs = new ArrayList<>();
 
             for (ChatEntity chat : chats) {
@@ -63,8 +75,10 @@ public class SpringController {
             }
 
             return ResponseEntity.ok(Map.of(
-                "success", true,
-                "chatIDs", chatIDs
+                    "success", true,
+                    "username",username,
+                    "sessionID", sessionID, 
+                    "chatIDs", chatIDs
             ));
         } else {
             return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Invalid username or password"));
@@ -103,31 +117,36 @@ public class SpringController {
     // Create a new chat session with Watsonx
     @PostMapping("/createChat")
     public ResponseEntity<Map<String, Object>> createChat(@RequestBody Map<String, String> payload) {
-        String username = payload.get("username");
+        String sessionID = payload.get("sessionID");
         String initialMessage = payload.get("initialMessage");
 
-        if (username == null || username.isEmpty()) {
-            System.out.println("username is empty");
-            return ResponseEntity.status(400).body(Collections.singletonMap("message", "Username cannot be null"));
+        if (sessionID == null || sessionID.isEmpty()) {
+            return ResponseEntity.status(400).body(Collections.singletonMap("message", "SessionID cannot be null"));
         }
         if (initialMessage == null || initialMessage.isEmpty()) {
-            System.out.println("initialMessage is empty");
             return ResponseEntity.status(400).body(Collections.singletonMap("message", "Initial message cannot be null"));
-        
-        }
-        if (!userRepository.existsById(username)) {
-            return ResponseEntity.status(401).body(Collections.singletonMap("message", "User not found"));
         }
 
-        String chatID = DBC.createChat(username, initialMessage);
-
-        ChatEntity chat = chatRepository.findById(chatID).orElse(null);
-        if (chat == null) {
-            return ResponseEntity.status(400).body(Collections.singletonMap("message", "Chat creation failed"));
+        Optional<UserEntity> userOptional = userRepository.findBySessionID(sessionID); 
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(404).body(Collections.singletonMap("message", "User not found for sessionID"));
         }
 
-        String messageHistory = chat.getMessageHistory();
-        WatsonxResponse wresponse = WXC.sendUserMessage(messageHistory);
+        UserEntity user = userOptional.get(); 
+
+        Optional<ChatEntity> existingChat = chatRepository.findBySessionID(sessionID);
+        ChatEntity chat;
+
+        if (existingChat.isEmpty()) {
+            chat = new ChatEntity(user, initialMessage, sessionID); 
+            chatRepository.save(chat);
+        } else {
+            chat = existingChat.get();
+        }
+
+        String chatID = chat.getChatID();
+
+        WatsonxResponse wresponse = WXC.sendUserMessage(chat.getMessageHistory());
 
         if (wresponse.statusCode == 200) {
             chat.addAIMessage(wresponse.responseText);
@@ -135,14 +154,15 @@ public class SpringController {
         }
 
         return ResponseEntity.ok(Map.of(
-            "chatID", chatID,
-            "initialMessage", initialMessage,
-            "aiResponse", wresponse.responseText
+                "chatID", chatID,
+                "sessionID", chat.getSessionID(),
+                "initialMessage", initialMessage,
+                "aiResponse", wresponse.responseText,
+                "messageHistory", chat.getMessageHistory()
         ));
     }
 
 
-    // Send a message to the chat and receive a response
     @PostMapping("/sendMessage")
     public ResponseEntity<Map<String, Object>> sendMessage(@RequestBody Map<String, String> payload) {
         String username = payload.get("username");
