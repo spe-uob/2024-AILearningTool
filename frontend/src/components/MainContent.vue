@@ -69,7 +69,7 @@ import axios from "axios";
 import { marked } from "marked";
 import { getTheme } from "../assets/color.js";
 import {getTranslation} from "../assets/language";
-import TypingText from "./TypingText.vue";
+import TypingText from "../components/helpers/TypingText.vue";
 
 export default {
   components: {
