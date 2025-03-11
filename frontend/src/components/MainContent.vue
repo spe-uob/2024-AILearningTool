@@ -42,7 +42,9 @@
             <strong v-if="msg.sender === 'user'">{{ getTranslation(currentLanguage, "USER") }}</strong>
             <strong v-else-if="msg.sender === 'assistant'">{{ getTranslation(currentLanguage, "AI") }}</strong>
             <strong v-else>{{ msg.sender }}</strong>
-            <p v-html="formatMessage(msg.content)"></p>
+            <!-- Use TypingText for assistant messages instead of static output -->
+            <TypingText v-if="msg.sender === 'assistant'" :text="formatMessage(msg.content)" :speed="15" />
+            <p v-else v-html="formatMessage(msg.content)"></p>
           </div>
         </div>
 
@@ -67,8 +69,12 @@ import axios from "axios";
 import { marked } from "marked";
 import { getTheme } from "../assets/color.js";
 import {getTranslation} from "../assets/language";
+import TypingText from "./TypingText.vue";
 
 export default {
+  components: {
+    TypingText  
+  },
   data() {
     return {
       userInput: "",
