@@ -14,11 +14,11 @@
     <MainContent
         :messages="messages"
         :chats="chats"
-        :currentLanguage="currentLanguage"
         :currentChatID="currentChatID"
         @addMessage="(a, b) => addMessage(a, b)"
         @addChat="(a, b) => addChat(a, b)"
         @updateChatID="(id) => currentChatID = id"
+        :currentLanguage="currentLanguage"
         @setButtonLock="(status) => this.chatInitButtonsDisabled = status"
     />
   </div>
@@ -52,29 +52,7 @@ export default {
       this.messages = [];
     },
 
-    async loadChat(chatID) {
-      if (!chatID) return;
 
-      this.resetMainContent();
-      this.currentChatID = chatID;
-
-      try {
-        const response = await axios.get(`${this.aiServerUrl}/getChatHistory`, {
-          params: {
-            username: sessionStorage.getItem("username"),
-            chatID: chatID
-          },
-        });
-
-        if (response.status === 200) {
-          this.messages = this.processChatHistory(response.data.history);
-        } else {
-          console.error("Failed to fetch chat history.");
-        }
-      } catch (error) {
-        console.error("Error fetching chat history:", error);
-      }
-    },
 
     processChatHistory(messageHistory) {
       let messages = [];
@@ -101,29 +79,11 @@ export default {
       });
     },
 
-    async addChat() {
-      try {
-        const response = await axios.post(`${this.aiServerUrl}/createChat`, {
-          username: sessionStorage.getItem("username"),
-          initialMessage: "Hello, how can I help?",
-        });
-
-        if (response.status === 200) {
-          const newChat = {
-            chatID: response.data.chatID,
-            title: "New Chat",
-          };
-
-          this.chats.push(newChat);
-          localStorage.setItem("chats", JSON.stringify(this.chats));
-
-          this.loadChat(newChat.chatID);
-        } else {
-          console.error("Failed to create chat.");
-        }
-      } catch (error) {
-        console.error("Error creating chat:", error);
-      }
+    addChat(chatID, title) {
+      this.chats.push({
+        chatID: chatID,
+        title: title
+      })
     },
 
     toggleSettings(isOpen) {
