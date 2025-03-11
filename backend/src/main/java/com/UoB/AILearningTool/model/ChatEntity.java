@@ -11,18 +11,21 @@ public class ChatEntity {
     private String chatID;
 
     @ManyToOne
-    @JoinColumn(name = "username", nullable = false) 
+    @JoinColumn(name = "username", nullable = false)
     private UserEntity owner;
+
+    @Column(name = "sessionid", unique = true, nullable = false)
+    private String sessionID;
 
     @Column(name = "message_history", columnDefinition = "TEXT")
     private String messageHistory;
 
-    public ChatEntity() {} 
+    public ChatEntity() {}
 
-   
-    public ChatEntity(UserEntity owner, String initialMessage) {
-        this.chatID = UUID.randomUUID().toString();  
+    public ChatEntity(UserEntity owner, String initialMessage, String sessionID) {
+        this.chatID = UUID.randomUUID().toString();
         this.owner = owner;
+        this.sessionID = sessionID;
         this.messageHistory = "<|system|>\n" + initialMessage;
     }
 
@@ -30,8 +33,20 @@ public class ChatEntity {
         return chatID;
     }
 
+    public void setChatID(String chatID) {
+        this.chatID = chatID;
+    }
+
     public UserEntity getOwner() {
         return owner;
+    }
+
+    public String getSessionID() {
+        return sessionID;
+    }
+
+    public void setSessionID(String sessionID) { 
+        this.sessionID = sessionID;
     }
 
     public String getMessageHistory() {
