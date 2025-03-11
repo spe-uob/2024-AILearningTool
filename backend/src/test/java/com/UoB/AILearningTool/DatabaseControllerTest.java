@@ -64,10 +64,12 @@ class DatabaseControllerTest {
         UserEntity user = new UserEntity("testUser", "password123", true);
         when(userRepository.findById("testUser")).thenReturn(Optional.of(user));
 
-        ChatEntity chat = new ChatEntity(user, "Hello AI!");
+        ChatEntity chat = new ChatEntity(user, "Hello AI!", "mockSessionID"); 
         when(chatRepository.save(any(ChatEntity.class))).thenReturn(chat);
 
-        String chatID = databaseController.createChat("testUser", "Hello AI!");
-        assertNotNull(chatID);
+        ChatEntity createdChat = databaseController.createChat("mockSessionID", "Hello AI!");
+        assertNotNull(createdChat);
+        assertEquals("mockSessionID", createdChat.getSessionID()); 
     }
+
 }
