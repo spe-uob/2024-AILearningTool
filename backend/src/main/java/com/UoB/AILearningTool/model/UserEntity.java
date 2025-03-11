@@ -2,6 +2,7 @@ package com.UoB.AILearningTool.model;
 
 import jakarta.persistence.*;
 import java.util.List;
+import com.UoB.AILearningTool.StringTools;
 
 @Entity
 @Table(name = "users")
@@ -20,10 +21,14 @@ public class UserEntity {
 
     public UserEntity() {}
 
+    @Column(name = "sessionid", unique = true, nullable = false)
+    private String sessionID;
+
     public UserEntity(String username, String password, boolean optionalConsent) {
         this.username = username;
         this.password = password;
         this.optionalConsent = optionalConsent;
+        this.sessionID = StringTools.generateSessionID();
     }
 
     public String getUsername() {
@@ -36,5 +41,13 @@ public class UserEntity {
 
     public boolean getOptionalConsent() {
         return optionalConsent;
+    }
+
+    public String getSessionID() {
+        return sessionID;
+    }
+
+    public void setSessionID(String sessionID) {
+        this.sessionID = sessionID;
     }
 }
