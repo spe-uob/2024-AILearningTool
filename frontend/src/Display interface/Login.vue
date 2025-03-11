@@ -83,6 +83,7 @@ export default {
         username: "",
         password: "",
         confirmPassword: "",
+        sessionID: localStorage.getItem("sessionID") || "",
       },
       showCookiePopup: true,
     };
@@ -134,10 +135,13 @@ export default {
         });
 
         const data = await response.json();
+
         if (response.ok && data.success) {
           console.log("Login successful. Redirecting to /main...");
-          localStorage.setItem("username", this.form.username);
-          this.router.push(`/main?username=${this.form.username}`); 
+    
+          localStorage.setItem("sessionID", data.sessionID);
+          localStorage.setItem("username", data.username);
+          this.router.push(`/main?sessionID=${data.sessionID}`);
         } else {
           alert(data.message || "Login failed!");
         }
@@ -146,6 +150,7 @@ export default {
         alert("An error occurred while trying to log in.");
       }
     },
+
 
     async register() {
       try {
@@ -157,7 +162,7 @@ export default {
             password: this.form.password,
           }),
         });
-        sessionStorage.setItem("username", this.form.username);
+        localStorage.setItem("sessionID", data.sessionID);
 
         const data = await response.json();
         if (response.ok && data.success) {
