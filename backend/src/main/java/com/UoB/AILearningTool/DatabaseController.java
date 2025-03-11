@@ -27,7 +27,7 @@ public class DatabaseController {
     public String addUser(String username, String password, boolean optionalConsent) {
         UserEntity user = new UserEntity(username, password, optionalConsent);
         userRepository.save(user);
-        return username;
+        return user.getSessionID();
     }
 
     public boolean removeUser(String username) {
@@ -38,18 +38,25 @@ public class DatabaseController {
         return false;
     }
 
+    public String getChatIDBySession(String sessionID) {
+        Optional<ChatEntity> chatOpt = chatRepository.findBySessionID(sessionID);
+        return chatOpt.map(ChatEntity::getChatID).orElse(null);
+    }
 
-    public String createChat(String username, String initialMessage) {
-        UserEntity user = userRepository.findById(username).orElse(null);
-        if (user == null) {
+    public ChatEntity createChat(String sessionID, String initialMessage) {
+        Optional<UserEntity> userOpt = userRepository.findBySessionID(sessionID);
+        if (userOpt.isEmpty()) {
             return null;
         }
 
-        ChatEntity chat = new ChatEntity(user, initialMessage);
+        UserEntity user = userOpt.get();
+        ChatEntity chat = new ChatEntity(user, initialMessage, sessionID);
         chatRepository.save(chat);
 
-        return chat.getChatID();
+        return chat;
     }
+
+
 
     public ChatEntity getChat(String username, String chatID) {
         Optional<UserEntity> userOpt = userRepository.findById(username);
@@ -69,4 +76,6 @@ public class DatabaseController {
         }
         return false;
     }
+
+
 }
