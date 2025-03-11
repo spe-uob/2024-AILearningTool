@@ -63,7 +63,7 @@
 </template>
 
 <script>
-import axios from "axios";
+
 import { getTheme } from "../assets/color.js";
 import { getTranslation } from "../assets/language";
 
@@ -73,6 +73,7 @@ export default {
       userInput: "",
       userId: localStorage.getItem("username") || "",  // username
       aiServerURL: "http://localhost:8080", // API address
+      sessionID: localStorage.getItem("sessionID") || "",
     };
   },
   props: ["messages", "chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
@@ -94,7 +95,7 @@ export default {
      * Initializes a new chat with a predefined message.
      */
     async sendInitialMessage(message) {
-      if (!this.userId) {
+      if (!this.sessionID) {
         alert("Please login!");
         return;
       }
@@ -103,18 +104,25 @@ export default {
         const response = await fetch(`${this.aiServerURL}/createChat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username: this.userId, initialMessage: message })
+          body: JSON.stringify({ sessionID: this.sessionID, initialMessage: message })
         });
-        if (!response.ok) {throw new Error("Fail to create chat");}
+        if (!response.ok) { throw new Error("Fail to create chat"); }
 
         const data = await response.json();
         this.$emit("updateChatID", data.chatID);
         this.$emit("addChat", data.chatID, data.initialMessage || message);
-        this.requestChatHistory();
+
+        if (data.aiResponse) {
+          this.$emit("addChat", data.chatID, data.aiResponse, true);
+        }
+
+        this.chatHistory = data.messageHistory.split("\n");
+
       } catch (error) {
         console.error("error:", error);
       }
     },
+
 
     /**
      * Requests chat history from the server based on the current chat ID.
@@ -164,7 +172,7 @@ export default {
         return;
       }
 
-      if (!this.userId) {
+      if (!this.sessionID) {
         alert("logon failed, please login again！");
         return;
       }
@@ -176,7 +184,7 @@ export default {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            username: this.userId,
+            username: this.sessionID,
             chatID: this.currentChatID,
             newMessage: this.userInput.trim(),
           }),
