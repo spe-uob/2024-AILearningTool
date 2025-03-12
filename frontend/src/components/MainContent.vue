@@ -41,16 +41,20 @@
             <strong v-if="msg.sender === 'user'">{{ getTranslation(currentLanguage, "USER") }}</strong>
             <strong v-else-if="msg.sender === 'assistant'">{{ getTranslation(currentLanguage, "AI") }}</strong>
             <strong v-else>{{ msg.sender }}</strong>
-            <p v-html="formatMessage(msg.content)"></p>
-            </div>
-            <!-- Add TTS button below the message -->
-             <div v-if="msg.sender === 'assistant'" class="tts-button-wrapper">
-              <button @click="speakMessage(msg.content)" class="tts-button">
-                <i class="fa fa-volume-up" aria-hidden="true"></i>
-              </button>
+            <div v-if="msg.sender === 'assistant'">
+              <!-- Use TypingText for assistant messages -->
+              <TypingText :text="formatMessage(msg.content)" :speed="15" />
+              <!-- Add TTS button below the assistant message -->
+              <div class="tts-button-wrapper">
+                <button @click="speakMessage(msg.content)" class="tts-button">
+                  <i class="fa fa-volume-up" aria-hidden="true"></i>
+                </button>
+               </div>
+              </div>
+              <div v-else>
+                <p v-html="formatMessage(msg.content)"></p>
+              </div>
              </div>
-          </div>
-        </div>
 
         <!-- Input area for user messages -->
         <div class="input-area">
@@ -74,8 +78,12 @@ import { marked } from "marked";
 import { getTheme } from "../assets/color.js";
 import {getTranslation} from "../assets/language";
 import { assign } from "core-js/core/object";
+import TypingText from "../components/helpers/TypingText.vue";
 
 export default {
+  components: {
+    TypingText  
+  },
   data() {
     return {
       userInput: "",
