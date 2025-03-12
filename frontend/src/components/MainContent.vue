@@ -41,20 +41,16 @@
             <strong v-if="msg.sender === 'user'">{{ getTranslation(currentLanguage, "USER") }}</strong>
             <strong v-else-if="msg.sender === 'assistant'">{{ getTranslation(currentLanguage, "AI") }}</strong>
             <strong v-else>{{ msg.sender }}</strong>
-            <div v-if="msg.sender === 'assistant'">
-              <!-- Use TypingText for assistant messages -->
-              <TypingText :text="formatMessage(msg.content)" :speed="15" />
-              <!-- Add TTS button below the assistant message -->
-              <div class="tts-button-wrapper">
-                <button @click="speakMessage(msg.content)" class="tts-button">
-                  <i class="fa fa-volume-up" aria-hidden="true"></i>
-                </button>
-               </div>
-              </div>
-              <div v-else>
-                <p v-html="formatMessage(msg.content)"></p>
-              </div>
+            <p v-html="formatMessage(msg.content)"></p>
+            </div>
+            <!-- Add TTS button below the message -->
+             <div v-if="msg.sender === 'assistant'" class="tts-button-wrapper">
+              <button @click="speakMessage(msg.content)" class="tts-button">
+                <i class="fa fa-volume-up" aria-hidden="true"></i>
+              </button>
              </div>
+          </div>
+        </div>
 
         <!-- Input area for user messages -->
         <div class="input-area">
@@ -77,13 +73,8 @@ import axios from "axios";
 import { marked } from "marked";
 import { getTheme } from "../assets/color.js";
 import {getTranslation} from "../assets/language";
-import { assign } from "core-js/core/object";
-import TypingText from "../components/helpers/TypingText.vue";
 
 export default {
-  components: {
-    TypingText  
-  },
   data() {
     return {
       userInput: "",
@@ -122,32 +113,46 @@ export default {
         /**
      * Uses the Web Speech API to speak the given text.
      */
-     speakMessage(text) {
+    speakMessage(text) {
+      // If something is currently being spoken, cancel it and return.
       if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.cancel
-      } else {
-        const utterance = new SpeechSynthesisUtterance(text);
-        let voices = window.speechSynthesis.getVoices();
-        if (!voices.length){
-          window.speechSynthesis.onvoiceschanged = () => { 
-            voices = window.speechSynthesis.getVoices();
-            assignVoice();
-          };
-        } else {
-            assignVoice();
-          }
+        window.speechSynthesis.cancel();
+        return;
+      }
 
-          function assignVoice() {
-            const prefferedVoice = voices.find(
-              (v) => v.lang == "en-GB" && v.name == "Google UK English Female"
-            );
-            utterance.voice = prefferedVoice || voices.find((v) => v.lang === "en-UK");
-            window.speechSynthesis.speak(utterance);
-          } 
-        utterance.rate = 1.0
-        utterance.pitch = 1.0
-        utterance.lang = this.currentLanguage;
+      // Create a new utterance with the provided text.
+      const utterance = new SpeechSynthesisUtterance(text);
+      // Set the rate and pitch.
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      // Set the language from currentLanguage (or default to 'en-US').
+      utterance.lang = this.currentLanguage || "en-US";
+
+      // Function to select and assign a voice, then speak the utterance.
+      const assignVoice = () => {
+        const voices = window.speechSynthesis.getVoices();
+        let preferredVoice;
+        // If the language is English, try to select the preferred English voice.
+        if (utterance.lang.startsWith("en")) {
+          preferredVoice = voices.find(
+            (v) => v.lang === "en-GB" && v.name === "Google UK English Female"
+          ) || voices.find((v) => v.lang === "en-GB") || voices.find((v) => v.lang === "en-US");
+        } else {
+          // Otherwise, select a voice that matches the utterance language.
+          preferredVoice = voices.find((v) => v.lang === utterance.lang);
+        }
+        if (preferredVoice) {
+          utterance.voice = preferredVoice;
+        }
         window.speechSynthesis.speak(utterance);
+      };
+
+      // Get the voices list. If it's empty, wait for voices to be loaded.
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length === 0) {
+        window.speechSynthesis.onvoiceschanged = assignVoice;
+      } else {
+        assignVoice();
       }
     },
     
