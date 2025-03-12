@@ -90,13 +90,6 @@ import {getTranslation} from "../assets/language";
 import TypingText from "../compnents/helpers/TypingText.vue";
 
 export default {
-  components: {
-<<<<<<< HEAD
-    TypingText,
-=======
-    TypingText
->>>>>>> f1dbdeb94aa88eba4762d3fd7436e301e80f639d
-  },
   data() {
     return {
       userInput: "",
