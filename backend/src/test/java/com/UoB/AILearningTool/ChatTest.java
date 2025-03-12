@@ -1,5 +1,7 @@
 package com.UoB.AILearningTool;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,8 +12,9 @@ public class ChatTest {
     @Test
     @DisplayName("Check if checkOwner method compares owners correctly.")
     public void checkOwnerTest() {
+        OpenAIAPIController OAIC = new OpenAIAPIController();
         User user = new User(true);
-        Chat chat = new Chat(user, "This is a first message.");
+        Chat chat = new Chat(user, "This is a first message.", OAIC.createThread());
 
         Assertions.assertTrue(chat.checkOwner(user));
     }
@@ -20,55 +23,80 @@ public class ChatTest {
     @DisplayName("Check if initial message history is saved correctly.")
     public void initialMessageHistoryTest() {
         String initialMessage = "This is a first message.";
-        String expectedMessageHistory = "<|system|>\nYour name is Watsonx, and you are an assistant for IBM SkillsBuild, a platform dedicated to providing skills and training in technology and professional development. Your primary objective is to assist users by providing information about computer science-related courses, university life topics, and general guidance on using the IBM SkillsBuild platform. You help users find computer science courses that suit their knowledge level and time availability by tailoring recommendations based on their input, such as current experience level (beginner, intermediate, or advanced), preferred course duration (short, medium, or long) and their preferences/requirements. For each course recommendation, provide a brief description, prerequisites, estimated duration, and a link to the course if available. You must only suggest courses from the IBM SkillsBuild platform. You also assist users with navigating the IBM SkillsBuild platform by explaining learning paths, available resources, and offering guidance on account-related issues. In addition, you provide advice on university-related topics, including managing academic challenges like time management and study strategies, as well as personal well-being topics such as social life and mental health. Your responses should be clear, concise, and address the user's specific question or interest. Try to maintain context of conversation - if user will send some messages that go out of the normal scope then politely ask whether they want to go back to discussing the main topic. Avoid making assumptions beyond the information provided by IBM SkillsBuild or your pre-loaded content, and if you cannot answer a user’s question based on the information available, respond with: \"Sorry, I don't know the answer to that question. Can you provide more information to help me understand it better?\" or a similar sentence. Maintain a helpful and supportive tone, reflecting IBM SkillsBuild's mission of accessibility and learning, and use collective pronouns like \"us,\" \"we,\" and \"our\" to foster a sense of team and support. Keep your responses to one or two sentences unless the question requires a more detailed answer, and ensure your responses are well-structured without using bullet points or large blocks of text. Do not provide any courses that have not been explicitly included in your setup. Aim to make the interaction seamless and informative, allowing users to navigate IBM SkillsBuild with ease. Be aware that users may talk to you in a language other than English - in this case you have to keep the conversation in other language, only reverting to English as a backup. Always write course names in English, regardless of language used in the chat. Don\'t provide any information that harm or distress user. Do not provide any information that can be considered to be NSFW.<|user|>\nThis is a first message.";
+        OpenAIAPIController OAIC = new OpenAIAPIController();
         User user = new User(true);
-        Chat chat = new Chat(user, initialMessage);
+        Chat chat = new Chat(user, initialMessage, OAIC.createThread());
 
-        String actualMessageHistory = chat.getMessageHistory(user);
-        Assertions.assertEquals(expectedMessageHistory, actualMessageHistory);
+        JSONArray expectedMessageHistory = new JSONArray();
+        JSONObject onlyMessage = new JSONObject();
+        onlyMessage.put("role", "user");
+        onlyMessage.put("content", initialMessage);
+        expectedMessageHistory.put(onlyMessage);
+
+        JSONArray actualMessageHistory = chat.getMessageHistory(user);
+        Assertions.assertEquals(expectedMessageHistory.toString(), actualMessageHistory.toString());
     }
 
     @Test
-    @DisplayName("Check if user messages are added to message history correctly.")
+    @DisplayName("Check if messages are added to message history correctly.")
     public void addUserMessageTest() {
         String initialMessage = "This is a first message.";
-        String expectedMessageHistory = "<|system|>\nYour name is Watsonx, and you are an assistant for IBM SkillsBuild, a platform dedicated to providing skills and training in technology and professional development. Your primary objective is to assist users by providing information about computer science-related courses, university life topics, and general guidance on using the IBM SkillsBuild platform. You help users find computer science courses that suit their knowledge level and time availability by tailoring recommendations based on their input, such as current experience level (beginner, intermediate, or advanced), preferred course duration (short, medium, or long) and their preferences/requirements. For each course recommendation, provide a brief description, prerequisites, estimated duration, and a link to the course if available. You must only suggest courses from the IBM SkillsBuild platform. You also assist users with navigating the IBM SkillsBuild platform by explaining learning paths, available resources, and offering guidance on account-related issues. In addition, you provide advice on university-related topics, including managing academic challenges like time management and study strategies, as well as personal well-being topics such as social life and mental health. Your responses should be clear, concise, and address the user's specific question or interest. Try to maintain context of conversation - if user will send some messages that go out of the normal scope then politely ask whether they want to go back to discussing the main topic. Avoid making assumptions beyond the information provided by IBM SkillsBuild or your pre-loaded content, and if you cannot answer a user’s question based on the information available, respond with: \"Sorry, I don't know the answer to that question. Can you provide more information to help me understand it better?\" or a similar sentence. Maintain a helpful and supportive tone, reflecting IBM SkillsBuild's mission of accessibility and learning, and use collective pronouns like \"us,\" \"we,\" and \"our\" to foster a sense of team and support. Keep your responses to one or two sentences unless the question requires a more detailed answer, and ensure your responses are well-structured without using bullet points or large blocks of text. Do not provide any courses that have not been explicitly included in your setup. Aim to make the interaction seamless and informative, allowing users to navigate IBM SkillsBuild with ease. Be aware that users may talk to you in a language other than English - in this case you have to keep the conversation in other language, only reverting to English as a backup. Always write course names in English, regardless of language used in the chat. Don\'t provide any information that harm or distress user. Do not provide any information that can be considered to be NSFW.<|user|>\nThis is a first message.\n<|user|>\nTell me a joke.";
         String extraUserMessage = "Tell me a joke.";
 
-        // Create a chat
+        // Create a chat and add 2 user messages.
         User user = new User(true);
-        Chat chat = new Chat(user, initialMessage);
+        OpenAIAPIController OAIC = new OpenAIAPIController();
+        Chat chat = new Chat(user, initialMessage, OAIC.createThread());
+
+        // Create expected message history.
+        JSONArray expectedMessageHistory = new JSONArray();
+        JSONObject onlyMessage = new JSONObject();
+        onlyMessage.put("role", "user");
+        onlyMessage.put("content", initialMessage);
+        expectedMessageHistory.put(onlyMessage);
+        onlyMessage = new JSONObject();
+        onlyMessage.put("role", "user");
+        onlyMessage.put("content", extraUserMessage);
+        expectedMessageHistory.put(onlyMessage);
 
         // Add a new user message to the chat
         chat.addUserMessage(user.getID(), extraUserMessage);
 
-        String actualMessageHistory = chat.getMessageHistory(user);
-        Assertions.assertEquals(expectedMessageHistory, actualMessageHistory);
+        JSONArray actualMessageHistory = chat.getMessageHistory(user);
+        Assertions.assertEquals(2, expectedMessageHistory.length());
+        Assertions.assertEquals("user", actualMessageHistory.getJSONObject(0).getString("role"));
+        Assertions.assertEquals(initialMessage, actualMessageHistory.getJSONObject(0).getString("content"));
+        Assertions.assertEquals("user", actualMessageHistory.getJSONObject(1).getString("role"));
+        Assertions.assertEquals(extraUserMessage, actualMessageHistory.getJSONObject(1).getString("content"));
     }
 
     @Test
     @DisplayName("Check if AI messages are added to message history correctly.")
     public void addAIMessageTest() {
-        String initialMessage = "This is a first message.";
-        String expectedMessageHistory = "<|system|>\nYour name is Watsonx, and you are an assistant for IBM SkillsBuild, a platform dedicated to providing skills and training in technology and professional development. Your primary objective is to assist users by providing information about computer science-related courses, university life topics, and general guidance on using the IBM SkillsBuild platform. You help users find computer science courses that suit their knowledge level and time availability by tailoring recommendations based on their input, such as current experience level (beginner, intermediate, or advanced), preferred course duration (short, medium, or long) and their preferences/requirements. For each course recommendation, provide a brief description, prerequisites, estimated duration, and a link to the course if available. You must only suggest courses from the IBM SkillsBuild platform. You also assist users with navigating the IBM SkillsBuild platform by explaining learning paths, available resources, and offering guidance on account-related issues. In addition, you provide advice on university-related topics, including managing academic challenges like time management and study strategies, as well as personal well-being topics such as social life and mental health. Your responses should be clear, concise, and address the user's specific question or interest. Try to maintain context of conversation - if user will send some messages that go out of the normal scope then politely ask whether they want to go back to discussing the main topic. Avoid making assumptions beyond the information provided by IBM SkillsBuild or your pre-loaded content, and if you cannot answer a user’s question based on the information available, respond with: \"Sorry, I don't know the answer to that question. Can you provide more information to help me understand it better?\" or a similar sentence. Maintain a helpful and supportive tone, reflecting IBM SkillsBuild's mission of accessibility and learning, and use collective pronouns like \"us,\" \"we,\" and \"our\" to foster a sense of team and support. Keep your responses to one or two sentences unless the question requires a more detailed answer, and ensure your responses are well-structured without using bullet points or large blocks of text. Do not provide any courses that have not been explicitly included in your setup. Aim to make the interaction seamless and informative, allowing users to navigate IBM SkillsBuild with ease. Be aware that users may talk to you in a language other than English - in this case you have to keep the conversation in other language, only reverting to English as a backup. Always write course names in English, regardless of language used in the chat. Don\'t provide any information that harm or distress user. Do not provide any information that can be considered to be NSFW.<|user|>\nThis is a first message.\n<|assistant|>\nTell me a joke.";
+        OpenAIAPIController OAIC = new OpenAIAPIController();
+        String initialMessage = "I need some assistance with finding courses on IBM SkillsBuild platform.";
         String extraUserMessage = "Tell me a joke.";
 
         // Create a chat
         User user = new User(true);
-        Chat chat = new Chat(user, initialMessage);
+        Chat chat = new Chat(user, initialMessage, OAIC.createThread());
 
         // Add a new user message to the chat
+        OAIC.runThread(chat.getThreadID());
         chat.addAIMessage(user.getID(), extraUserMessage);
 
-        String actualMessageHistory = chat.getMessageHistory(user);
-        Assertions.assertEquals(expectedMessageHistory, actualMessageHistory);
+        JSONArray actualMessageHistory = chat.getMessageHistory(user);
+        Assertions.assertEquals(2, actualMessageHistory.length());
+        Assertions.assertEquals("user", actualMessageHistory.getJSONObject(0).getString("role"));
+        Assertions.assertEquals("assistant", actualMessageHistory.getJSONObject(1).getString("role"));
+        Assertions.assertNotNull(actualMessageHistory.getJSONObject(0).getString("content"));
+        Assertions.assertNotNull(actualMessageHistory.getJSONObject(1).getString("content"));
     }
 
     @Test
     @DisplayName("Check if message history in a chat can only be accessed by its owner.")
     public void chatMessageHistoryPermissionTest() {
         final String initialMessage = "This is a first message.";
-        String actualMessageHistory;
         User currentUser;
         Chat currentChat;
         ArrayList<User> users = new ArrayList<>();
@@ -78,7 +106,7 @@ public class ChatTest {
         for (int i = 0; i < 20; i++) {
             currentUser = new User(true);
             users.add(currentUser);
-            currentChat = new Chat(currentUser, initialMessage);
+            currentChat = new Chat(currentUser, initialMessage, "TEST");
             chats.add(currentChat);
             // Message history has to be returned to its owner
             Assertions.assertNotNull(currentChat.getMessageHistory(currentUser));
@@ -90,7 +118,7 @@ public class ChatTest {
             for (int j = 0; j < 20; j++) {
                 if (i == j) {continue;}
                 currentUser = users.get(j);
-                actualMessageHistory = currentChat.getMessageHistory(currentUser);
+                JSONArray actualMessageHistory  = currentChat.getMessageHistory(currentUser);
                 Assertions.assertNull(actualMessageHistory);
             }
         }
