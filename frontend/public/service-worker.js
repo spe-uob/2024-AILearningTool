@@ -1,7 +1,6 @@
-// Name of the cache
 const CACHE_NAME = 'my-app-cache-v1';
 
-// List the URLs you want to cache
+// URLs to be cached
 const urlsToCache = [
   '/',
   '/index.html',
