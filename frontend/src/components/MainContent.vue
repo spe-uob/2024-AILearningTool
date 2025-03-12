@@ -42,7 +42,7 @@
             <strong v-if="msg.sender === 'user'">{{ getTranslation(currentLanguage, "USER") }}</strong>
             <strong v-else-if="msg.sender === 'assistant'">{{ getTranslation(currentLanguage, "AI") }}</strong>
             <strong v-else>{{ msg.sender }}</strong>
-            <p v-html="formatMessage(msg.content)"></p>
+            <p>{{ msg.content }}</p>
           </div>
         </div>
 
@@ -64,8 +64,6 @@
 
 <script>
 
-import axios from "axios";
-import { marked } from "marked";
 import { getTheme } from "../assets/color.js";
 import { getTranslation } from "../assets/language";
 
@@ -76,7 +74,7 @@ export default {
       userId: localStorage.getItem("username") || "",  // username
       aiServerURL: "http://localhost:8080", // API address
       sessionID: localStorage.getItem("sessionID") || "",
-    };
+      };
   },
   props: ["messages", "chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
   watch: {
@@ -93,45 +91,63 @@ export default {
     getTheme,
     getTranslation,
 
-    /** 
-     * Converts markdown format to HTML. 
-     */
-    formatMessage(message) {
-      // Use marked to convert markdown to HTML.
-      return marked(message);
+    updateChatList(newChats) {
+      this.chats = newChats;
+      this.$emit('updateChats', newChats);
     },
-    
+
+    resetContent() {
+      this.messages = [];
+      this.$emit('updateChatID', '');
+    },
+
     /**
      * Initializes a new chat with a predefined message.
      */
     async sendInitialMessage(message) {
-      if (!this.sessionID) {
-        alert("Please login!");
-        return;
-      }
+  if (!this.sessionID) {
+    alert("Please login!");
+    return;
+  }
 
-      try {
-        const response = await fetch(`${this.aiServerURL}/createChat`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionID: this.sessionID, initialMessage: message })
-        });
-        if (!response.ok) { throw new Error("Fail to create chat"); }
+  try {
+    const chatCount = this.chats.length + 1;
+    const chatTitle = `Chat ${chatCount}`;
 
-        const data = await response.json();
-        this.$emit("updateChatID", data.chatID);
-        this.$emit("addChat", data.chatID, data.initialMessage || message);
+    const response = await fetch(`${this.aiServerURL}/createChat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        sessionID: this.sessionID, 
+        initialMessage: message 
+      })
+    });
 
-        if (data.aiResponse) {
-          this.$emit("addChat", data.chatID, data.aiResponse, true);
-        }
+    if (!response.ok) {
+      throw new Error("Failed to create chat");
+    }
 
-        this.chatHistory = data.messageHistory.split("\n");
+    const data = await response.json();
+    
+    if (!data.chatID) {
+      throw new Error("Invalid response: missing chatID");
+    }
+    
+    this.$emit("updateChatID", data.chatID);
+    
+    this.$emit("addChat", data.chatID, chatTitle);
+    
+    this.$emit("addMessage", "user", message);
+    
+    if (data.aiResponse) {
+      this.$emit("addMessage", "assistant", data.aiResponse);
+    }
 
-      } catch (error) {
-        console.error("error:", error);
-      }
-    },
+  } catch (error) {
+    console.error("Error creating chat:", error);
+    alert(error.message || "Failed to create chat");
+  }
+},
 
 
     /**
@@ -177,41 +193,55 @@ export default {
      * Sends a user message to the AI server and processes the response.
      */
     async sendMessage() {
-      if (!this.userInput.trim()) {
-        alert("Please enter messages");
-        return;
+  if (!this.userInput.trim()) {
+    alert("Please enter messages");
+    return;
+  }
+
+  if (!this.userId) {
+    alert("logon failed, please login again！");
+    return;
+  }
+
+  if (!this.currentChatID) {
+    alert("Please select a chat first!");
+    return;
+  }
+
+  const messageContent = this.userInput.trim();
+  this.userInput = ""; // 提前清空输入框，提升用户体验
+
+  try {
+    
+    this.$emit("addMessage", "user", messageContent);
+
+    const response = await fetch(`${this.aiServerURL}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: this.userId,
+        chatID: this.currentChatID,
+        newMessage: messageContent,
+      }),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      
+      this.$emit("addMessage", "assistant", data.response);
+      
+      if (data.messageHistory) {
+        this.processChatHistory(data.messageHistory);
       }
-
-      if (!this.sessionID) {
-        alert("logon failed, please login again！");
-        return;
-      }
-
-      try {
-        this.$emit("addMessage", "user", this.userInput.trim());
-
-        const response = await fetch(`${this.aiServerURL}/sendMessage`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username: this.sessionID,
-            chatID: this.currentChatID,
-            newMessage: this.userInput.trim(),
-          }),
-        });
-
-        const data = await response.json();
-        if (response.ok) {
-          this.$emit("addMessage", "assistant", data.response);
-        } else {
-          alert("Fail to send messages");
-        }
-      } catch (error) {
-        console.error("error:", error);
-      }
-
-      this.userInput = "";
-    },
+    } else {
+      alert("Fail to send messages");
+      console.error("Server error:", data.message || "Unknown error");
+    }
+  } catch (error) {
+    console.error("Error sending message:", error);
+    alert("Failed to send message. Please try again.");
+  }
+},
 
     scrollToBottom() {
       this.$nextTick(() => {
