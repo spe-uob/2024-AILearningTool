@@ -73,6 +73,7 @@ import axios from "axios";
 import { marked } from "marked";
 import { getTheme } from "../assets/color.js";
 import {getTranslation} from "../assets/language";
+import { assign } from "core-js/core/object";
 
 export default {
   data() {
@@ -118,7 +119,24 @@ export default {
         window.speechSynthesis.cancel
       } else {
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 1.1
+        let voices = window.speechSynthesis.getVoices();
+        if (!voices.length){
+          window.speechSynthesis.onvoiceschanged = () => { 
+            voices = window.speechSynthesis.getVoices();
+            assignVoice();
+          };
+        } else {
+            assignVoice();
+          }
+
+          function assignVoice() {
+            const prefferedVoice = voices.find(
+              (v) => v.lang == "en-GB" && v.name == "Google UK English Female"
+            );
+            utterance.voice = prefferedVoice || voices.find((v) => v.lang === "en-UK");
+            window.speechSynthesis.speak(utterance);
+          } 
+        utterance.rate = 1.0
         utterance.pitch = 1.0
         utterance.lang = this.currentLanguage;
         window.speechSynthesis.speak(utterance);
