@@ -53,17 +53,15 @@ export default {
         if (!response.ok) throw new Error("Failed to load chat history.");
 
         const data = await response.json();
-        console.log("Chat history loaded:", data);
-
-        if (data.chats && data.chats.length > 0) {
-          this.$emit("updateChats", data.chats);
-        } else {
-          console.warn("No chat history found.");
+        if (data.chatList && Array.isArray(data.chatList)) {
+          this.$emit("updateChats", data.chatList);
         }
       } catch (error) {
         console.error("Error loading chat history:", error);
       }
     },
+
+
 
     addChat() {
       this.$emit("resetMainContent");
