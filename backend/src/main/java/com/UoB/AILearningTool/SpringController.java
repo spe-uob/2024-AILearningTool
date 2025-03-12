@@ -94,7 +94,7 @@ public class SpringController {
     public void createChat(@CookieValue(value = "userID", defaultValue = "") String userID,
                            @RequestParam(name = "initialMessage") String initialMessage,
                            HttpServletResponse response) throws IOException {
-        response.setContentType("text/plain"); // Set the content type to text
+        response.setContentType("text/plain; charset=utf-8"); // Set the content type to text
 
         // Get the user
         User user = DBC.getUser(userID);
@@ -163,7 +163,8 @@ public class SpringController {
                             @RequestParam(name = "newMessage") String newMessage,
                            @RequestParam(name = "chatID") String chatID,
                            HttpServletResponse response) throws IOException {
-        response.setContentType("text/plain");
+        response.setContentType("text/plain; charset=utf-8");
+        response.setStatus(401); // Default
 
         // Get the user and chat
         User user = DBC.getUser(userID);
@@ -239,6 +240,7 @@ public class SpringController {
     public void getChatHistory(@CookieValue(value = "userID", defaultValue = "") String userID,
                                @RequestParam(name = "chatID") String chatID,
                                HttpServletResponse response) {
+        response.setContentType("text/plain; charset=utf-8");
         User user = DBC.getUser(userID);
         Chat chat = DBC.getChat(DBC.getUser(userID), chatID);
         if (chat == null) {

@@ -38,7 +38,7 @@ public class AiLearningToolApplication implements CommandLineRunner {
 	}
 
 
-	private void copyFile(Path source, Path target) throws IOException {
+	void copyFile(Path source, Path target) throws IOException {
 		Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
 	}
 
@@ -49,6 +49,10 @@ public class AiLearningToolApplication implements CommandLineRunner {
 				"spring.servlet.multipart.max-file-size=50MB",
 				"spring.servlet.multipart.max-request-size=50MB",
 				"spring.web.resources.static-locations=classpath:/static/",
+				"",
+				"spring.http.encoding.charset=UTF-8",
+				"spring.http.encoding.enabled=true",
+				"spring.http.encoding.force=true",
 				"",
 				"server.ssl.key-store=classpath:keystore.p12",
 				"server.ssl.key-store-password=ailearntool",

@@ -42,7 +42,9 @@
             <strong v-if="msg.sender === 'user'">{{ getTranslation(currentLanguage, "USER") }}</strong>
             <strong v-else-if="msg.sender === 'assistant'">{{ getTranslation(currentLanguage, "AI") }}</strong>
             <strong v-else>{{ msg.sender }}</strong>
-            <p>{{ msg.content }}</p>
+            <!-- Use TypingText for assistant messages instead of static output -->
+            <TypingText v-if="msg.sender === 'assistant'" :text="formatMessage(msg.content)" :speed="15" />
+            <p v-else v-html="formatMessage(msg.content)"></p>
           </div>
         </div>
 
@@ -63,10 +65,15 @@
 </template>
 
 <script>
+import { marked } from "marked";
 import { getTheme } from "../assets/color.js";
 import {getTranslation} from "../assets/language";
+import TypingText from "../components/helpers/TypingText.vue";
 
 export default {
+  components: {
+    TypingText
+  },
   data() {
     return {
       userInput: "",
@@ -93,6 +100,14 @@ export default {
   methods: {
     getTheme,
     getTranslation,
+
+    /**
+     * Converts markdown format to HTML.
+     */
+    formatMessage(message) {
+      // Use marked to convert markdown to HTML.
+      return marked(message);
+    },
     /**
      * Initializes a new chat with a predefined message.
      */
