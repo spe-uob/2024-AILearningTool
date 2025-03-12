@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@vue/compiler-sfc": "^3.2.13",
-    "axios": "^1.7.9",
     "core-js": "^3.8.3",
     "marked": "^15.0.7",
     "vue": "^3.2.13",

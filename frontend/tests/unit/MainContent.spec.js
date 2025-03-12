@@ -1,12 +1,6 @@
 import { mount, flushPromises } from '@vue/test-utils'
 import MainContent from '@/components/MainContent.vue'
 
-// Mock axios before importing the component
-jest.mock('axios', () => ({
-  get: jest.fn(() => Promise.resolve({ status: 200, data: 'AI response' })),
-  post: jest.fn(() => Promise.resolve({ status: 200, data: {} }))
-}))
-
 // Mock getTranslation
 jest.mock('@/assets/language', () => ({
   getTranslation: jest.fn((lang, key) => key)

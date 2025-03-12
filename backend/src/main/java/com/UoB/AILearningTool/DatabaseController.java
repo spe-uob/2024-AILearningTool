@@ -39,9 +39,9 @@ public class DatabaseController {
     }
 
     // Creates a new chat
-    public String createChat(User user, String initialMessage) {
+    public String createChat(User user, String initialMessage, String threadID) {
         String id = StringTools.RandomString(20);
-        chats.put(id, new Chat(user, initialMessage));
+        chats.put(id, new Chat(user, initialMessage, threadID));
         return id;
     }
 

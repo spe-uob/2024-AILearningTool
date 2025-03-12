@@ -65,7 +65,6 @@
 </template>
 
 <script>
-import axios from "axios";
 import { marked } from "marked";
 import { getTheme } from "../assets/color.js";
 import {getTranslation} from "../assets/language";
@@ -73,7 +72,7 @@ import TypingText from "../components/helpers/TypingText.vue";
 
 export default {
   components: {
-    TypingText  
+    TypingText
   },
   data() {
     return {
@@ -102,8 +101,8 @@ export default {
     getTheme,
     getTranslation,
 
-    /** 
-     * Converts markdown format to HTML. 
+    /**
+     * Converts markdown format to HTML.
      */
     formatMessage(message) {
       // Use marked to convert markdown to HTML.
@@ -151,7 +150,7 @@ export default {
         if (!response.ok) {
           throw new Error("Non-200 backend API response");
         } else {
-          this.processChatHistory(await response.text());
+          await this.processChatHistory(await response.json());
         }
       });
     },
@@ -160,44 +159,11 @@ export default {
      * Processes retrieved chat history and structures it for display.
      */
     async processChatHistory(messageHistory) {
-      messageHistory = String(messageHistory);
-      let currentRole;
-      let nextRole;
-      let nextRoleIndex;
-      let currentMessage;
-      for (let i = 0; ; i++) {
-        if (i === 0) {
-          currentRole = "<|system|>";
-          nextRole = "<|user|>";
-        } else if (i % 2 !== 0) {
-          currentRole = "<|user|>";
-          nextRole = "<|assistant|>";
-        } else {
-          currentRole = "<|assistant|>";
-          nextRole = "<|user|>";
-        }
-        if (messageHistory.includes(currentRole)) {
-          messageHistory = messageHistory.substring(
-              messageHistory.indexOf(currentRole) + currentRole.length
-          );
-          nextRoleIndex = messageHistory.indexOf(nextRole);
-          if (nextRoleIndex !== -1) {
-            currentMessage = messageHistory.substring(
-                0,
-                messageHistory.indexOf(nextRole)
-            );
-          } else {
-            currentMessage = messageHistory;
-          }
-          if (currentRole === "<|system|>") {
-            continue;
-          }
-          this.$emit("addMessage", this.currentTurn, currentMessage);
-          this.currentTurn = this.currentTurn === "user" ? "assistant" : "user";
-        } else {
-          break;
-        }
+      // New code starts here
+      for (let i = 0; i < messageHistory.length; i++) {
+        this.$emit("addMessage", ((i % 2 === 0) ? "user" : "assistant"), messageHistory[i]["content"]);
       }
+      // New code ends here
       this.$emit("setButtonLock", false)
     },
 
@@ -225,26 +191,28 @@ export default {
       this.userInput = "";
 
       try {
-        const response = await axios.get(this.aiServerURL + "/sendMessage", {
-          params: {
-            userID: this.userId,
-            chatID: this.currentChatID,
-            newMessage: messageToSend,
-          },
-          withCredentials: true,
-        });
+        let response = await fetch(this.aiServerURL + "/sendMessage?" + new URLSearchParams({
+          "userID": this.userId,
+          "chatID": this.currentChatID,
+          "newMessage": messageToSend,
+        }),{
+              method: "GET",
+              credentials: "include",
+            }
+        );
 
-        if (response.status !== 200) {
+        if (! response.ok) {
           throw new Error(`Unexpected response code: ${response.status}`);
         }
-
-        this.$emit("addMessage", "assistant", response.data);
+        let responseJSON = await response.json();
+        this.$emit("addMessage", "assistant", (responseJSON["content"]));
       } catch (error) {
         console.error("Error sending message:", error);
         this.$emit("addMessage", "System",
             localStorage.getItem("langCode"), "FAILED_TO_SEND_MESSAGE");
       }
       this.scrollToBottom();
+      this.$emit("setButtonLock", false)
     },
     
     scrollToBottom() {

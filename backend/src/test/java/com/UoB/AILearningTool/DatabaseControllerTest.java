@@ -56,7 +56,7 @@ public class DatabaseControllerTest {
 
         // Create chats.
         for (User user : users) {
-            chatIDs.add(DBC.createChat(user, "This is a first message."));
+            chatIDs.add(DBC.createChat(user, "This is a first message.", "TEST"));
         }
 
         // DBC.getChat() must return a non-null element.
@@ -82,7 +82,7 @@ public class DatabaseControllerTest {
 
         // Create chats.
         for (User user : users) {
-            chatIDs.add(DBC.createChat(user, "This is a first message."));
+            chatIDs.add(DBC.createChat(user, "This is a first message.", "TEST"));
         }
 
         for (int i = 0; i < 20; i++) {
