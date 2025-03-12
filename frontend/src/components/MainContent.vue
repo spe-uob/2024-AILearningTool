@@ -47,7 +47,6 @@
              <div v-if="msg.sender === 'assistant'" class="tts-button-wrapper">
               <button @click="speakMessage(msg.content)" class="tts-button">
                 <i class="fa fa-volume-up" aria-hidden="true"></i>
-
               </button>
              </div>
           </div>
@@ -121,7 +120,7 @@ export default {
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.rate = 1.1
         utterance.pitch = 1.0
-        utterance.lang = "en-UK";
+        utterance.lang = this.currentLanguage;
         window.speechSynthesis.speak(utterance);
       }
     },
