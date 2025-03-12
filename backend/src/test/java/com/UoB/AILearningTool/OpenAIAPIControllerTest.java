@@ -26,24 +26,18 @@ public class OpenAIAPIControllerTest {
         Chat chat = DBC.getChat(user, DBC.createChat(user, newMessage, OAIC.createThread()));
 
         Integer response = OAIC.sendUserMessage(chat, newMessage);
-        OAIC.runThread(chat.getThreadID());
+        Assertions.assertEquals(200, response);
+        response = OAIC.runThread(chat.getThreadID());
+        Assertions.assertEquals(200, response);
+        // Wait until any runs for a thread are completed
+        while (OAIC.isLocked(chat)) {
+            continue;
+        }
         WatsonxResponse AIResponse = OAIC.getLastThreadMessage(chat.getThreadID());
 
+
         Assertions.assertNotNull(AIResponse.responseText, "The message content should not be null.");
+        Assertions.assertNotEquals(AIResponse.responseText, newMessage);
         Assertions.assertEquals(200, AIResponse.statusCode, "The status code should be 200 for a successful response.");
     }
-//    TODO: Refactor this test
-//    @Test
-//    @DisplayName("OpenAI API should be able to generate response for chat history with multiple messages.")
-//    public void developedMessageHistoryRequestTest() {
-//        OpenAIAPIController OAIC = new OpenAIAPIController();
-//        DatabaseController DBC = new DatabaseController();
-//        String userID = DBC.addUser(true);
-//        String chatID = DBC.createChat(DBC.getUser(userID), "I need some help with finding an online course.", OAIC.createThread());
-//
-//        WatsonxResponse response = openAIAPIController.sendUserMessage(messageHistory);
-//
-//        Assertions.assertNotNull(response.responseText, "The message content should not be null.");
-//        Assertions.assertEquals(200, response.statusCode, "The status code should be 200 for a successful response.");
-//    }
 }

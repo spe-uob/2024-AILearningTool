@@ -22,24 +22,23 @@ public class ChatTest {
     @Test
     @DisplayName("Check if initial message history is saved correctly.")
     public void initialMessageHistoryTest() {
-        OpenAIAPIController OAIC = new OpenAIAPIController();
-
         String initialMessage = "This is a first message.";
+        OpenAIAPIController OAIC = new OpenAIAPIController();
+        User user = new User(true);
+        Chat chat = new Chat(user, initialMessage, OAIC.createThread());
+
         JSONArray expectedMessageHistory = new JSONArray();
         JSONObject onlyMessage = new JSONObject();
         onlyMessage.put("role", "user");
         onlyMessage.put("content", initialMessage);
         expectedMessageHistory.put(onlyMessage);
 
-        User user = new User(true);
-        Chat chat = new Chat(user, initialMessage, OAIC.createThread());
-
         JSONArray actualMessageHistory = chat.getMessageHistory(user);
-        Assertions.assertEquals(expectedMessageHistory, actualMessageHistory);
+        Assertions.assertEquals(expectedMessageHistory.toString(), actualMessageHistory.toString());
     }
 
     @Test
-    @DisplayName("Check if user messages are added to message history correctly.")
+    @DisplayName("Check if messages are added to message history correctly.")
     public void addUserMessageTest() {
         String initialMessage = "This is a first message.";
         String extraUserMessage = "Tell me a joke.";
@@ -48,7 +47,6 @@ public class ChatTest {
         User user = new User(true);
         OpenAIAPIController OAIC = new OpenAIAPIController();
         Chat chat = new Chat(user, initialMessage, OAIC.createThread());
-        chat.addUserMessage(user.getID(), extraUserMessage);
 
         // Create expected message history.
         JSONArray expectedMessageHistory = new JSONArray();
@@ -65,9 +63,11 @@ public class ChatTest {
         chat.addUserMessage(user.getID(), extraUserMessage);
 
         JSONArray actualMessageHistory = chat.getMessageHistory(user);
-        Assertions.assertEquals(expectedMessageHistory.length(), 2);
-        Assertions.assertEquals(actualMessageHistory.getJSONObject(0).getString("content"), initialMessage);
-        Assertions.assertEquals(actualMessageHistory.getJSONObject(1).getString("content"), extraUserMessage);
+        Assertions.assertEquals(2, expectedMessageHistory.length());
+        Assertions.assertEquals("user", actualMessageHistory.getJSONObject(0).getString("role"));
+        Assertions.assertEquals(initialMessage, actualMessageHistory.getJSONObject(0).getString("content"));
+        Assertions.assertEquals("user", actualMessageHistory.getJSONObject(1).getString("role"));
+        Assertions.assertEquals(extraUserMessage, actualMessageHistory.getJSONObject(1).getString("content"));
     }
 
     @Test
@@ -82,19 +82,20 @@ public class ChatTest {
         Chat chat = new Chat(user, initialMessage, OAIC.createThread());
 
         // Add a new user message to the chat
-        chat.addAIMessage(user.getID(), initialMessage);
         OAIC.runThread(chat.getThreadID());
         chat.addAIMessage(user.getID(), extraUserMessage);
 
         JSONArray actualMessageHistory = chat.getMessageHistory(user);
-        Assertions.assertEquals(actualMessageHistory.length(), 3);
+        Assertions.assertEquals(2, actualMessageHistory.length());
+        Assertions.assertEquals("user", actualMessageHistory.getJSONObject(0).getString("role"));
         Assertions.assertEquals("assistant", actualMessageHistory.getJSONObject(1).getString("role"));
+        Assertions.assertNotNull(actualMessageHistory.getJSONObject(0).getString("content"));
+        Assertions.assertNotNull(actualMessageHistory.getJSONObject(1).getString("content"));
     }
 
     @Test
     @DisplayName("Check if message history in a chat can only be accessed by its owner.")
     public void chatMessageHistoryPermissionTest() {
-        OpenAIAPIController OAIC = new OpenAIAPIController();
         final String initialMessage = "This is a first message.";
         User currentUser;
         Chat currentChat;
@@ -105,7 +106,7 @@ public class ChatTest {
         for (int i = 0; i < 20; i++) {
             currentUser = new User(true);
             users.add(currentUser);
-            currentChat = new Chat(currentUser, initialMessage, OAIC.createThread());
+            currentChat = new Chat(currentUser, initialMessage, "TEST");
             chats.add(currentChat);
             // Message history has to be returned to its owner
             Assertions.assertNotNull(currentChat.getMessageHistory(currentUser));

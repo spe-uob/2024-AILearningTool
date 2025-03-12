@@ -46,7 +46,6 @@ public class DatabaseControllerTest {
     @DisplayName("Check whether chats can be created and accessed.")
     public void createChats() {
         DatabaseController DBC = new DatabaseController();
-        OpenAIAPIController OAIC = new OpenAIAPIController();
         ArrayList<User> users = new ArrayList<>();
         ArrayList<String> chatIDs = new ArrayList<>();
 
@@ -57,7 +56,7 @@ public class DatabaseControllerTest {
 
         // Create chats.
         for (User user : users) {
-            chatIDs.add(DBC.createChat(user, "This is a first message.", OAIC.createThread()));
+            chatIDs.add(DBC.createChat(user, "This is a first message.", "TEST"));
         }
 
         // DBC.getChat() must return a non-null element.
@@ -73,7 +72,6 @@ public class DatabaseControllerTest {
         Chat currentChat;
         User currentUser;
         DatabaseController DBC = new DatabaseController();
-        OpenAIAPIController OAIC = new OpenAIAPIController();
         ArrayList<User> users = new ArrayList<>();
         ArrayList<String> chatIDs = new ArrayList<>();
 
@@ -84,7 +82,7 @@ public class DatabaseControllerTest {
 
         // Create chats.
         for (User user : users) {
-            chatIDs.add(DBC.createChat(user, "This is a first message.", OAIC.createThread()));
+            chatIDs.add(DBC.createChat(user, "This is a first message.", "TEST"));
         }
 
         for (int i = 0; i < 20; i++) {
