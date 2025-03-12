@@ -44,7 +44,7 @@ public class SpringController {
         }
         
         String sessionID = StringTools.generateSessionID();
-
+        
         UserEntity newUser = new UserEntity(username, password, true);
         newUser.setSessionID(sessionID); 
         userRepository.save(newUser);
@@ -136,21 +136,23 @@ public class SpringController {
 
         Optional<ChatEntity> existingChat = chatRepository.findBySessionID(sessionID);
         ChatEntity chat;
-
+    
         if (existingChat.isEmpty()) {
-            chat = new ChatEntity(user, initialMessage, sessionID); 
-            chatRepository.save(chat);
+            chat = new ChatEntity(user, initialMessage, sessionID);
         } else {
             chat = existingChat.get();
+            chat.setMessageHistory("<|system|>\n" + initialMessage); 
         }
-
+        chatRepository.save(chat); 
+    
         String chatID = chat.getChatID();
-
+    
+        
         WatsonxResponse wresponse = WXC.sendUserMessage(chat.getMessageHistory());
-
+    
         if (wresponse.statusCode == 200) {
             chat.addAIMessage(wresponse.responseText);
-            chatRepository.save(chat);
+            chatRepository.save(chat); 
         }
 
         return ResponseEntity.ok(Map.of(
@@ -163,6 +165,8 @@ public class SpringController {
     }
 
 
+
+    // Send a message to the chat and receive a response
     @PostMapping("/sendMessage")
     public ResponseEntity<Map<String, Object>> sendMessage(@RequestBody Map<String, String> payload) {
         String username = payload.get("username");
@@ -222,26 +226,27 @@ public class SpringController {
         if (user.isEmpty()) {
             return ResponseEntity.status(404).body(Collections.singletonMap("message", "User not found"));
         }
-
+    
         List<ChatEntity> chats = chatRepository.findByOwner(user.get());
         List<Map<String, String>> chatList = new ArrayList<>();
-
+    
         for (ChatEntity chat : chats) {
             String[] lines = chat.getMessageHistory().split("\n");
             String title = "New Chat";
-
+            
             for (String line : lines) {
-                if (!line.startsWith("<|")) {
-                    title = line.trim(); 
-                    break;
+                if (!line.startsWith("<|user|>") && !line.startsWith("<|assistant|>")) {
+                    title = line.trim();
+                    if (!title.isEmpty()) {
+                        break;  
+                    }
                 }
             }
-
+    
             chatList.add(Map.of("chatID", chat.getChatID(), "title", title));
         }
-
-        System.out.println("Returning chat history: " + chatList);
-        return ResponseEntity.ok(Collections.singletonMap("chats", chatList));
+    
+        return ResponseEntity.ok(Collections.singletonMap("chatList", chatList));
     }
 
 }
