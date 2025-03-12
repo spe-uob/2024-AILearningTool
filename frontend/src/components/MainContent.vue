@@ -2,62 +2,75 @@
   <main>
     <div class="chat-area">
       <!-- Welcome Screen with Logo -->
-      <div v-if="this.currentChatID.length === 0" class="welcome-container">
+      <div v-if="currentChatID.length === 0" class="welcome-container">
         <img src="../assets/logo.png" alt="Logo" class="logo" />
         <p class="welcome-text">
           {{ getTranslation(currentLanguage, 'WELCOME_TO_WATSONX_AI') }}
         </p>
-        <p v-if="this.currentChatID.length === 0" class="instruction-text">
+        <p v-if="currentChatID.length === 0" class="instruction-text">
           {{ getTranslation(currentLanguage, 'SELECT_INITIAL_TOPIC') }}
         </p>
 
         <!-- Buttons for chat initialisation -->
-        <div v-if="this.currentChatID.length === 0" class="button-container">
-          <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_CHOOSING_A_COURSE'))" :disabled="chatInitButtonsDisabled">
+        <div v-if="currentChatID.length === 0" class="button-container">
+          <button 
+            @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_CHOOSING_A_COURSE'))" 
+            :disabled="chatInitButtonsDisabled">
             {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_CHOOSING_A_COURSE") }}
           </button>
-          <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_PLATFORM'))" :disabled="chatInitButtonsDisabled">
-            {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_PLATFORM")}}
+          <button 
+            @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_PLATFORM'))" 
+            :disabled="chatInitButtonsDisabled">
+            {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_PLATFORM") }}
           </button>
-          <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_HAVE_QUESTIONS_ABOUT_UNI_LIFE'))" :disabled="chatInitButtonsDisabled">
-            {{getTranslation(currentLanguage, "I_HAVE_QUESTIONS_ABOUT_UNI_LIFE")}}
+          <button 
+            @click="sendInitialMessage(getTranslation(currentLanguage, 'I_HAVE_QUESTIONS_ABOUT_UNI_LIFE'))" 
+            :disabled="chatInitButtonsDisabled">
+            {{ getTranslation(currentLanguage, "I_HAVE_QUESTIONS_ABOUT_UNI_LIFE") }}
           </button>
         </div>
       </div>
 
       <!-- Display all messages in the conversation -->
-      <div v-if="this.currentChatID.length > 0" class="chat-container">
+      <div v-if="currentChatID.length > 0" class="chat-container">
         <!-- Scrollable message area -->
         <div class="messages-container" ref="messagesContainer">
-          <div v-for="(msg, index) in messages">
-             <div :key="index"
+          <div v-for="(msg, index) in messages" :key="index">
+            <div 
               class="message"
               :class="{
-              'user-message': msg.sender === 'user',
-              'assistant-message': msg.sender === 'assistant',
-              'system-message': msg.sender === 'System'
-            }"
-          >
-            <strong v-if="msg.sender === 'user'">{{ getTranslation(currentLanguage, "USER") }}</strong>
-            <strong v-else-if="msg.sender === 'assistant'">{{ getTranslation(currentLanguage, "AI") }}</strong>
-            <strong v-else>{{ msg.sender }}</strong>
-            <p v-html="formatMessage(msg.content)"></p>
+                'user-message': msg.sender === 'user',
+                'assistant-message': msg.sender === 'assistant',
+                'system-message': msg.sender === 'System'
+              }"
+            >
+              <strong v-if="msg.sender === 'user'">{{ getTranslation(currentLanguage, "USER") }}</strong>
+              <strong v-else-if="msg.sender === 'assistant'">{{ getTranslation(currentLanguage, "AI") }}</strong>
+              <strong v-else>{{ msg.sender }}</strong>
+              <!-- For assistant messages, use TypingText to animate the output -->
+              <TypingText 
+                v-if="msg.sender === 'assistant'" 
+                :text="formatMessage(msg.content)" 
+                :speed="15" 
+              />
+              <!-- For non-assistant messages, render markdown as HTML -->
+              <p v-else v-html="formatMessage(msg.content)"></p>
             </div>
-            <!-- Add TTS button below the message -->
-             <div v-if="msg.sender === 'assistant'" class="tts-button-wrapper">
+            <!-- TTS Button: For assistant messages, show a speaker icon below the message -->
+            <div v-if="msg.sender === 'assistant'" class="tts-button-wrapper">
               <button @click="speakMessage(msg.content)" class="tts-button">
-                <i class="fa fa-volume-up" aria-hidden="true"></i>
+                <i class="fa fa-volume-up"></i>
               </button>
-             </div>
+            </div>
           </div>
         </div>
 
         <!-- Input area for user messages -->
         <div class="input-area">
           <textarea
-              v-model="userInput"
-              :placeholder="getTranslation(currentLanguage, 'TYPE_YOUR_MESSAGE')"
-              @keypress.enter.prevent="sendMessage"
+            v-model="userInput"
+            :placeholder="getTranslation(currentLanguage, 'TYPE_YOUR_MESSAGE')"
+            @keypress.enter.prevent="sendMessage"
           ></textarea>
           <button @click="sendMessage" :disabled="chatInitButtonsDisabled">
             {{ getTranslation(currentLanguage, "SEND") }}
@@ -68,13 +81,19 @@
   </main>
 </template>
 
+
+
 <script>
 import axios from "axios";
 import { marked } from "marked";
 import { getTheme } from "../assets/color.js";
 import {getTranslation} from "../assets/language";
+import TypingText from "../compnents/helpers/TypingText.vue";
 
 export default {
+  components: {
+    TypingText,
+  },
   data() {
     return {
       userInput: "",
