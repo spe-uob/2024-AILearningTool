@@ -3,28 +3,37 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  transition: all 0.3s ease-in-out;
 }
 
 body {
   font-family: Arial, sans-serif;
   line-height: 1.6;
+  background-color: #f4f4f9;
 }
 
 #app {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  opacity: 0;
+  animation: fadeIn 0.8s ease-in-out forwards;
 }
 
 /* General content wrapper */
 .responsive-container {
   width: 100%;
   padding: 1rem;
+  opacity: 0;
+  animation: fadeInUp 0.6s ease-in-out 0.2s forwards;
 }
 
 /* Main content adjustments */
 main {
   padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Welcome container */
@@ -33,39 +42,56 @@ main {
   text-align: center;
 }
 
-/* Logo size for smaller devices */
+/* Logo styling with animation */
 .logo {
   width: 150px;
   max-width: 80%;
   height: auto;
   margin-bottom: 1rem;
+  transform: scale(0.8);
+  animation: popIn 0.6s ease-in-out forwards;
 }
 
 /* Text sizes */
 .welcome-text {
   font-size: 1.5rem;
   margin-bottom: 0.75rem;
+  opacity: 0;
+  animation: fadeInUp 0.5s ease-in-out 0.4s forwards;
 }
 
 .instruction-text {
   font-size: 1rem;
   margin-bottom: 1rem;
+  opacity: 0;
+  animation: fadeInUp 0.5s ease-in-out 0.6s forwards;
 }
 
-/* Container for the 3 chat initialisation buttons */
+/* Button container */
 .button-container {
   display: flex;
-  flex-wrap: wrap;  
+  flex-wrap: wrap;
   gap: 0.5rem;
   justify-content: center;
 }
 
-/* Button styling */
+/* Button styling with hover effect */
 .button-container button {
   flex: 1 1 auto;
   padding: 0.75rem;
   font-size: 1rem;
   min-width: 100px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.3s;
+}
+
+.button-container button:hover {
+  background: #0056b3;
+  transform: scale(1.05);
 }
 
 /* ---------- Larger Screens ---------- */
@@ -73,69 +99,101 @@ main {
 /* Tablets (600px and up) */
 @media (min-width: 600px) {
   .logo {
-    width: 180px;
+      width: 180px;
   }
   .welcome-text {
-    font-size: 2rem;
+      font-size: 2rem;
   }
   .instruction-text {
-    font-size: 1.25rem;
+      font-size: 1.25rem;
   }
   .button-container button {
-    font-size: 1.125rem;
+      font-size: 1.125rem;
   }
 }
 
 /* Desktops (1024px and up) */
 @media (min-width: 1024px) {
   .responsive-container {
-    width: 90%;
-    max-width: 1200px;
-    margin: 0 auto;
+      width: 90%;
+      max-width: 1200px;
+      margin: 0 auto;
   }
   main {
-    padding: 2rem;
+      padding: 2rem;
   }
 }
 
 /* ---------- Phones in Portrait Mode (max-width: 600px) ---------- */
 @media (max-width: 600px) and (orientation: portrait) {
   html, body, #app {
-    margin: 0;
-    padding: 0;
-    height: 100%;
+      margin: 0;
+      padding: 0;
+      height: 100%;
   }
 
   #app {
-    display: flex;
-    flex-direction: row;
-    min-height: 100%;
-    overflow-y: hidden; 
+      display: flex;
+      flex-direction: row;
+      min-height: 100%;
+      overflow-y: hidden;
   }
 
   setting-sidebar {
-    flex: 0 0 80px; /* fixed width for the sidebar */
-    overflow-y: auto; 
+      flex: 0 0 80px; /* fixed width for the sidebar */
+      overflow-y: auto;
   }
 
   .conversation-history {
-    flex: 0 0 150px;
-    overflow-y: auto;
+      flex: 0 0 150px;
+      overflow-y: auto;
   }
 
   .main-content,
   .responsive-container,
   #app > div:last-child {
-    flex: 1;
-    overflow-y: auto; /* allows vertical scrolling if content is tall */
+      flex: 1;
+      overflow-y: auto; /* allows vertical scrolling if content is tall */
   }
 
   .welcome-container {
-    padding: 0.75rem;
+      padding: 0.75rem;
   }
 
   .button-container button {
-    padding: 0.6rem;
-    font-size: 0.95rem;
+      padding: 0.6rem;
+      font-size: 0.95rem;
+  }
+}
+
+/* ---------- Animations ---------- */
+@keyframes fadeIn {
+  from {
+      opacity: 0;
+  }
+  to {
+      opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+      opacity: 0;
+      transform: translateY(20px);
+  }
+  to {
+      opacity: 1;
+      transform: translateY(0);
+  }
+}
+
+@keyframes popIn {
+  0% {
+      opacity: 0;
+      transform: scale(0.8);
+  }
+  100% {
+      opacity: 1;
+      transform: scale(1);
   }
 }
