@@ -62,6 +62,8 @@ export default {
 };
 </script>
 
+<style src="./assets/responsive.css"></style>
+
 <style>
 body {
   background-color: var(--background-color);
