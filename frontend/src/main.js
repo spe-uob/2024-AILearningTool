@@ -32,8 +32,31 @@ router.afterEach((to) => {
     document.title = to.meta.title || 'Default title';
 });
 
+// Detect if it is a mobile device
+function isMobileDevice() {
+    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+// Attempts to lock screen orientation, performed on mobile only
+function lockOrientation() {
+    if (!isMobileDevice()) return; // Mobile only
+
+    if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock("portrait").catch(err => {
+            console.warn("Screen orientation lock failed:", err);
+        });
+    }
+}
+
+// Vue mounts and then tries to lock the orientation
+document.addEventListener("DOMContentLoaded", lockOrientation);
+document.addEventListener("fullscreenchange", lockOrientation);
+
 const app = createApp(App);
 app.use(router);
 app.mount('#app');
+
+// Try locking again (make sure it takes effect after Vue is mounted)
+lockOrientation();
 
 export default router;
