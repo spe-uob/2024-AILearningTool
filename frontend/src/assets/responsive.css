@@ -197,3 +197,24 @@ main {
       transform: scale(1);
   }
 }
+
+@media (max-width: 1024px) and (orientation: landscape) {
+    body::before {
+        content: "Please rotate your device!";
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 1.2rem;
+        font-size: 1.5rem;
+        text-align: center;
+        border-radius: 10px;
+        z-index: 9999;
+    }
+
+    #app {
+        display: none; /* Hide the entire application */
+    }
+}
