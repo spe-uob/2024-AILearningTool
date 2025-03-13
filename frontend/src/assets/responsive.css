@@ -1,0 +1,141 @@
+/* ---------- Base Mobile-First Styles ---------- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* General content wrapper */
+.responsive-container {
+  width: 100%;
+  padding: 1rem;
+}
+
+/* Main content adjustments */
+main {
+  padding: 1rem;
+}
+
+/* Welcome container */
+.welcome-container {
+  padding: 1rem;
+  text-align: center;
+}
+
+/* Logo size for smaller devices */
+.logo {
+  width: 150px;
+  max-width: 80%;
+  height: auto;
+  margin-bottom: 1rem;
+}
+
+/* Text sizes */
+.welcome-text {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.instruction-text {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Container for the 3 chat initialisation buttons */
+.button-container {
+  display: flex;
+  flex-wrap: wrap;  
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+/* Button styling */
+.button-container button {
+  flex: 1 1 auto;
+  padding: 0.75rem;
+  font-size: 1rem;
+  min-width: 100px;
+}
+
+/* ---------- Larger Screens ---------- */
+
+/* Tablets (600px and up) */
+@media (min-width: 600px) {
+  .logo {
+    width: 180px;
+  }
+  .welcome-text {
+    font-size: 2rem;
+  }
+  .instruction-text {
+    font-size: 1.25rem;
+  }
+  .button-container button {
+    font-size: 1.125rem;
+  }
+}
+
+/* Desktops (1024px and up) */
+@media (min-width: 1024px) {
+  .responsive-container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  main {
+    padding: 2rem;
+  }
+}
+
+/* ---------- Phones in Portrait Mode (max-width: 600px) ---------- */
+@media (max-width: 600px) and (orientation: portrait) {
+  html, body, #app {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+  }
+
+  #app {
+    display: flex;
+    flex-direction: row;
+    min-height: 100%;
+    overflow-y: hidden; 
+  }
+
+  setting-sidebar {
+    flex: 0 0 80px; /* fixed width for the sidebar */
+    overflow-y: auto; 
+  }
+
+  .conversation-history {
+    flex: 0 0 150px;
+    overflow-y: auto;
+  }
+
+  .main-content,
+  .responsive-container,
+  #app > div:last-child {
+    flex: 1;
+    overflow-y: auto; /* allows vertical scrolling if content is tall */
+  }
+
+  .welcome-container {
+    padding: 0.75rem;
+  }
+
+  .button-container button {
+    padding: 0.6rem;
+    font-size: 0.95rem;
+  }
+}
