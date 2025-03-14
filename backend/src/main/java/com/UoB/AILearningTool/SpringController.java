@@ -34,7 +34,7 @@ public class SpringController {
     }
 
     // User registration
-    @PostMapping("/register")
+      @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> registerUser(@RequestBody Map<String, String> credentials) {
         String username = credentials.get("username");
         String password = credentials.get("password");
@@ -42,17 +42,9 @@ public class SpringController {
         if (userRepository.existsById(username)) {
             return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Username already exists"));
         }
-        
-        String sessionID = StringTools.generateSessionID();
-        
-        UserEntity newUser = new UserEntity(username, password, true);
-        newUser.setSessionID(sessionID); 
-        userRepository.save(newUser);
 
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "sessionID", sessionID 
-        ));
+        DBC.addUser(username, password, true);
+        return ResponseEntity.ok(Collections.singletonMap("success", true));
     }
 
     // User Login
