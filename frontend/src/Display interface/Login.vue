@@ -152,7 +152,7 @@ export default {
     },
 
 
-    async register() {
+       async register() {
       try {
         const response = await fetch("http://localhost:8080/register", {
           method: "POST",
@@ -162,7 +162,7 @@ export default {
             password: this.form.password,
           }),
         });
-        localStorage.setItem("sessionID", data.sessionID);
+        sessionStorage.setItem("username", this.form.username);
 
         const data = await response.json();
         if (response.ok && data.success) {
