@@ -87,7 +87,7 @@
 import { marked } from "marked";
 import { getTheme } from "../assets/color.js";
 import {getTranslation} from "../assets/language";
-import TypingText from "../compnents/helpers/TypingText.vue";
+import TypingText from "../components/helpers/TypingText.vue";
 
 export default {
   components: {
