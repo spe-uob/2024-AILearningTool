@@ -34,6 +34,26 @@ public class DatabaseController {
         if (userRepository.existsById(username)) {
             userRepository.deleteById(username);
             return true;
+        } else {
+            return false;
+        }
+    }
+
+    // Creates a new chat
+    public String createChat(UserEntity user, String initialMessage, String threadID) {
+        String id = StringTools.RandomString(20);
+        ChatEntity chat = new ChatEntity(user, initialMessage, threadID);
+        chatRepository.save(chat);
+        return chat.getChatID();
+    }
+
+
+    // Deletes an existing chat
+    public boolean deleteChat(UserEntity user, String chatID) {
+        Optional<ChatEntity> chatOpt = chatRepository.findById(chatID);
+        if (chatOpt.isPresent() && chatOpt.get().getOwner().getUsername().equals(user.getUsername())) {
+            chatRepository.deleteById(chatID);
+            return true;
         }
         return false;
     }
@@ -56,8 +76,6 @@ public class DatabaseController {
         return chat;
     }
 
-
-
     public ChatEntity getChat(String username, String chatID) {
         Optional<UserEntity> userOpt = userRepository.findById(username);
         if (userOpt.isEmpty()) {
@@ -76,6 +94,4 @@ public class DatabaseController {
         }
         return false;
     }
-
-
 }
