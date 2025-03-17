@@ -9,7 +9,7 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
-  import java.lang.reflect.Field;
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Map;
 
@@ -29,19 +29,16 @@ class SpringControllerTest {
 
     private UserEntity testUser;
 
-  
+    @BeforeEach
+    public void setUp() throws Exception {
+        MockitoAnnotations.openMocks(this);
+        testUser = new UserEntity("testUser", "password123", true);
+        springController = new SpringController(mockDBC, null);
 
-@BeforeEach
-public void setUp() throws Exception {
-    MockitoAnnotations.openMocks(this);
-    testUser = new UserEntity("testUser", "password123", true);
-    springController = new SpringController(mockDBC, null);
-
-    Field userRepoField = SpringController.class.getDeclaredField("userRepository");
-    userRepoField.setAccessible(true);
-    userRepoField.set(springController, userRepository);
-}
-
+        Field userRepoField = SpringController.class.getDeclaredField("userRepository");
+        userRepoField.setAccessible(true);
+        userRepoField.set(springController, userRepository);
+    }
 
     @Test
     void testRegisterUser_Success() {

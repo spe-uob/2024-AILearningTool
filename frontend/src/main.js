@@ -1,6 +1,7 @@
 import { createApp } from 'vue';
 import App from './App.vue';
 import { createRouter, createWebHistory } from 'vue-router';
+import '@/registerServiceWorker';
 
 const Cookie = () => import('./Display interface/Cookie.vue');
 const MainView = () => import('./Display interface/MainView.vue');

@@ -69,7 +69,6 @@ class DatabaseControllerTest {
 
         ChatEntity createdChat = databaseController.createChat("mockSessionID", "Hello AI!");
         assertNotNull(createdChat);
-        assertEquals("mockSessionID", createdChat.getSessionID()); 
+        assertEquals("mockSessionID", createdChat.getSessionID());
     }
-
 }
