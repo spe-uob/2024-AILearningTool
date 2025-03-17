@@ -4,11 +4,17 @@ import com.UoB.AILearningTool.model.ChatEntity;
 import com.UoB.AILearningTool.model.UserEntity;
 import com.UoB.AILearningTool.repository.UserRepository;
 import com.UoB.AILearningTool.repository.ChatRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import com.UoB.AILearningTool.StringTools;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -108,108 +114,143 @@ public class SpringController {
 
     // Create a new chat session with Watsonx
     @PostMapping("/createChat")
-    public ResponseEntity<Map<String, Object>> createChat(@RequestBody Map<String, String> payload) {
-        String sessionID = payload.get("sessionID");
-        String initialMessage = payload.get("initialMessage");
-
-        if (sessionID == null || sessionID.isEmpty()) {
-            return ResponseEntity.status(400).body(Collections.singletonMap("message", "SessionID cannot be null"));
-        }
-        if (initialMessage == null || initialMessage.isEmpty()) {
-            return ResponseEntity.status(400).body(Collections.singletonMap("message", "Initial message cannot be null"));
-        }
-
-        Optional<UserEntity> userOptional = userRepository.findBySessionID(sessionID); 
+    public ResponseEntity<Map<String, Object>> createChat(@RequestBody Map<String, String> request) {
+        String sessionID = request.get("sessionID");
+        String initialMessage = request.get("initialMessage");
+    
+        Optional<UserEntity> userOptional = userRepository.findBySessionID(sessionID);
         if (userOptional.isEmpty()) {
-            return ResponseEntity.status(404).body(Collections.singletonMap("message", "User not found for sessionID"));
+            return ResponseEntity.status(401)
+                .body(Collections.singletonMap("message", "Invalid session"));
         }
-
-        UserEntity user = userOptional.get(); 
-
-        Optional<ChatEntity> existingChat = chatRepository.findBySessionID(sessionID);
-        ChatEntity chat;
     
-        if (existingChat.isEmpty()) {
-            chat = new ChatEntity(user, initialMessage, sessionID);
-        } else {
-            chat = existingChat.get();
-            chat.setMessageHistory("<|system|>\n" + initialMessage); 
-        }
-        chatRepository.save(chat); 
-    
-        String chatID = chat.getChatID();
+        UserEntity user = userOptional.get();
     
         
-        WatsonxResponse wresponse = WXC.sendUserMessage(chat.getMessageHistory());
+        ChatEntity chat = new ChatEntity(user, initialMessage, sessionID);
+        chatRepository.save(chat);
+        String chatID = chat.getChatID();
     
-        if (wresponse.statusCode == 200) {
-            chat.addAIMessage(wresponse.responseText);
-            chatRepository.save(chat); 
+       
+        WatsonxResponse wresponse = WXC.sendUserMessage(chat, initialMessage);
+        if (wresponse.statusCode != 200) {
+            return ResponseEntity.status(500)
+                .body(Collections.singletonMap("message", "Failed to get AI response"));
         }
-
+    
+        
+        chat.addAIMessage(wresponse.responseText);
+        chatRepository.save(chat);
+    
         return ResponseEntity.ok(Map.of(
-                "chatID", chatID,
-                "sessionID", chat.getSessionID(),
-                "initialMessage", initialMessage,
-                "aiResponse", wresponse.responseText,
-                "messageHistory", chat.getMessageHistory()
+            "chatID", chatID,
+            "aiResponse", wresponse.responseText
         ));
     }
-
-
-
-    // Send a message to the chat and receive a response
+    
+    
     @PostMapping("/sendMessage")
-    public ResponseEntity<Map<String, Object>> sendMessage(@RequestBody Map<String, String> payload) {
-        String username = payload.get("username");
-        String chatID = payload.get("chatID");
-        String newMessage = payload.get("newMessage");
-
-        ChatEntity chat = chatRepository.findById(chatID).orElse(null);
-
-        if (chat == null || !chat.getOwner().getUsername().equals(username)) {
-            return ResponseEntity.status(400).body(Collections.singletonMap("message", "Chat not found or access denied"));
+    public ResponseEntity<Map<String, Object>> sendMessage(@RequestBody Map<String, String> request) {
+        String username = request.get("username");
+        String chatID = request.get("chatID");
+        String newMessage = request.get("newMessage");
+    
+       
+        Optional<UserEntity> userOptional = userRepository.findById(username);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(401)
+                .body(Collections.singletonMap("message", "User not found"));
         }
-
-        // store user's messages
+    
+        ChatEntity chat = chatRepository.findById(chatID).orElse(null);
+        if (chat == null || !chat.getOwner().getUsername().equals(username)) {
+            return ResponseEntity.status(404)
+                .body(Collections.singletonMap("message", "Chat not found"));
+        }
+    
         chat.addUserMessage(newMessage);
         chatRepository.save(chat);
-
-        String inputString = chat.getMessageHistory();
-        WatsonxResponse wresponse = WXC.sendUserMessage(inputString);
-
-        if (wresponse.statusCode == 200) {
-            chat.addAIMessage(wresponse.responseText);
-            chatRepository.save(chat);
+    
+        WatsonxResponse wresponse = WXC.sendUserMessage(chat, newMessage);
+        if (wresponse.statusCode != 200) {
+            return ResponseEntity.status(500)
+                .body(Collections.singletonMap("message", "Failed to get AI response"));
         }
-
-        return ResponseEntity.ok(Collections.singletonMap("response", wresponse.responseText));
-    }
-
-    // Send a message history and receive a response from Watsonx.
-    @PostMapping("/sendIncognitoMessage")
-    public ResponseEntity<Map<String, Object>> sendIncognitoMessage(@RequestBody Map<String, String> payload) {
-        String inputString = payload.get("inputString");
-
-        WatsonxResponse wresponse = WXC.sendUserMessage(inputString);
-        return ResponseEntity.ok(Collections.singletonMap("response", wresponse.responseText));
+    
+        chat.addAIMessage(wresponse.responseText);
+        chatRepository.save(chat);
+    
+        return ResponseEntity.ok(Map.of(
+            "response", wresponse.responseText
+        ));
     }
 
     // Get message history from a chat
     @GetMapping("/getChatHistory")
-    public ResponseEntity<Map<String, Object>> getChatHistory(@RequestParam String username, @RequestParam String chatID) {
-        ChatEntity chat = chatRepository.findById(chatID).orElse(null);
-
-        if (chat == null || !chat.getOwner().getUsername().equals(username)) {
-            return ResponseEntity.status(401).body(Collections.singletonMap("message", "Chat not found or access denied"));
+    public void getChatHistory(@CookieValue(value = "userID", defaultValue = "") String userID,
+                               @RequestParam(name = "chatID") String chatID,
+                               HttpServletResponse response) {
+        response.setContentType("text/plain; charset=utf-8");
+        
+        Optional<UserEntity> userOptional = userRepository.findById(userID);
+        if (userOptional.isEmpty()) {
+            response.setStatus(401);
+            try {
+                response.getWriter().write("User doesn't exist!");
+                return;
+            } catch (IOException e) {
+                return;
+            }
         }
-
+        
+        UserEntity user = userOptional.get();
+        ChatEntity chat = chatRepository.findById(chatID).orElse(null);
+        
+        if (chat == null || !chat.getOwner().getUsername().equals(userID)) {
+            response.setStatus(404);
+            try {
+                response.getWriter().write("Chat doesn't exist or you are not authorized to access it.");
+                return;
+            } catch (IOException e) {
+                return;
+            }
+        }
+    
         String chatHistory = chat.getMessageHistory();
         if (chatHistory.startsWith("<|system|>")) {
             chatHistory = chatHistory.replace("<|system|>\n", ""); 
         }
-
-        return ResponseEntity.ok(Collections.singletonMap("history", chatHistory));
+    
+       
+        JSONArray messageHistory = new JSONArray();
+        String[] messages = chatHistory.split("\n");
+        for (int i = 0; i < messages.length; i++) {
+            String message = messages[i];
+            if (message.startsWith("<|user|>")) {
+                JSONObject userMessage = new JSONObject();
+                userMessage.put("role", "user");
+                userMessage.put("content", message.replace("<|user|>", "").trim());
+                messageHistory.put(userMessage);
+            } else if (message.startsWith("<|assistant|>")) {
+                JSONObject assistantMessage = new JSONObject();
+                assistantMessage.put("role", "assistant");
+                assistantMessage.put("content", message.replace("<|assistant|>", "").trim());
+                messageHistory.put(assistantMessage);
+            } else if (!message.isEmpty()) {
+                JSONObject systemMessage = new JSONObject();
+                systemMessage.put("role", "system");
+                systemMessage.put("content", message.trim());
+                messageHistory.put(systemMessage);
+            }
+        }
+    
+        // If we reach here, chat != null and messageHistory != null
+        response.setStatus(200);
+        try {
+            response.getWriter().write(messageHistory.toString());
+        } catch (IOException e) {
+            response.setStatus(500);
+        }
     }
 
     @GetMapping("/getUserChats")
