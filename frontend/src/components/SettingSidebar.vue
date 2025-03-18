@@ -25,6 +25,9 @@
         </ul>
         <div class="action-buttons">
           <button @click="Logout">{{ getTranslation(currentLanguage, "LOG_OUT") }}</button>
+          <button id="delete-account-btn" @click="deleteAccount">{{ getTranslation(currentLanguage, "DELETE_ACCOUNT") }}</button>
+        </div>
+        <div id="close-btn-container">
           <button class="close-btn" @click="closeSettings">{{ getTranslation(currentLanguage, "CLOSE")}}</button>
         </div>
       </div>
@@ -65,6 +68,27 @@ export default {
       const theme = getTheme(themeName);
       Object.keys(theme).forEach((key) => {
         document.documentElement.style.setProperty(`--${key}-color`, theme[key]);
+      });
+    },
+
+    deleteAccount() {
+      // If user changes their mind, don't send the request, otherwise proceed with deleting.
+      if (!confirm(getTranslation(this.currentLanguage, "DELETE_ACCOUNT_CONFIRMATION"))) {
+        return
+      }
+      fetch(
+          "http://localhost:8080/revokeConsent",
+          {
+            method: "DELETE",
+            credentials: "include",
+          }
+      ).then(async (response) => {
+        if (response.ok) {
+          alert("Account has been deleted")
+          this.Logout()
+        } else {
+          alert("Unable to delete the account")
+        }
       });
     },
 
@@ -159,6 +183,12 @@ li {
   margin-top: 20px;
 }
 
+#close-btn-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 75px;
+}
+
 button {
   padding: 10px 16px;
   border: none;
@@ -176,11 +206,22 @@ button:hover {
 }
 
 .close-btn {
-  background-color: #f44336;
-  color: white;
+  background-color: #b5b5b5;
 }
 
 .close-btn:hover {
-  background-color: #d32f2f;
+  background-color: #a0a0a0;
+}
+
+#delete-account-btn {
+  background-color: #660000;
+  font-size: 0.85em;
+  font-weight: bolder;
+  color: white;
+}
+
+#delete-account-btn:hover {
+  background-color: #500000;
+  color: white;
 }
 </style>

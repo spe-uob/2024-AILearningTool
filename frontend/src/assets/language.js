@@ -36,7 +36,9 @@ const translations = {
         COOKIE_DISCLAIMER: "Watsonx AI uses cookies. If you continue to use this site, you consent to the their storage in your browser.",
         I_UNDERSTAND: "I understand",
         PLEASE_ENTER_A_MESSAGE: "Please enter a message!",
-        FAILED_TO_SEND_MESSAGE: "Failed to send message. Please try again."
+        FAILED_TO_SEND_MESSAGE: "Failed to send message. Please try again.",
+        DELETE_ACCOUNT: "Delete the account",
+        DELETE_ACCOUNT_CONFIRMATION: "Are you sure that you want to delete your account?"
     },
     zh: {
         UNDEFINED: "未定义",
@@ -73,7 +75,9 @@ const translations = {
         COOKIE_DISCLAIMER: "Watsonx AI 使用 cookie。如果您继续使用本网站，即表示您同意将其存储在您的浏览器中。",
         I_UNDERSTAND: "我了解",
         PLEASE_ENTER_A_MESSAGE: "请输入信息！",
-        FAILED_TO_SEND_MESSAGE: "发送信息失败！请重试。"
+        FAILED_TO_SEND_MESSAGE: "发送信息失败！请重试。",
+        DELETE_ACCOUNT: "UNDEFINED",
+        DELETE_ACCOUNT_CONFIRMATION: "UNDEFINED"
     },
     ru: {
         UNDEFINED: "Перевод недоступен",
@@ -109,7 +113,9 @@ const translations = {
         COOKIE_DISCLAIMER: "ИИ Watsonx использует файлы куки. Продолжая использовать наше веб-приложение, вы соглашаетесь на хранение куки-файлов в вашем браузере.",
         I_UNDERSTAND: "Согласен",
         PLEASE_ENTER_A_MESSAGE: "Пожалуйста введите сообщение!",
-        FAILED_TO_SEND_MESSAGE: "Не удалось отправить сообщение. Пожалуйста, попробуйте ещё раз."
+        FAILED_TO_SEND_MESSAGE: "Не удалось отправить сообщение. Пожалуйста, попробуйте ещё раз.",
+        DELETE_ACCOUNT: "Удалить аккаунт",
+        DELETE_ACCOUNT_CONFIRMATION: "Вы уверены, что хотите удалить ваш аккаунт?"
     }
 };
 

@@ -74,10 +74,11 @@ public class SpringController {
 
     // If user revokes their consent for data storage / optional cookies,
     // remove all data stored about them.
-    @GetMapping("/revokeConsent")
+    @DeleteMapping("/revokeConsent")
     public void revokeConsent(@CookieValue(value = "userID", defaultValue = "") String userID,
                                  HttpServletResponse response) {
         if (DBC.removeUser(userID)) {
+            userStore.remove(userID);
             response.setStatus(200);
             Cookie cookie = new Cookie("userID", "");
             cookie.setMaxAge(0);
