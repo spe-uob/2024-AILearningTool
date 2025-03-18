@@ -73,5 +73,5 @@ jobs:
             docker pull ghcr.io/spe-uob/2024-ailearningtool:latest
             docker stop ailearningtool || true
             docker rm ailearningtool || true
-            docker run -d --name ailearningtool -p 443:443 ghcr.io/spe-uob/2024-ailearningtool:latest -v /etc/letsencrypt/live/$BACKEND_URL:/keystore.p12
+            docker run -d --name ailearningtool -p 443:443 ghcr.io/spe-uob/2024-ailearningtool:latest -v keystore.p12:/keystore.p12
 
