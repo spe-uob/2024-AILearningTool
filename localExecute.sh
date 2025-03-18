@@ -29,8 +29,8 @@ server.servlet.encoding.force=true" > backend/src/main/resources/application.pro
 echo "const BACKEND_URL = 'http://localhost:$PORT';
 export { BACKEND_URL };" > frontend/src/assets/globalConstants.js
 
-# Builds the frontend code for localhost deployment without SSL
-cd frontend && npm run build
+# Builds the frontend code for localhost deployment without SSL, moves result to resources of the backend
+cd frontend && npm run build && cp -a dist/. ../backend/src/main/resources/static/
 
 # Executes the backend
 cd ../backend && mvn clean && mvn spring-boot:run
