@@ -1,0 +1,67 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64; rv:132.0) Gecko/20100101 Firefox/132.0" version="24.8.4">
+  <diagram name="Page-1" id="D5iIy3KWxEPgB1KizNsA">
+    <mxGraphModel dx="1468" dy="892" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2koVdJtbBCh85IIp-lrr-1" value="&lt;font style=&quot;font-size: 15px;&quot;&gt;GET /signup&lt;font&gt;&lt;br&gt;&lt;/font&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fontSize=24;fillColor=#E6E6E6;" vertex="1" parent="1">
+          <mxGeometry x="74" y="375" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="2koVdJtbBCh85IIp-lrr-2" value="&lt;div&gt;Receives:&lt;/div&gt;&lt;div&gt;optionalConsent cookie&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#E6E6E6;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="74" y="415" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="2koVdJtbBCh85IIp-lrr-5" value="&lt;div&gt;Returns:&lt;/div&gt;&lt;div&gt;userID cookie&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#E6E6E6;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="74" y="495" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="2koVdJtbBCh85IIp-lrr-6" value="&lt;font size=&quot;3&quot;&gt;GET /revokeConsent&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fontSize=24;fillColor=#E6E6E6;" vertex="1" parent="1">
+          <mxGeometry x="314" y="375" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="2koVdJtbBCh85IIp-lrr-7" value="&lt;div&gt;Receives:&lt;/div&gt;&lt;div&gt;optionalConsent cookie&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#E6E6E6;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="314" y="415" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="2koVdJtbBCh85IIp-lrr-8" value="&lt;div&gt;Returns:&lt;/div&gt;&lt;div&gt;userID cookie&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#E6E6E6;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="314" y="495" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="2koVdJtbBCh85IIp-lrr-9" value="&lt;font size=&quot;3&quot;&gt;GET /createChat&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fontSize=24;fillColor=#E6E6E6;" vertex="1" parent="1">
+          <mxGeometry x="554" y="375" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="2koVdJtbBCh85IIp-lrr-10" value="&lt;div&gt;Receives:&lt;/div&gt;&lt;div&gt;userID cookie&lt;/div&gt;&lt;div&gt;initialMessage string&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#E6E6E6;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="554" y="415" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="2koVdJtbBCh85IIp-lrr-11" value="&lt;div&gt;Returns:&lt;/div&gt;&lt;div&gt;chatID text/plain&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#E6E6E6;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="554" y="495" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="2koVdJtbBCh85IIp-lrr-12" value="&lt;font size=&quot;3&quot;&gt;GET /sendMessage&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fontSize=24;fillColor=#E6E6E6;" vertex="1" parent="1">
+          <mxGeometry x="74" y="655" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="2koVdJtbBCh85IIp-lrr-13" value="&lt;div&gt;Receives:&lt;/div&gt;&lt;div&gt;userID cookie&lt;/div&gt;&lt;div&gt;newMessage string&lt;/div&gt;&lt;div&gt;chatID string&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#E6E6E6;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="74" y="695" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="2koVdJtbBCh85IIp-lrr-14" value="&lt;div&gt;Returns:&lt;/div&gt;&lt;div&gt;responseText text/plain&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#E6E6E6;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="74" y="775" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="2koVdJtbBCh85IIp-lrr-15" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;GET /sendIncognitoMessage&lt;br&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fontSize=24;fillColor=#E6E6E6;" vertex="1" parent="1">
+          <mxGeometry x="314" y="655" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="2koVdJtbBCh85IIp-lrr-16" value="&lt;div&gt;Receives:&lt;/div&gt;&lt;div&gt;userID cookie&lt;/div&gt;&lt;div&gt;inputString string&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#E6E6E6;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="314" y="695" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="2koVdJtbBCh85IIp-lrr-17" value="&lt;div&gt;Returns:&lt;/div&gt;&lt;div&gt;responseText text/plain&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#E6E6E6;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="314" y="775" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="2koVdJtbBCh85IIp-lrr-18" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;GET /getChatHistory&lt;br&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fontSize=24;fillColor=#E6E6E6;" vertex="1" parent="1">
+          <mxGeometry x="554" y="655" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="2koVdJtbBCh85IIp-lrr-19" value="&lt;div&gt;Receives:&lt;/div&gt;&lt;div&gt;userID cookie&lt;/div&gt;&lt;div&gt;chatID string&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#E6E6E6;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="554" y="695" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="2koVdJtbBCh85IIp-lrr-20" value="&lt;div&gt;Returns:&lt;/div&gt;&lt;div&gt;responseText text/plain&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#E6E6E6;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="554" y="775" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="2koVdJtbBCh85IIp-lrr-21" value="&lt;font style=&quot;font-size: 32px;&quot;&gt;Backend HTTP methods&lt;br&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="240" y="210" width="360" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
