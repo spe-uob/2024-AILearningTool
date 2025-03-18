@@ -94,36 +94,6 @@ main {
   transform: scale(1.05);
 }
 
-/* ---------- Larger Screens ---------- */
-
-/* Tablets (600px and up) */
-@media (min-width: 600px) {
-  .logo {
-      width: 180px;
-  }
-  .welcome-text {
-      font-size: 2rem;
-  }
-  .instruction-text {
-      font-size: 1.25rem;
-  }
-  .button-container button {
-      font-size: 1.125rem;
-  }
-}
-
-/* Desktops (1024px and up) */
-@media (min-width: 1024px) {
-  .responsive-container {
-      width: 90%;
-      max-width: 1200px;
-      margin: 0 auto;
-  }
-  main {
-      padding: 2rem;
-  }
-}
-
 /* ---------- Phones in Portrait Mode (max-width: 600px) ---------- */
 @media (max-width: 600px) and (orientation: portrait) {
   html, body, #app {
