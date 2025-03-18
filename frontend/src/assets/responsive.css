@@ -1,148 +1,150 @@
 /* ---------- Mobile Devices Styles ---------- */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  transition: all 0.3s ease-in-out;
-}
-
-body {
-  font-family: Arial, sans-serif;
-  line-height: 1.6;
-  background-color: #f4f4f9;
-}
-
-#app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  opacity: 0;
-  animation: fadeIn 0.8s ease-in-out forwards;
-}
-
-/* General content wrapper */
-.responsive-container {
-  width: 100%;
-  padding: 1rem;
-  opacity: 0;
-  animation: fadeInUp 0.6s ease-in-out 0.2s forwards;
-}
-
-/* Main content */
-main {
-  padding: 1rem;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Welcome container */
-.welcome-container {
-  padding: 0.75rem; /* reduced from 1rem */
-  text-align: center;
-}
-
-/* Logo styling */
-.logo {
-  width: 130px; /* reduced from 150px */
-  max-width: 80%;
-  height: auto;
-  margin-bottom: 1rem;
-  transform: scale(0.8);
-  animation: popIn 0.6s ease-in-out forwards;
-}
-
-/* Text sizes */
-.welcome-text {
-  font-size: 1.3rem; /* reduced from 1.5rem */
-  margin-bottom: 0.5rem; /* reduced from 0.75rem */
-  opacity: 0;
-  animation: fadeInUp 0.5s ease-in-out 0.4s forwards;
-}
-
-.instruction-text {
-  font-size: 0.9rem; /* reduced from 1rem */
-  margin-bottom: 0.75rem; /* reduced from 1rem */
-  opacity: 0;
-  animation: fadeInUp 0.5s ease-in-out 0.6s forwards;
-}
-
-/* Button container */
-.button-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: center;
-}
-
-/* Button styling */
-.button-container button {
-  flex: 1 1 auto;
-  padding: 0.6rem;     /* reduced from 0.75rem */
-  font-size: 0.95rem;   /* reduced from 1rem */
-  min-width: 100px;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: transform 0.2s, background 0.3s;
-}
-
-.button-container button:hover {
-  background: #0056b3;
-  transform: scale(1.05);
-}
-
-/* ---------- Landscape Orientation Notice ---------- */
-@media (max-width: 1024px) and (orientation: landscape) {
-  body::before {
-    content: "Please rotate your device!";
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 1.2rem;
-    font-size: 1.5rem;
-    text-align: center;
-    border-radius: 10px;
-    z-index: 9999;
+@media (max-width: 600px) and (orientation: portrait) {
+  * {
+    margin: 0;
+    padding: 0;
+    transition: all 0.3s ease-in-out;
   }
+  
+  body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #f4f4f9;
+  }
+  
   #app {
-    display: none; /* Hide the entire application */
-  }
-}
-
-/* ---------- Animations ---------- */
-@keyframes fadeIn {
-  from {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
     opacity: 0;
+    animation: fadeIn 0.8s ease-in-out forwards;
   }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes fadeInUp {
-  from {
+  
+  /* General content wrapper */
+  .responsive-container {
+    width: 100%;
+    padding: 1rem;
     opacity: 0;
-    transform: translateY(20px);
+    animation: fadeInUp 0.6s ease-in-out 0.2s forwards;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  
+  /* Main content */
+  main {
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
-}
-
-@keyframes popIn {
-  0% {
-    opacity: 0;
+  
+  /* Welcome container */
+  .welcome-container {
+    padding: 0.75rem; 
+    text-align: center;
+  }
+  
+  /* Logo styling */
+  .logo {
+    max-width: 60%;
+    height: auto;
+    margin: -15px;
     transform: scale(0.8);
+    animation: popIn 0.6s ease-in-out forwards;
   }
-  100% {
-    opacity: 1;
-    transform: scale(1);
+  
+  /* Text sizes */
+  .welcome-text {
+    font-size: 1.3rem; 
+    margin: -20px; 
+    opacity: 0;
+    animation: fadeInUp 0.5s ease-in-out 0.4s forwards;
   }
-}
+  
+  .instruction-text {
+    font-size: 0.6rem; 
+    margin: -25px; 
+    opacity: 0;
+    animation: fadeInUp 0.5s ease-in-out 0.6s forwards;
+  }
+  
+  /* Button container */
+  .button-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.1rem;
+    justify-content: center;
+    margin: -25px
+  }
+  
+  /* Button styling */
+  .button-container button {
+    flex: 1 1 auto;
+    padding: 0.6rem;     
+    font-size: 0.95rem;   
+    min-width: 100px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.3s;
+  }
+  
+  .button-container button:hover {
+    background: #0056b3;
+    transform: scale(1.05);
+  }
+  }
+  
+  /* ---------- Landscape Orientation Notice ---------- */
+  @media (max-width: 1000px) and (orientation: landscape) {
+    body::before {
+      content: "Please rotate your device!";
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 1.2rem;
+      font-size: 1.5rem;
+      text-align: center;
+      border-radius: 10px;
+      z-index: 9999;
+    }
+    #app {
+      display: none; /* Hide the entire application */
+    }
+  }
+  
+  /* ---------- Animations ---------- */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes popIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
