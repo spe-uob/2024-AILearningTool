@@ -245,7 +245,7 @@ export default {
 </script>
 
 
-<style scoped>
+<style>
 /* Adjust the main area height to make the chat window more compact */
 main {
   flex-grow: 1;
