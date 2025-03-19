@@ -22,6 +22,9 @@ public class ChatEntity {
     @Column(name = "sessionid", unique = true, nullable = false)
     private String sessionID;
 
+    @Column(name = "threadid", unique = true, nullable = false)
+    private String threadID;
+
     @Column(name = "message_history", columnDefinition = "TEXT")
     private String messageHistory;
 
@@ -41,6 +44,10 @@ public class ChatEntity {
 
     public String getChatID() {
         return chatID;
+    }
+
+    public String getThreadID() {
+        return threadID;
     }
 
     public void setChatID(String chatID) {

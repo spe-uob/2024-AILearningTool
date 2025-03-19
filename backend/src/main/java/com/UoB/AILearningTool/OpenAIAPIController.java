@@ -1,5 +1,6 @@
 package com.UoB.AILearningTool;
 
+import com.UoB.AILearningTool.model.ChatEntity;
 import org.json.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +84,7 @@ public class OpenAIAPIController {
     }
 
     // Check if a run is in progress for a thread
-    public boolean isLocked(Chat chat) {
+    public boolean isLocked(ChatEntity chat) {
         HttpRequest listMessagesRequest = HttpRequest
                 .newBuilder(URI.create("https://api.openai.com/v1/threads/" + chat.getThreadID() + "/runs"))
                 .headers("Content-Type", "application/json",
@@ -138,7 +139,7 @@ public class OpenAIAPIController {
     }
 
     // Add a message to an OpenAI thread.
-    public Integer sendUserMessage(Chat chat, String message) {
+    public Integer sendUserMessage(ChatEntity chat, String message) {
         // Creating a request body
         JSONObject newMessage = new JSONObject();
         newMessage.put("role", "user");

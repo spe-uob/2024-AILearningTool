@@ -8,6 +8,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,7 @@ import java.util.Optional;
 
 @RestController
 public class SpringController {
+    private static final Logger log = LoggerFactory.getLogger(SpringController.class);
     private final DatabaseController DBC;
     private final OpenAIAPIController WXC;
 
@@ -125,27 +128,40 @@ public class SpringController {
         }
     
         UserEntity user = userOptional.get();
-    
         
         ChatEntity chat = new ChatEntity(user, initialMessage, sessionID);
         chatRepository.save(chat);
         String chatID = chat.getChatID();
-    
-       
-        WatsonxResponse wresponse = WXC.sendUserMessage(chat, initialMessage);
-        if (wresponse.statusCode != 200) {
-            return ResponseEntity.status(500)
-                .body(Collections.singletonMap("message", "Failed to get AI response"));
+
+
+        // Add initial message to a new thread
+        Integer sendMessageResultCode = WXC.sendUserMessage(chat, initialMessage);
+        if (sendMessageResultCode != 200) {
+            return ResponseEntity.status(500).body(Collections.singletonMap("message", "Unable to add initial message to the thread."));
         }
-    
-        
-        chat.addAIMessage(wresponse.responseText);
+
+        // Run the new thread
+        int runThreadResultCode = WXC.runThread(chat.getThreadID());
+        if (runThreadResultCode != 200) {
+            return ResponseEntity.status(500).body(Collections.singletonMap("message", "Unable to run a new thread."));
+        }
+
+        // Wait until any runs for a thread are completed
+        while (WXC.isLocked(chat)) {
+            log.info("Thread is busy");
+        }
+
+        // Get the response from the AI and save it to the database
+        WatsonxResponse AIResponse = WXC.getLastThreadMessage(chat.getThreadID());
+        if (AIResponse.statusCode != 200) {
+            return ResponseEntity.status(500).body(Collections.singletonMap("message", "Unable to get last thread message."));
+        }
+
+        chat.addAIMessage(user, AIResponse.responseText);
         chatRepository.save(chat);
     
         return ResponseEntity.ok(Map.of(
-            "chatID", chatID,
-            "aiResponse", wresponse.responseText
-        ));
+            "chatID", chatID));
     }
     
     
@@ -154,10 +170,9 @@ public class SpringController {
         String username = request.get("username");
         String chatID = request.get("chatID");
         String newMessage = request.get("newMessage");
-    
-       
-        Optional<UserEntity> userOptional = userRepository.findById(username);
-        if (userOptional.isEmpty()) {
+
+        UserEntity user = userRepository.findById(username).orElse(null);
+        if (user == null) {
             return ResponseEntity.status(401)
                 .body(Collections.singletonMap("message", "User not found"));
         }
@@ -167,21 +182,40 @@ public class SpringController {
             return ResponseEntity.status(404)
                 .body(Collections.singletonMap("message", "Chat not found"));
         }
-    
-        chat.addUserMessage(newMessage);
-        chatRepository.save(chat);
-    
-        WatsonxResponse wresponse = WXC.sendUserMessage(chat, newMessage);
-        if (wresponse.statusCode != 200) {
-            return ResponseEntity.status(500)
-                .body(Collections.singletonMap("message", "Failed to get AI response"));
+
+        // Add a message to the thread
+        int sendMessageResultCode = WXC.sendUserMessage(chat, newMessage);
+        if (sendMessageResultCode != 200) {
+            return ResponseEntity.status(sendMessageResultCode)
+                    .body(Collections.singletonMap("message", "Unable to add message to the thread."));
         }
-    
-        chat.addAIMessage(wresponse.responseText);
+
+        // Run the thread
+        int runThreadResultCode = WXC.runThread(chat.getThreadID());
+        if (runThreadResultCode != 200) {
+            return ResponseEntity.status(500)
+                    .body(Collections.singletonMap("message", "Unable to run the thread."));
+        }
+
+        // Wait until any runs for a thread are completed
+        while (WXC.isLocked(chat)) {
+            log.info("Thread is busy");
+        }
+
+        // Add new message to the message history
+        WatsonxResponse AIResponse = WXC.getLastThreadMessage(chat.getThreadID());
+        if (AIResponse.statusCode != 200) {
+            return ResponseEntity.status(404)
+                    .body(Collections.singletonMap("message", "Unable to receive the new AI response."));
+        }
+
+        chat.addUserMessage(user, newMessage);
+        chat.addAIMessage(user, AIResponse.responseText);
         chatRepository.save(chat);
-    
+
         return ResponseEntity.ok(Map.of(
-            "response", wresponse.responseText
+                "role", "assistant",
+                "content", AIResponse.responseText
         ));
     }
 

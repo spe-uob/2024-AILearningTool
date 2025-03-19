@@ -3,6 +3,7 @@ package com.UoB.AILearningTool.model;
 import jakarta.persistence.*;
 import java.util.List;
 import com.UoB.AILearningTool.StringTools;
+import java.security.*;
 
 @Entity
 @Table(name = "users")
