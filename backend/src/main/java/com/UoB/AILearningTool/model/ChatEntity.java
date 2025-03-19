@@ -1,6 +1,11 @@
 package com.UoB.AILearningTool.model;
 
+import com.UoB.AILearningTool.StringTools;
 import jakarta.persistence.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.web.bind.annotation.DeleteMapping;
+
 import java.util.UUID;
 
 @Entity
@@ -20,13 +25,18 @@ public class ChatEntity {
     @Column(name = "message_history", columnDefinition = "TEXT")
     private String messageHistory;
 
+
     public ChatEntity() {}
 
     public ChatEntity(UserEntity owner, String initialMessage, String sessionID) {
-        this.chatID = UUID.randomUUID().toString();
+        this.chatID = StringTools.RandomString(32);
         this.owner = owner;
         this.sessionID = sessionID;
-        this.messageHistory = "<|system|>\n" + initialMessage;
+        this.messageHistory = new JSONArray().put(
+                new JSONObject().put(
+                        "role", "user"
+                ).put("content", initialMessage)
+        ).toString();
     }
 
     public String getChatID() {
@@ -49,19 +59,38 @@ public class ChatEntity {
         this.sessionID = sessionID;
     }
 
-    public String getMessageHistory() {
-        return messageHistory;
+    public JSONArray getMessageHistory(UserEntity user) {
+        if (this.getOwner().equals(user)) {
+            return new JSONArray(this.messageHistory);
+        } else {return null;}
+
     }
 
-    public void setMessageHistory(String newHistory) {
-        this.messageHistory = newHistory;
+    public void setMessageHistory(JSONArray newHistory) {
+        this.messageHistory = new JSONArray(newHistory).toString();
     }
 
-    public void addUserMessage(String message) {
-        this.messageHistory += "\n<|user|>\n" + message;
+    public void addUserMessage(UserEntity user, String message) {
+        if (this.getOwner().equals(user)) {
+            this.messageHistory = this.getMessageHistory(user).put(
+                    new JSONObject().put(
+                            "role", "user"
+                    ).put(
+                            "content", message
+                    )
+            ).toString();
+        }
     }
 
-    public void addAIMessage(String message) {
-        this.messageHistory += "\n<|assistant|>\n" + message;
+    public void addAIMessage(UserEntity user, String message) {
+        if (this.getOwner().equals(user)) {
+            this.messageHistory = this.getMessageHistory(user).put(
+                    new JSONObject().put(
+                            "role", "assistant"
+                    ).put(
+                            "content", message
+                    )
+            ).toString();
+        }
     }
 }
