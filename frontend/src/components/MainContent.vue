@@ -64,8 +64,8 @@
 
 <script>
 import axios from "axios";
-import { getTheme } from "../assets/color.js";
-import {getTranslation} from "../assets/language";
+import { getTheme } from "@/assets/color.js";
+import {getTranslation} from "@/assets/language";
 
 export default {
   data() {
