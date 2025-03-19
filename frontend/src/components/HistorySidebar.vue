@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import { getTheme } from "../assets/color.js";
+import { getTheme } from "@/assets/color.js";
 import { getTranslation } from "@/assets/language";
 
 export default {
@@ -92,7 +92,7 @@ export default {
 </script>
 
 
-<style scoped>
+<style>
 /* Sidebar Layout */
 .history-sidebar {
   width: 240px;
