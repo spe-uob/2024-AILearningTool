@@ -1,11 +1,10 @@
-# Deploy the Docker image to GHCR
+# Push the Docker image to GHCR and deploy on the server
 name: CD Deployment
 
 on:
   push:
     branches:
       - dev
-      - build-system-overhaul
 
 jobs:
   build-and-deploy:
@@ -39,3 +38,17 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ghcr.io/spe-uob/2024-ailearningtool:latest
+
+      # Step 6: Pull the image and deploy on the server
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker pull ghcr.io/spe-uob/2024-ailearningtool:latest
+            docker stop ailearningtool || true
+            docker rm ailearningtool || true
+            docker run -d --name ailearningtool -p 8080:8080 ghcr.io/spe-uob/2024-ailearningtool:latest
+
