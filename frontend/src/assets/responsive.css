@@ -12,6 +12,11 @@
         background-color: #f4f4f9;
         touch-action: manipulation;
     }
+   
+    html, body {
+        overflow-x: hidden;
+        width: 100%;
+    }
 
     #app {
         display: flex;
