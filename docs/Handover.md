@@ -19,7 +19,7 @@ AILearningTool is a web-based chatbot developed using **Spring Boot** (backend) 
 
 ## 2. Architecture & Components
 
-![Architecture Diagram](docs/Diagrams/architecture_diagram.png)
+![Architecture Diagram](https://github.com/spe-uob/2024-AILearningTool/blob/feature/issue-210/Improve-documentation/docs/Diagrams/architecture_diagram.png)
 ### Backend
 
 - **Framework:** Spring Boot 3.3.4  
