@@ -40,6 +40,29 @@ export default {
   },
   methods: {
     getTranslation,
+
+    async fetchChatHistory() {
+      const username = localStorage.getItem("username");
+      if (!username) {
+        console.error("No username found in localStorage.");
+        return;
+      }
+
+      try {
+        const response = await fetch(`${this.aiServerUrl}/getUserChats?username=${username}`);
+        if (!response.ok) throw new Error("Failed to load chat history.");
+
+        const data = await response.json();
+        if (data.chatList && Array.isArray(data.chatList)) {
+          this.$emit("updateChats", data.chatList);
+        }
+      } catch (error) {
+        console.error("Error loading chat history:", error);
+      }
+    },
+
+
+
     addChat() {
       this.$emit("resetMainContent");
     },
@@ -87,6 +110,7 @@ export default {
   mounted() {
     this.applyTheme("default");
     this.listenForThemeChange();
+    this.fetchChatHistory();
   },
 };
 </script>

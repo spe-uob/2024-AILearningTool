@@ -1,9 +1,7 @@
 package com.UoB.AILearningTool;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 
-// Class representing a user profile (someone who consented to optional cookies).
 public class User {
     private final String id;
     private boolean optionalConsent = false;
@@ -23,11 +21,9 @@ public class User {
         this.lastActivityTime = LocalDateTime.now();
     }
 
-
-    // Create a user
-    public User(boolean optionalConsent) {
+    public User(String username, boolean optionalConsent) {
         updateLastActivityTime();
-        this.id = StringTools.RandomString(25);
+        this.id = username;
         this.optionalConsent = optionalConsent;
     }
 }

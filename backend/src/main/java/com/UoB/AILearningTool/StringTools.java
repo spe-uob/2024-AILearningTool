@@ -7,6 +7,10 @@ import java.util.ArrayList;
 // StringTools create / transform strings to the required formats.
 public class StringTools {
 
+    public static String generateSessionID() {
+        return RandomString(15);
+    }
+
     // Generates a random string of specific size (e.g. for userID / chatID)
     public static String RandomString(int n) {
         String newString = "";

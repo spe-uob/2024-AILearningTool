@@ -1,103 +1,74 @@
 package com.UoB.AILearningTool;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
+import com.UoB.AILearningTool.model.ChatEntity;
+import com.UoB.AILearningTool.model.UserEntity;
+import com.UoB.AILearningTool.repository.ChatRepository;
+import com.UoB.AILearningTool.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
+import java.util.Optional;
 
-public class DatabaseControllerTest {
-    @Test
-    @DisplayName("Check whether users can be created.")
-    public void createUsers() {
-        DatabaseController DBC = new DatabaseController();
-        ArrayList<String> usernames = new ArrayList<>();
-        for (int i = 0; i < 20; i++) {
-            usernames.add(DBC.addUser(true));
-        }
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-        for (String username : usernames) {
-            User user = DBC.getUser(username);
-            Assertions.assertEquals(username, user.getID());
-        }
+class DatabaseControllerTest {
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private ChatRepository chatRepository;
+
+    @InjectMocks
+    private DatabaseController databaseController;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    @DisplayName("Check whether users can be deleted.")
-    public void deleteUsers() {
-        DatabaseController DBC = new DatabaseController();
-        ArrayList<String> usernames = new ArrayList<>();
-        for (int i = 0; i < 20; i++) {
-            usernames.add(DBC.addUser(true));
-        }
+    void testAddUser() {
+        UserEntity user = new UserEntity("testUser", "password123", true);
+        when(userRepository.save(any(UserEntity.class))).thenReturn(user);
 
-        // Deleting all users
-        for (String username : usernames) {
-            DBC.removeUser(username);
-        }
-
-        // Search for non-existing user must return null
-        for (String username : usernames) {
-            Assertions.assertNull(DBC.getUser(username));
-        }
+        String result = databaseController.addUser("testUser", "password123", true);
+        assertEquals("testUser", result);
     }
 
     @Test
-    @DisplayName("Check whether chats can be created and accessed.")
-    public void createChats() {
-        DatabaseController DBC = new DatabaseController();
-        ArrayList<User> users = new ArrayList<>();
-        ArrayList<String> chatIDs = new ArrayList<>();
+    void testGetUser() {
+        UserEntity user = new UserEntity("testUser", "password123", true);
+        when(userRepository.findById("testUser")).thenReturn(Optional.of(user));
 
-        // Create users.
-        for (int i = 0; i < 20; i++) {
-            users.add(DBC.getUser(DBC.addUser(true)));
-        }
-
-        // Create chats.
-        for (User user : users) {
-            chatIDs.add(DBC.createChat(user, "This is a first message.", "TEST"));
-        }
-
-        // DBC.getChat() must return a non-null element.
-        for (int i = 0; i < 20; i++) {
-            Chat actualChat = DBC.getChat(users.get(i), chatIDs.get(i));
-            Assertions.assertNotNull(actualChat);
-        }
+        UserEntity result = databaseController.getUser("testUser");
+        assertNotNull(result);
+        assertEquals("testUser", result.getUsername());
     }
 
     @Test
-    @DisplayName("Check whether chats can only be accessed by their owners.")
-    public void accessChatPermissionTest() {
-        Chat currentChat;
-        User currentUser;
-        DatabaseController DBC = new DatabaseController();
-        ArrayList<User> users = new ArrayList<>();
-        ArrayList<String> chatIDs = new ArrayList<>();
+    void testRemoveUser() {
+        when(userRepository.existsById("testUser")).thenReturn(true);
+        doNothing().when(userRepository).deleteById("testUser");
 
-        // Create users.
-        for (int i = 0; i < 20; i++) {
-            users.add(DBC.getUser(DBC.addUser(true)));
-        }
-
-        // Create chats.
-        for (User user : users) {
-            chatIDs.add(DBC.createChat(user, "This is a first message.", "TEST"));
-        }
-
-        for (int i = 0; i < 20; i++) {
-            // If currentUser is the chat owner, Chat object is returned.
-            currentUser = users.get(i);
-            currentChat = DBC.getChat(currentUser, chatIDs.get(i));
-            Assertions.assertNotNull(currentChat);
-            for (int j = 0; j < 20; j++) {
-                if (i == j) {continue;}
-                // If currentUser isn't the chat owner, null object is returned.
-                currentUser = users.get(j);
-                currentChat = DBC.getChat(currentUser, chatIDs.get(i));
-                Assertions.assertNull(currentChat);
-            }
-        }
+        boolean result = databaseController.removeUser("testUser");
+        assertTrue(result);
     }
 
+    @Test
+    void testCreateChat() {
+        UserEntity user = new UserEntity("testUser", "password123", true);
+        when(userRepository.findById("testUser")).thenReturn(Optional.of(user));
+
+        ChatEntity chat = new ChatEntity(user, "Hello AI!", "mockSessionID"); 
+        when(chatRepository.save(any(ChatEntity.class))).thenReturn(chat);
+
+        ChatEntity createdChat = databaseController.createChat("mockSessionID", "Hello AI!");
+        assertNotNull(createdChat);
+        assertEquals("mockSessionID", createdChat.getSessionID());
+    }
 }

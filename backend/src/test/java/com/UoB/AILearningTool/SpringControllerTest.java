@@ -1,143 +1,96 @@
 package com.UoB.AILearningTool;
 
-import org.json.JSONArray;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.Test;
+import com.UoB.AILearningTool.model.UserEntity;
+import com.UoB.AILearningTool.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.Cookie;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-// integrates Mockito with JUnit
 @ExtendWith(MockitoExtension.class)
 class SpringControllerTest {
     @Mock
-    private DatabaseController mockDBController;
+    private DatabaseController mockDBC;
 
     @Mock
-    private OpenAIAPIController mockWXC;
+    private UserRepository userRepository;
 
-    @Mock
-    private HttpServletResponse mockResponse;
-
-    @Mock
-    private PrintWriter mockWriter;
-
-    // This Tells Mockito to inject the @Mock fields into SpringController's constructor
     @InjectMocks
     private SpringController springController;
 
-    @Captor
-    private ArgumentCaptor<Cookie> cookieCaptor;
+    private UserEntity testUser;
 
     @BeforeEach
-    public void setUp() throws IOException {
-        Mockito.lenient().when(mockResponse.getWriter()).thenReturn(mockWriter);
+    public void setUp() throws Exception {
+        MockitoAnnotations.openMocks(this);
+        testUser = new UserEntity("testUser", "password123", true);
+        springController = new SpringController(mockDBC, null);
+
+        Field userRepoField = SpringController.class.getDeclaredField("userRepository");
+        userRepoField.setAccessible(true);
+        userRepoField.set(springController, userRepository);
     }
 
     @Test
-    public void testNewUserCreated() {
+    void testRegisterUser_Success() {
+        Map<String, String> credentials = Map.of("username", "testUser", "password", "password123");
 
-        // mock addUser to return a specific ID "user123" when called wit optional consent = true
-        boolean optionalConsent = true;
-        String generatedUserID = "user123";
-        when(mockDBController.addUser(optionalConsent)).thenReturn(generatedUserID);
+        when(userRepository.existsById("testUser")).thenReturn(false);
+        when(mockDBC.addUser("testUser", "password123", true)).thenReturn("testUser");
 
-        // call the signup method with the arranged parameters
-        springController.signup(optionalConsent, mockResponse);
+        ResponseEntity<Map<String, Object>> response = springController.registerUser(credentials);
 
-        // verify that addUser was called with optionalConsent = true
-        verify(mockDBController, times(1)).addUser(optionalConsent);
+        assertEquals(200, response.getStatusCodeValue());
+        assertTrue(response.getBody().containsKey("success"));
 
-        // capture the cookie added to the response
-        verify(mockResponse, times(1)).addCookie(cookieCaptor.capture());
-        Cookie capturedCookie = cookieCaptor.getValue();
-
-
-        // assertions on the captured cookie
-        assertEquals("userID", capturedCookie.getName(), "Cookie name should be userID");
-        assertEquals(generatedUserID, capturedCookie.getValue(), "Cookie value should match generated userID");
-        assertEquals(30 * 24 * 60 * 60, capturedCookie.getMaxAge(), "Cookie max age should be 30 days");
+        verify(mockDBC, times(1)).addUser("testUser", "password123", true);
     }
 
     @Test
-    public void testRevokeConsent() {
+    void testRegisterUser_UsernameExists() {
+        Map<String, String> credentials = Map.of("username", "existingUser", "password", "password123");
 
-        // define a userID "user123" to revoke consent for
-        String userID = "user123";
+        when(userRepository.existsById("existingUser")).thenReturn(true);
 
-        // mock removeUser to return true
-        when(mockDBController.removeUser(userID)).thenReturn(true);
+        ResponseEntity<Map<String, Object>> response = springController.registerUser(credentials);
 
-        springController.revokeConsent(userID, mockResponse);
+        assertEquals(400, response.getStatusCodeValue());
+        assertTrue(response.getBody().containsKey("message"));
+        assertEquals("Username already exists", response.getBody().get("message"));
 
-        // verify that removeUser was called with the correct userID
-        verify(mockDBController, times(1)).removeUser(userID);
-
-        // verify that the status was set to 200 when user was removed
-        verify(mockResponse, times(1)).setStatus(HttpServletResponse.SC_OK);
-
-        // capture the cookie added to the response
-        verify(mockResponse, times(1)).addCookie(cookieCaptor.capture());
-        Cookie capturedCookie = cookieCaptor.getValue();
-
-        // assertions on captured cookie
-        assertEquals("userID", capturedCookie.getName(), "Cookie name should be userID");
-        assertEquals("", capturedCookie.getValue(), "Cookie value should be empty");
-        assertEquals(0, capturedCookie.getMaxAge(), "Cookie max age should be 0");
+        verify(mockDBC, never()).addUser(anyString(), anyString(), anyBoolean());
     }
 
-//    TODO: No idea how this one works, refactor it for the new API structure.
-//    @Test
-//    void testCreateChat() {
-//        // Given
-//        String userID = "user123";
-//        String initialMessage = "Hello chatbot!";
-//        String generatedChatID = "abc123";
-//        User mockUser = new User(true);
-//        Chat mockChat = mock(Chat.class);
-//        OpenAIAPIController OAIC = new OpenAIAPIController();
-//
-//        // Mock out DB calls
-//        when(mockDBController.getUser(userID)).thenReturn(mockUser);
-//        when(mockDBController.createChat(mockUser, initialMessage, OAIC.createThread())).thenReturn(generatedChatID);
-//        when(mockDBController.getChat(mockUser, generatedChatID)).thenReturn(mockChat);
-//
-//        // Mock chat & AI calls
-//        JSONArray messageHistory = ;
-//        when(mockChat.getMessageHistory(mockUser)).thenReturn(messageHistory);
-//
-//        WatsonxResponse aiResponse = new WatsonxResponse(200, "AI says hi");
-//        when(mockWXC.sendUserMessage(mockChat, messageHistory)).thenReturn(aiResponse);
-//
-//        // When
-//        springController.createChat(userID, initialMessage, mockResponse);
-//
-//        // Then
-//        verify(mockDBController).getUser(userID);
-//        verify(mockDBController).createChat(mockUser, initialMessage);
-//        verify(mockDBController).getChat(mockUser, generatedChatID);
-//
-//        verify(mockChat).getMessageHistory(mockUser);
-//        verify(mockWXC).sendUserMessage(messageHistory);
-//
-//        // AI responded with status 200, so we expect addAIMessage to be called:
-//        verify(mockChat).addAIMessage(userID, "AI says hi");
-//
-//        // Finally, verify response
-//        verify(mockResponse).setContentType("text/plain");
-//        verify(mockResponse).setStatus(200);
-//        verify(mockWriter).write(generatedChatID);
-//    }
+    @Test
+    void testRevokeConsent_Success() {
+        when(mockDBC.removeUser("testUser")).thenReturn(true);
 
+        ResponseEntity<Map<String, Object>> response = springController.revokeConsent("testUser");
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("User data deleted successfully.", response.getBody().get("message"));
+
+        verify(mockDBC, times(1)).removeUser("testUser");
+    }
+
+    @Test
+    void testRevokeConsent_Failure() {
+        when(mockDBC.removeUser("testUser")).thenReturn(false);
+
+        ResponseEntity<Map<String, Object>> response = springController.revokeConsent("testUser");
+
+        assertEquals(400, response.getStatusCodeValue());
+        assertEquals("User not found", response.getBody().get("message"));
+
+        verify(mockDBC, times(1)).removeUser("testUser");
+    }
 }
-
-
-

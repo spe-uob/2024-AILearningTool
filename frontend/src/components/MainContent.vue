@@ -96,19 +96,15 @@ export default {
   data() {
     return {
       userInput: "",
-      currentTopic: "",
-      currentTurn: "user", // Tracks conversation turn (user or AI)
-      userId: localStorage.getItem("userId") || "",
-      aiServerURL: "http://localhost:8080", // API endpoint for AI server
-      currentTheme: "default", // Stores the current UI theme
+      userId: localStorage.getItem("username") || "",  // username
+      aiServerURL: "http://localhost:8080", // API address
+      sessionID: localStorage.getItem("sessionID") || "",
     };
   },
   props: ["messages", "chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
   watch: {
-    // Automatically scroll to the bottom when new messages arrive
     messages() {
       if (this.messages.length === 0 && this.currentChatID.length > 0) {
-        this.currentTurn = "user";
         this.requestChatHistory();
       }
       this.$nextTick(() => {
@@ -120,13 +116,20 @@ export default {
     getTheme,
     getTranslation,
 
-    /**
-     * Converts markdown format to HTML.
-     */
+    updateChatList(newChats) {
+      this.chats = newChats;
+      this.$emit('updateChats', newChats);
+    },
+
     formatMessage(message) {
-      // Use marked to convert markdown to HTML.
       return marked(message);
     },
+
+    resetContent() {
+      this.messages = [];
+      this.$emit('updateChatID', '');
+    },
+
 
         /**
      * Uses the Web Speech API to speak the given text.
@@ -178,107 +181,134 @@ export default {
      * Initializes a new chat with a predefined message.
      */
     async sendInitialMessage(message) {
-      this.$emit("setButtonLock", true)
-      let response = await fetch(this.aiServerURL + "/createChat?" + new URLSearchParams({
-        "initialMessage": message
-      }),{
-            method: "GET",
-            credentials: "include",
-          }
-      );
-
-      if (!response.ok) {
-        throw new Error("Non-200 backend API response");
+      if (!this.sessionID) {
+        alert("Please login!");
+        return;
       }
 
-      this.$emit("updateChatID", await response.text());
-      await this.$nextTick(() => {
-        this.$emit("addChat", this.currentChatID, message);
-        this.requestChatHistory();
-      });
+      try {
+        const chatCount = this.chats.length + 1;
+        const chatTitle = `Chat ${chatCount}`;
+
+        const response = await fetch(`${this.aiServerURL}/createChat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sessionID: this.sessionID,
+            initialMessage: message
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to create chat");
+        }
+
+        this.$emit("updateChatID", data.chatID);
+        this.$emit("addChat", data.chatID, chatTitle);
+        this.$emit("addMessage", "user", message);
+
+        if (data.aiResponse) {
+          this.$emit("addMessage", "assistant", data.aiResponse);
+        }
+
+      } catch (error) {
+        console.error("Error creating chat:", error);
+        alert(error.message || "Failed to create chat");
+      }
     },
 
-    /**
-     * Requests chat history from the server based on the current chat ID.
-     */
-    requestChatHistory() {
-      fetch(
-          this.aiServerURL +
-          "/getChatHistory?" +
-          new URLSearchParams({
+
+    async sendMessage() {
+      if (!this.userInput.trim()) {
+        alert("Please enter messages");
+        return;
+      }
+
+      if (!this.userId) {
+        alert("Login failed, please log in again!");
+        return;
+      }
+
+      if (!this.currentChatID) {
+        alert("Please select a chat first!");
+        return;
+      }
+
+      const messageContent = this.userInput.trim();
+      this.userInput = "";
+
+      try {
+        this.$emit("addMessage", "user", messageContent);
+
+        const response = await fetch(`${this.aiServerURL}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: this.userId,
             chatID: this.currentChatID,
+            newMessage: messageContent,
           }),
-          {
-            method: "GET",
-            credentials: "include",
-          }
-      ).then(async (response) => {
+        });
+
+        const data = await response.json();
+
         if (!response.ok) {
-          throw new Error("Non-200 backend API response");
-        } else {
-          await this.processChatHistory(await response.json());
+          throw new Error(data.message || "Failed to send message");
         }
-      });
+
+        this.$emit("addMessage", "assistant", data.response);
+
+      } catch (error) {
+        console.error("Error sending message:", error);
+        alert(error.message || "Failed to send message");
+      }
+    },
+
+
+    async requestChatHistory() {
+      if (!this.userId || !this.currentChatID) return;
+
+      try {
+        const response = await fetch(`${this.aiServerURL}/getChatHistory?` + new URLSearchParams({
+          username: this.userId,
+          chatID: this.currentChatID
+        }), {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!response.ok) throw new Error("Failed to load chat history");
+
+        const data = await response.json();
+        this.processChatHistory(data.history);
+      } catch (error) {
+        console.error("Error loading chat history:", error);
+      }
     },
 
     /**
      * Processes retrieved chat history and structures it for display.
      */
     async processChatHistory(messageHistory) {
-      // New code starts here
-      for (let i = 0; i < messageHistory.length; i++) {
-        this.$emit("addMessage", ((i % 2 === 0) ? "user" : "assistant"), messageHistory[i]["content"]);
-      }
-      // New code ends here
-      this.$emit("setButtonLock", false)
-    },
-
-    /**
-     * Sends a user message to the AI server and processes the response.
-     */
-    async sendMessage() {
-      if (!this.userInput.trim()) {
-        alert(
-            getTranslation(localStorage.getItem("langCode"), "PLEASE_ENTER_A_MESSAGE")
-        );
+      if (!Array.isArray(messageHistory)) {
+        console.error("Invalid chat history format:", messageHistory);
         return;
       }
 
-      // "if" below can be removed later
-      if (!this.currentChatID) {
-        alert("ChatId is not set. Please start a new chat.");
-        return;
-      }
-
-      this.$emit("addMessage", "user", this.userInput);
-      this.$emit("setButtonLock", true)
-
-      const messageToSend = this.userInput.trim();
-      this.userInput = "";
-
-      try {
-        let response = await fetch(this.aiServerURL + "/sendMessage?" + new URLSearchParams({
-          "userID": this.userId,
-          "chatID": this.currentChatID,
-          "newMessage": messageToSend,
-        }),{
-              method: "GET",
-              credentials: "include",
-            }
-        );
-
-        if (! response.ok) {
-          throw new Error(`Unexpected response code: ${response.status}`);
+      messageHistory.forEach(msg => {
+        if (msg.content.startsWith("<|user|>")) {
+          this.$emit("addMessage", "user", msg.content.replace("<|user|>", "").trim());
+        } else if (msg.content.startsWith("<|assistant|>")) {
+          this.$emit("addMessage", "assistant", msg.content.replace("<|assistant|>", "").trim());
+        } else {
+          this.$emit("addMessage", "system", msg.content);
         }
-        let responseJSON = await response.json();
-        this.$emit("addMessage", "assistant", (responseJSON["content"]));
-      } catch (error) {
-        console.error("Error sending message:", error);
-        this.$emit("addMessage", "System",
-            localStorage.getItem("langCode"), "FAILED_TO_SEND_MESSAGE");
-      }
-      this.scrollToBottom();
-      this.$emit("setButtonLock", false)
+      });
+
+      // 解锁按钮，确保 UI 流畅
+      this.$emit("setButtonLock", false);
     },
     
     scrollToBottom() {
@@ -288,7 +318,7 @@ export default {
           container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
         }
       });
-    },
+    }
   }
 };
 </script>
