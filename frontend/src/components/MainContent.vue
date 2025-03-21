@@ -87,6 +87,7 @@
 import { marked } from "marked";
 import { getTheme } from "../assets/color.js";
 import {getTranslation} from "../assets/language";
+import { BACKEND_URL } from "@/assets/globalConstants"
 import TypingText from "../components/helpers/TypingText.vue";
 
 export default {
@@ -99,7 +100,6 @@ export default {
       currentTopic: "",
       currentTurn: "user", // Tracks conversation turn (user or AI)
       userId: localStorage.getItem("userId") || "",
-      aiServerURL: "http://localhost:8080", // API endpoint for AI server
       currentTheme: "default", // Stores the current UI theme
     };
   },
@@ -179,7 +179,7 @@ export default {
      */
     async sendInitialMessage(message) {
       this.$emit("setButtonLock", true)
-      let response = await fetch(this.aiServerURL + "/createChat?" + new URLSearchParams({
+      let response = await fetch(BACKEND_URL + "/createChat?" + new URLSearchParams({
         "initialMessage": message
       }),{
             method: "GET",
@@ -203,7 +203,7 @@ export default {
      */
     requestChatHistory() {
       fetch(
-          this.aiServerURL +
+          BACKEND_URL +
           "/getChatHistory?" +
           new URLSearchParams({
             chatID: this.currentChatID,
@@ -257,7 +257,7 @@ export default {
       this.userInput = "";
 
       try {
-        let response = await fetch(this.aiServerURL + "/sendMessage?" + new URLSearchParams({
+        let response = await fetch(BACKEND_URL + "/sendMessage?" + new URLSearchParams({
           "userID": this.userId,
           "chatID": this.currentChatID,
           "newMessage": messageToSend,

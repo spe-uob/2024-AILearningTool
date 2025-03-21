@@ -9,6 +9,8 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      BACKEND_URL: ailearningtool.ddns.net
     steps:
       # Step 1: Checkout the repository
       - name: Checkout repository
@@ -21,16 +23,37 @@ jobs:
           java-version: '21'  
           distribution: 'temurin'
 
-      # Step 3: Build the JAR file with Maven
+      # Step 3: Adjust the backend application parameters
+      - name: Adjust the backend URL
+        run: | 
+          echo "spring.application.name=AILearningTool 
+          server.port=443 
+          spring.servlet.multipart.max-file-size=50MB 
+          spring.servlet.multipart.max-request-size=50MB 
+          spring.web.resources.static-locations=classpath:/static/
+          server.servlet.encoding.charset=UTF-8
+          server.servlet.encoding.enabled=true 
+          server.servlet.encoding.force=true 
+          server.ssl.key-store=classpath:keystore.p12 
+          server.ssl.key-store-password=ailearntool" > application.properties
+        working-directory: backend/src/main/resources
+
+      # Step 4: Adjust the frontend BACKEND_URL constant
+      - name: Update frontend BACKEND_URL constant
+        run : echo "const BACKEND_URL = 'http://" + $BACKEND_URL + "';
+              export { BACKEND_URL };" > globalConstants.js
+        working-directory: frontend/src/assets
+        
+      # Step 5: Build the JAR file with Maven
       - name: Build JAR
         run: mvn clean package
         working-directory: backend
 
-      # Step 4: Log in to GitHub Container Registry
+      # Step 6: Log in to GitHub Container Registry
       - name: Log in to GHCR
         run: echo "${{ secrets.CONTAINER_REGISTRY_PAT }}" | docker login ghcr.io -u GerardChabaBristol --password-stdin
 
-      # Step 5: Build and push the Docker image
+      # Step 7: Build and push the Docker image
       - name: Publish Docker image to GHCR
         uses: docker/build-push-action@v3
         with:
@@ -39,7 +62,7 @@ jobs:
           push: true
           tags: ghcr.io/spe-uob/2024-ailearningtool:latest
 
-      # Step 6: Pull the image and deploy on the server
+      # Step 8: Pull the image and deploy on the server
       - name: Deploy to Server
         uses: appleboy/ssh-action@master
         with:
@@ -50,5 +73,5 @@ jobs:
             docker pull ghcr.io/spe-uob/2024-ailearningtool:latest
             docker stop ailearningtool || true
             docker rm ailearningtool || true
-            docker run -d --name ailearningtool -p 8080:8080 ghcr.io/spe-uob/2024-ailearningtool:latest
+            docker run -d --name ailearningtool -p 443:443 ghcr.io/spe-uob/2024-ailearningtool:latest -v keystore.p12:/keystore.p12
 
