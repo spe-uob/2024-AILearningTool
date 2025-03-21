@@ -26,15 +26,15 @@ jobs:
       # Step 3: Adjust the backend application parameters
       - name: Adjust the backend URL
         run: | 
-          echo "spring.application.name=AILearningTool 
-          server.port=443 
-          spring.servlet.multipart.max-file-size=50MB 
-          spring.servlet.multipart.max-request-size=50MB 
-          spring.web.resources.static-locations=classpath:/static/
-          server.servlet.encoding.charset=UTF-8
-          server.servlet.encoding.enabled=true 
-          server.servlet.encoding.force=true 
-          server.ssl.key-store=classpath:keystore.p12 
+          echo -e "spring.application.name=AILearningTool\n\
+          server.port=443\n\
+          spring.servlet.multipart.max-file-size=50MB\n\
+          spring.servlet.multipart.max-request-size=50MB\n\
+          spring.web.resources.static-locations=classpath:/static/\n\
+          server.servlet.encoding.charset=UTF-8\n\
+          server.servlet.encoding.enabled=true\n\
+          server.servlet.encoding.force=true\n\
+          server.ssl.key-store=classpath:keystore.p12\n\
           server.ssl.key-store-password=ailearntool" > application.properties
         working-directory: backend/src/main/resources
 
