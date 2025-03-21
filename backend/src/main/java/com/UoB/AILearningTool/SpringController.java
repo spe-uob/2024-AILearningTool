@@ -219,72 +219,26 @@ public class SpringController {
         ));
     }
 
-    // Get message history from a chat
-    @GetMapping("/getChatHistory")
-    public void getChatHistory(@CookieValue(value = "userID", defaultValue = "") String userID,
-                               @RequestParam(name = "chatID") String chatID,
-                               HttpServletResponse response) {
-        response.setContentType("text/plain; charset=utf-8");
-        
-        Optional<UserEntity> userOptional = userRepository.findById(userID);
-        if (userOptional.isEmpty()) {
-            response.setStatus(401);
-            try {
-                response.getWriter().write("User doesn't exist!");
-                return;
-            } catch (IOException e) {
-                return;
-            }
+    @PostMapping("/getChatHistory")
+    public ResponseEntity<Map<String, Object>> getChatHistory(@RequestBody Map<String, String> request) {
+        String userID = request.get("userID");
+        String chatID = request.get("chatID");
+
+        UserEntity user = userRepository.findById(userID).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(404)
+                    .body(Collections.singletonMap("message", "User doesn't exist"));
         }
-        
-        UserEntity user = userOptional.get();
+
         ChatEntity chat = chatRepository.findById(chatID).orElse(null);
-        
+
         if (chat == null || !chat.getOwner().getUsername().equals(userID)) {
-            response.setStatus(404);
-            try {
-                response.getWriter().write("Chat doesn't exist or you are not authorized to access it.");
-                return;
-            } catch (IOException e) {
-                return;
-            }
+            return ResponseEntity.status(404)
+                    .body(Collections.singletonMap("message", "Chat doesn't exist or you are not authorized to access it."));
         }
-    
-        String chatHistory = chat.getMessageHistory();
-        if (chatHistory.startsWith("<|system|>")) {
-            chatHistory = chatHistory.replace("<|system|>\n", ""); 
-        }
-    
-       
-        JSONArray messageHistory = new JSONArray();
-        String[] messages = chatHistory.split("\n");
-        for (int i = 0; i < messages.length; i++) {
-            String message = messages[i];
-            if (message.startsWith("<|user|>")) {
-                JSONObject userMessage = new JSONObject();
-                userMessage.put("role", "user");
-                userMessage.put("content", message.replace("<|user|>", "").trim());
-                messageHistory.put(userMessage);
-            } else if (message.startsWith("<|assistant|>")) {
-                JSONObject assistantMessage = new JSONObject();
-                assistantMessage.put("role", "assistant");
-                assistantMessage.put("content", message.replace("<|assistant|>", "").trim());
-                messageHistory.put(assistantMessage);
-            } else if (!message.isEmpty()) {
-                JSONObject systemMessage = new JSONObject();
-                systemMessage.put("role", "system");
-                systemMessage.put("content", message.trim());
-                messageHistory.put(systemMessage);
-            }
-        }
-    
-        // If we reach here, chat != null and messageHistory != null
-        response.setStatus(200);
-        try {
-            response.getWriter().write(messageHistory.toString());
-        } catch (IOException e) {
-            response.setStatus(500);
-        }
+
+        return ResponseEntity.status(200)
+                .body(new JSONObject(chat.getMessageHistory(user)).toMap());
     }
 
     @GetMapping("/getUserChats")
@@ -298,19 +252,7 @@ public class SpringController {
         List<Map<String, String>> chatList = new ArrayList<>();
     
         for (ChatEntity chat : chats) {
-            String[] lines = chat.getMessageHistory().split("\n");
-            String title = "New Chat";
-            
-            for (String line : lines) {
-                if (!line.startsWith("<|user|>") && !line.startsWith("<|assistant|>")) {
-                    title = line.trim();
-                    if (!title.isEmpty()) {
-                        break;  
-                    }
-                }
-            }
-    
-            chatList.add(Map.of("chatID", chat.getChatID(), "title", title));
+            chatList.add(Map.of("chatID", chat.getChatID(), "title", "todo"));
         }
     
         return ResponseEntity.ok(Collections.singletonMap("chatList", chatList));
