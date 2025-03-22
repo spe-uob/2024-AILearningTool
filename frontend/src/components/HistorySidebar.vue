@@ -33,7 +33,6 @@ export default {
   data() {
     return {
       isCollapsed: true, // Controls sidebar visibility
-      aiServerUrl: "http://localhost:8080",
       currentTheme: "default", // Tracks the current theme
       themeStyles: {}, // Stores dynamic styles
     };
