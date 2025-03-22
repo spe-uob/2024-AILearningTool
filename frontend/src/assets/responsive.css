@@ -99,6 +99,26 @@
         background: #0056b3;
         transform: scale(1.05);
     }
+
+    /* Make messages take up the full available width */
+    .message {
+        width: calc(100% - 24px) !important;
+        max-width: calc(100% - 24px) !important;
+        margin: 14px !important;       
+        padding: 12px 16px !important; 
+    }
+      
+    .user-message,
+  .assistant-message {
+    align-self: stretch !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+  }
+  .user-message::after,
+  .assistant-message::after {
+    display: none !important;
+  }
 }
 
 /* ---------- Landscape Orientation Notice ---------- */
