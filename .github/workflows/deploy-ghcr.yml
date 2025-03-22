@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - dev
+      - feature/issue-203/fix-CD-runner
 
 jobs:
   build-and-deploy:
