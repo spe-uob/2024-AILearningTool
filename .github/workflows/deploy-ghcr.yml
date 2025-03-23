@@ -35,13 +35,13 @@ jobs:
           server.servlet.encoding.charset=UTF-8\n\
           server.servlet.encoding.enabled=true\n\
           server.servlet.encoding.force=true\n\
-          server.ssl.key-store=classpath:keystore.p12\n\
+          server.ssl.key-store=./file:keystore.p12\n\
           server.ssl.key-store-password=ailearntool" > application.properties
         working-directory: backend/src/main/resources
 
       # Step 4: Adjust the frontend BACKEND_URL constant
       - name: Update frontend BACKEND_URL constant
-        run : echo "const BACKEND_URL = 'http://" + $BACKEND_URL + "';
+        run : echo "const BACKEND_URL = 'http://$BACKEND_URL';
               export { BACKEND_URL };" > globalConstants.js
         working-directory: frontend/src/assets
         
