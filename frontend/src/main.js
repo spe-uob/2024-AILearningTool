@@ -1,7 +1,7 @@
 import { createApp } from 'vue';
 import App from './App.vue';
-import { createRouter, createWebHistory } from 'vue-router';
 import '@/registerServiceWorker';
+import { createRouter, createWebHashHistory } from 'vue-router';
 
 const Cookie = () => import('./Display interface/Cookie.vue');
 const MainView = () => import('./Display interface/MainView.vue');
@@ -14,7 +14,7 @@ const routes = [
 ];
 
 const router = createRouter({
-    history: createWebHistory(),
+    history: createWebHashHistory(),
     routes,
 });
 
@@ -23,6 +23,8 @@ router.beforeEach((to, from, next) => {
     const isAuthenticated = localStorage.getItem('token');
     if (to.path !== '/login' && !isAuthenticated) {
         next('/login');
+    } else if (to.path === '/login' && isAuthenticated) {
+        next('/main');
     } else {
         next();
     }
