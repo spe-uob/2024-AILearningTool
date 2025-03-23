@@ -1,6 +1,21 @@
 # AILearningTool - Project Handover Document
 
 ---
+## Table of Contents
+- [Overview](#1-overview)
+- [Architecture & Components](#2-architecture--components)
+  - [Backend](#backend)
+  - [Frontend](#frontend)
+- [Setup & Installation](#3-setup--installation)
+  - [Prerequisites](#prerequisites)
+  - [Cloning the Repository](#cloning-the-repository)
+  - [Building the Project](#building-the-project)
+- [Configuration Details](#4-configuration-details)
+  - [Application Properties](#application-properties)
+  - [Frontend Configuration](#frontend-configuration)
+- [Testing & Troubleshooting](#5-testing--troubleshooting)
+- [License](#license)
+
 
 ## 1. Overview
 
@@ -59,13 +74,13 @@ AILearningTool is a web-based chatbot developed using **Spring Boot** (backend) 
 - Node.js (recommended v18+) & npm (managed by frontend-maven-plugin)  
 - Git
 
-### Clone Repository
+### Cloning the Repository
 ```bash
 git clone https://github.com/spe-uob/2024-AILearningTool.git
 cd 2024-AILearningTool
 ```
 
-### Build and Deploy Project
+### Building the Project
 
 **Navigate to backend directory**
 ```bash
