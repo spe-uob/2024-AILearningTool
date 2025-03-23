@@ -25,7 +25,6 @@
 </template>
 
 <script>
-import axios from "axios";
 import HistorySidebar from "../components/HistorySidebar.vue";
 import MainContent from "../components/MainContent.vue";
 import SettingSidebar from "../components/SettingSidebar.vue";
