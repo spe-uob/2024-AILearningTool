@@ -1,5 +1,7 @@
 package com.UoB.AILearningTool;
 
+import com.UoB.AILearningTool.model.ChatEntity;
+import com.UoB.AILearningTool.model.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -21,18 +23,18 @@ public class ChatTest {
     @Test
     @DisplayName("Check if checkOwner method compares owners correctly.")
     public void checkOwnerTest() {
-        User user = new User("testUser", true);  
-        Chat chat = new Chat(user, "This is a first message.", mockThreadId);
+        UserEntity user = new UserEntity("testUserLogin", "testUserPassword", true);
+        ChatEntity chat = new ChatEntity(user, "This is a first message.", mockThreadId);
 
-        Assertions.assertTrue(chat.checkOwner(user));
+        Assertions.assertEquals(user, chat.getOwner());
     }
 
     @Test
     @DisplayName("Check if initial message history is saved correctly.")
     public void initialMessageHistoryTest() {
         String initialMessage = "This is a first message.";
-        User user = new User("testUser2", true);  
-        Chat chat = new Chat(user, initialMessage, mockThreadId);
+        UserEntity user = new UserEntity("testUserLogin2", "testUserPassword2", true);
+        ChatEntity chat = new ChatEntity(user, initialMessage, mockThreadId);
 
         JSONArray expectedMessageHistory = new JSONArray();
         JSONObject onlyMessage = new JSONObject();
@@ -49,8 +51,8 @@ public class ChatTest {
     public void addUserMessageTest() {
         String initialMessage = "This is a first message.";
         String extraUserMessage = "Tell me a joke.";
-        User user = new User("testUser3", true);  
-        Chat chat = new Chat(user, initialMessage, mockThreadId);
+        UserEntity user = new UserEntity("testUserLogin3", "testUserPassword3", true);
+        ChatEntity chat = new ChatEntity(user, initialMessage, mockThreadId);
 
         // Create expected message history.
         JSONArray expectedMessageHistory = new JSONArray();
@@ -63,7 +65,7 @@ public class ChatTest {
         onlyMessage.put("content", extraUserMessage);
         expectedMessageHistory.put(onlyMessage);
 
-        chat.addUserMessage(user.getID(), extraUserMessage);
+        chat.addUserMessage(user, extraUserMessage);
 
         JSONArray actualMessageHistory = chat.getMessageHistory(user);
         Assertions.assertEquals(2, expectedMessageHistory.length());
@@ -78,10 +80,10 @@ public class ChatTest {
     public void addAIMessageTest() {
         String initialMessage = "I need some assistance with finding courses on IBM SkillsBuild platform.";
         String aiResponse = "Here's a helpful response";
-        User user = new User("testUser4", true);  
-        Chat chat = new Chat(user, initialMessage, mockThreadId);
+        UserEntity user = new UserEntity("testUserLogin4", "testUserPassword4", true);
+        ChatEntity chat = new ChatEntity(user, initialMessage, mockThreadId);
 
-        chat.addAIMessage(user.getID(), aiResponse);
+        chat.addAIMessage(user, aiResponse);
 
         JSONArray actualMessageHistory = chat.getMessageHistory(user);
         Assertions.assertEquals(2, actualMessageHistory.length());
@@ -95,15 +97,15 @@ public class ChatTest {
     @DisplayName("Check if message history in a chat can only be accessed by its owner.")
     public void chatMessageHistoryPermissionTest() {
         final String initialMessage = "This is a first message.";
-        User currentUser;
-        Chat currentChat;
-        ArrayList<User> users = new ArrayList<>();
-        ArrayList<Chat> chats = new ArrayList<>();
+        UserEntity currentUser;
+        ChatEntity currentChat;
+        ArrayList<UserEntity> users = new ArrayList<>();
+        ArrayList<ChatEntity> chats = new ArrayList<>();
 
         for (int i = 0; i < 20; i++) {
-            currentUser = new User("testUser" + i, true);  
+            currentUser = new UserEntity("testUserLogin" + i, "testUserPassword" + i, true);
             users.add(currentUser);
-            currentChat = new Chat(currentUser, initialMessage, mockThreadId);
+            currentChat = new ChatEntity(currentUser, initialMessage, mockThreadId);
             chats.add(currentChat);
             Assertions.assertNotNull(currentChat.getMessageHistory(currentUser));
         }

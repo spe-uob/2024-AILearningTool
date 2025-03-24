@@ -1,5 +1,7 @@
 package com.UoB.AILearningTool;
 
+import com.UoB.AILearningTool.model.ChatEntity;
+import com.UoB.AILearningTool.model.UserEntity;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,9 +23,8 @@ public class OpenAIAPIControllerTest {
     public void initialMessageHistoryRequestTest() {
         String newMessage = "I need help with finding online courses SkillsBuild.";
         OpenAIAPIController OAIC = new OpenAIAPIController();
-        DatabaseController DBC = new DatabaseController();
-        User user = DBC.getUser(DBC.addUser(true));
-        Chat chat = DBC.getChat(user, DBC.createChat(user, newMessage, OAIC.createThread()));
+        UserEntity user = new UserEntity("testUserLogin1", "testUserPassword1", true);
+        ChatEntity chat = new ChatEntity(user, "Hello there!", OAIC.createThread());
 
         Integer response = OAIC.sendUserMessage(chat, newMessage);
         Assertions.assertEquals(200, response);
