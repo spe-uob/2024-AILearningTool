@@ -49,10 +49,10 @@
               <strong v-else>{{ msg.sender }}</strong>
               <!-- For assistant messages, use TypingText to animate the output -->
               <TypingText 
-                v-if="msg.sender === 'assistant' && !animatedMessages[index]" 
+                v-if="msg.sender === 'assistant' && !animatedMessages[msg.id]" 
                 :text="formatMessage(msg.content)" 
                 :speed="15" 
-                @finished="animatedMessages[index] = true"
+                @finished="animatedMessages[msg.id] = true"
               />
               <!-- For non-assistant messages, render markdown as HTML -->
               <p v-else v-html="formatMessage(msg.content)"></p>
