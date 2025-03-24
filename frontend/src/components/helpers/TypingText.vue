@@ -44,7 +44,6 @@
             index++;
           } else {
             clearInterval(this.timer);
-            this.$emit('finished');
           }
         }, this.speed);
       }
