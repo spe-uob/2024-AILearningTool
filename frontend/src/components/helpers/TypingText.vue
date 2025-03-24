@@ -44,6 +44,8 @@
             index++;
           } else {
             clearInterval(this.timer);
+            // Emit an event when finished typing
+            this.$emit('finished');
           }
         }, this.speed);
       }
