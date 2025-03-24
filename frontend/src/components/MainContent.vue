@@ -48,12 +48,15 @@
               <strong v-else-if="msg.sender === 'assistant'">{{ getTranslation(currentLanguage, "AI") }}</strong>
               <strong v-else>{{ msg.sender }}</strong>
               <!-- For assistant messages, use TypingText to animate the output -->
+              <div v-if="msg.sender === 'assistant'">
               <TypingText 
-                v-if="msg.sender === 'assistant' && !animatedMessages[msg.id]" 
+                v-if="!finishedMessages[`${currentChatID}-${index}`]" 
                 :text="formatMessage(msg.content)" 
                 :speed="15" 
-                @finished="animatedMessages[msg.id] = true"
+                @finished="finishedMessages[`${currentChatID}-${index}`] = formatMessage(msg.content)"
               />
+              <p v-else v-html="finishedMessages[`${currentChatID}-${index}`]"></p>
+              </div>
               <!-- For non-assistant messages, render markdown as HTML -->
               <p v-else v-html="formatMessage(msg.content)"></p>
             </div>
@@ -102,7 +105,7 @@ export default {
       currentTurn: "user", // Tracks conversation turn (user or AI)
       userId: localStorage.getItem("userId") || "",
       currentTheme: "default", // Stores the current UI theme
-      animatedMessages: {} // Track whether each assistant message's typing effect is finished
+      finishedMessages: {}  
     };
   },
   props: ["messages", "chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
