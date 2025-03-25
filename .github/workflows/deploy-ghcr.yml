@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BACKEND_URL: ailearningtool.ddns.net
-      OPENAI_API_KEY: secrets.OPENAI_API_KEY
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     steps:
       # Step 1: Checkout the repository
       - name: Checkout repository
@@ -28,7 +28,7 @@ jobs:
 
       # Step 3: Adjust OpenAI API key.
       - name: Adjust the OpenAI API key
-        run: (envsubst < OpenAIAuthenticator.java) > OpenAIAuthenticator.java
+        run: (envsubst < OpenAIAuthenticator.java) > OpenAIAuthenticatorUPD.java && cp OpenAIAuthenticatorUPD.java OpenAIAuthenticator.java && rm OpenAIAuthenticatorUPD.java
         working-directory: backend/src/main/java/com/UoB/AILearningTool
 
       # Step 4: Adjust the backend application parameters
