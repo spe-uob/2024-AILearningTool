@@ -50,12 +50,13 @@
               <!-- For assistant messages, use TypingText to animate the output -->
               <div v-if="msg.sender === 'assistant'">
               <TypingText 
-                v-if="!finishedMessages[`${currentChatID}-${index}`]" 
+                v-if="!getFinishedMessage(index)" 
                 :text="formatMessage(msg.content)" 
                 :speed="15" 
-                @finished="finishedMessages[`${currentChatID}-${index}`] = formatMessage(msg.content)"
+                @finished="setFinishedMessage(index, formatMessage(msg.content))"
               />
-              <p v-else v-html="finishedMessages[`${currentChatID}-${index}`]"></p>
+              <!-- Otherwise, render the static text from localStorage -->
+              <p v-else v-html="getFinishedMessage(index)"></p>
               </div>
               <!-- For non-assistant messages, render markdown as HTML -->
               <p v-else v-html="formatMessage(msg.content)"></p>
@@ -202,6 +203,17 @@ export default {
         this.requestChatHistory();
       });
     },
+
+    // Returns the finished message text for a given index if it exists in localStorage.
+  getFinishedMessage(index) {
+    const key = `finishedMessage_${this.currentChatID}_${index}`;
+    return localStorage.getItem(key);
+  },
+  // Saves the finished message text for a given index into localStorage.
+  setFinishedMessage(index, text) {
+    const key = `finishedMessage_${this.currentChatID}_${index}`;
+    localStorage.setItem(key, text);
+  },
 
     /**
      * Requests chat history from the server based on the current chat ID.
