@@ -106,7 +106,6 @@ export default {
       currentTurn: "user", // Tracks conversation turn (user or AI)
       userId: localStorage.getItem("userId") || "",
       currentTheme: "default", // Stores the current UI theme
-      finishedMessages: {}  
     };
   },
   props: ["messages", "chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
