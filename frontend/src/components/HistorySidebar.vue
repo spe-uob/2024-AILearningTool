@@ -15,11 +15,44 @@
       <!-- Chat History List -->
       <div class="history-list-wrapper">
         <div v-for="chat in chats" :key="chat.chatID">
-          <button class="chat-item selectable-chat" @click="selectChat(chat.chatID)" :class="{ 'selected': currentChatID === chat.chatID }"  :disabled="chatInitButtonsDisabled">
-            {{ chat.title }}
-          </button>
+          <div class="chat-item-container">
+            <button class="chat-item selectable-chat" @click="selectChat(chat.chatID)" :class="{ 'selected': currentChatID === chat.chatID }" :disabled="chatInitButtonsDisabled">
+              {{ chat.title }}
+            </button>
+            <button class="download-btn" @click="downloadChat(chat)" title="Download Chat History">
+              ⬇️
+            </button>
+          </div>
         </div>
       </div>
+      
+      
+      <style scoped>
+      .chat-item-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 4px 0;
+      }
+      
+      .chat-item {
+        flex: 1;
+      }
+      
+      .download-btn {
+        padding: 8px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        border-radius: 50%;
+        transition: background-color 0.3s;
+      }
+      
+      .download-btn:hover {
+        background-color: var(--border-color);
+      }
+      </style>
     </div>
   </aside>
 </template>
@@ -27,6 +60,7 @@
 <script>
 import { getTheme } from "../assets/color.js";
 import { getTranslation } from "@/assets/language";
+import { BACKEND_URL } from "@/assets/globalConstants"
 
 export default {
   props: ["chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
@@ -68,24 +102,46 @@ export default {
         this.applyTheme(event.detail.themeName);
       });
     },
-  },
-  computed: {
-    asideStyles() {
-      return this.themeStyles.aside;
+    async downloadChat(chat) {
+      try {
+        const response = await fetch(
+          BACKEND_URL + "/getChatHistory?" +
+          new URLSearchParams({
+            chatID: chat.chatID,
+          }),
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch chat history");
+        }
+
+        const messages = await response.json();
+        
+        // Format the chat history
+        const formattedChat = messages.map((msg, index) => {
+          const role = index % 2 === 0 ? "User" : "AI";
+          return `${role}: ${msg.content}\n`;
+        }).join('\n');
+
+        // Create a download link
+        const blob = new Blob([formattedChat], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `chat-${chat.chatID}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } catch (error) {
+        console.error("Error downloading chat:", error);
+        alert("Failed to download chat history");
+      }
     },
-    buttonStyles() {
-      return this.themeStyles.button;
-    },
-    newChatButtonStyles() {
-      return {
-        ...this.buttonStyles,
-        backgroundColor: "var(--button-color)",
-      };
-    },
-  },
-  mounted() {
-    this.applyTheme("default");
-    this.listenForThemeChange();
   },
 };
 </script>
