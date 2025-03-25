@@ -6,6 +6,7 @@ on:
     branches:
       - dev
       - feature/issue-203/fix-CD-runner
+      - bugfix/issue-232/implement-openai-secret
 
 jobs:
   build-and-deploy:
