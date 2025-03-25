@@ -14,13 +14,13 @@ public class OpenAIAuthenticator {
 
     // Constructor that initializes the API key
     public OpenAIAuthenticator() {
-          this.apiKey = "SOMEKEY";
+          this.apiKey = "$OPENAI_API_KEY";
           log.info("OpenAI API key set.");
     }
 
     // Returns the API key as a "Bearer token" (used in authorization headers)
     public String getBearerToken() {
-      if (this.apiKey == null || this.apiKey.equals("SOMEKEY") || this.apiKey.isEmpty()) {
+      if (this.apiKey == null || this.apiKey.equals("OPENAI_API_KEY") || this.apiKey.isEmpty()) {
         log.error("API Key not set or is empty.");
         throw new IllegalStateException("API Key for OpenAI is not set.");
       }
