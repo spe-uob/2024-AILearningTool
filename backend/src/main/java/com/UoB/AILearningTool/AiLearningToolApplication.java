@@ -18,6 +18,7 @@ public class AiLearningToolApplication {
 		//  disable SSL if launched without keystore.p12
 		if (!Files.exists(Paths.get("keystore.p12"))) {
 			// Force disable SSL
+			System.out.println("keystore.p12 not found");
 			System.setProperty("server.ssl.enabled", "false");
 		}
 		SpringApplication.run(AiLearningToolApplication.class, args);
