@@ -15,7 +15,7 @@ public class OpenAIAuthenticator {
 
     // Constructor that initializes the API key
     public OpenAIAuthenticator() {
-        this.apiKey = "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"; 
+        this.apiKey = "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";
         log.info("OpenAI API key set.");
     }
 
