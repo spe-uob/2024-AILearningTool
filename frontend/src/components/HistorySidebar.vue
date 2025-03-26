@@ -125,7 +125,8 @@ export default {
   cursor: pointer;
   font-size: 22px;
   font-weight: bold;
-  padding: 8px;
+  padding: 4px;
+  margin: 8px;
   transition: opacity 0.3s ease-in-out;
   color: black;
 }
