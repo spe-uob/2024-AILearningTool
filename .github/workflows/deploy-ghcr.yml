@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - dev
+      - feature/issue-203/url-global-variable
 
 jobs:
   build-and-deploy:
