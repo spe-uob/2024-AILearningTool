@@ -18,7 +18,7 @@ jest.mock('@/assets/color.js', () => ({
 }))
 
 describe('HistorySidebar.vue', () => {
-  it('renders correctly when expanded', () => {
+  it('renders correctly when expanded', async () => {
     const wrapper = mount(HistorySidebar, {
       props: {
         chats: [
@@ -34,16 +34,20 @@ describe('HistorySidebar.vue', () => {
         }
       }
     })
+    
+    // Manually expand the sidebar since it's collapsed by default
+    await wrapper.setData({ isCollapsed: false });
+    await wrapper.vm.$nextTick();
     
     // Check if component exists
     expect(wrapper.exists()).toBe(true)
     
-    // Check if chat items are rendered - adjust the expected count to match actual implementation
+    // Check if chat items are rendered - should be 3 items (1 new chat button + 2 chat history items)
     const chatItems = wrapper.findAll('.chat-item')
-    expect(chatItems.length).toBe(3) // Updated to match actual count
+    expect(chatItems.length).toBe(3)
   })
   
-  it('highlights the current chat', () => {
+  it('highlights the current chat', async () => {
     const wrapper = mount(HistorySidebar, {
       props: {
         chats: [
@@ -60,11 +64,16 @@ describe('HistorySidebar.vue', () => {
       }
     })
     
-    // Find all chat items
-    const chatItems = wrapper.findAll('.chat-item')
+    // Manually expand the sidebar since it's collapsed by default
+    await wrapper.setData({ isCollapsed: false });
+    await wrapper.vm.$nextTick();
     
-    // Check if the current chat has the 'selectable-chat' class instead of 'active'
+    // Find all chat items in the history list (excluding the new chat button)
+    const chatItems = wrapper.findAll('.history-list-wrapper .chat-item')
+    
+    // Check if the current chat has both 'selectable-chat' and 'selected' classes
     expect(chatItems[0].classes()).toContain('selectable-chat')
+    expect(chatItems[0].classes()).toContain('selected')
   })
   
   it('emits chatSelected event when a chat is clicked', async () => {
@@ -84,18 +93,22 @@ describe('HistorySidebar.vue', () => {
       }
     })
     
-    // Find the second chat item
-    const chatItems = wrapper.findAll('.chat-item')
+    // Manually expand the sidebar since it's collapsed by default
+    await wrapper.setData({ isCollapsed: false });
+    await wrapper.vm.$nextTick();
     
-    // Click on the second chat
+    // Find chat items in the history list
+    const chatItems = wrapper.findAll('.history-list-wrapper .chat-item')
+    
+    // Click on the second chat (index 1)
     await chatItems[1].trigger('click')
     
-    // Check if chatSelected event was emitted with the correct chatID
+    // Check if chatSelected event was emitted with the correct chatID ('2')
     expect(wrapper.emitted()).toHaveProperty('chatSelected')
-    expect(wrapper.emitted().chatSelected[0]).toEqual(['1']) // Adjust based on actual implementation
+    expect(wrapper.emitted().chatSelected[0]).toEqual(['2'])
   })
   
-  it('has a new chat button', () => {
+  it('has a new chat button', async () => {
     const wrapper = mount(HistorySidebar, {
       props: {
         chats: [
@@ -112,8 +125,18 @@ describe('HistorySidebar.vue', () => {
       }
     })
     
-    // Check if there's a button that could be used to create a new chat
-    const buttons = wrapper.findAll('button')
-    expect(buttons.length).toBeGreaterThan(0)
+    // Manually expand the sidebar since it's collapsed by default
+    await wrapper.setData({ isCollapsed: false });
+    await wrapper.vm.$nextTick();
+    
+    // Find the new chat button (first chat-item, not in history-list-wrapper)
+    const newChatButton = wrapper.find('button.chat-item:not(.history-list-wrapper .chat-item)')
+    expect(newChatButton.exists()).toBe(true)
+    
+    // Click the new chat button
+    await newChatButton.trigger('click')
+    
+    // Check if resetMainContent event was emitted
+    expect(wrapper.emitted()).toHaveProperty('resetMainContent')
   })
 })
