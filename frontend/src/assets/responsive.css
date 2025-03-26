@@ -144,19 +144,29 @@
     /* Adjusting the toggle button */
     .toggle-btn {
         position: fixed;
-        left: 12px;
-        top: 12px;
-        background: rgba(255, 255, 255, 0.9);
+        left: 10px;          
+        top: 20px;           
         backdrop-filter: blur(4px);
-        border-radius: 8px;
-        padding: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        border-radius: 4px;
+        padding: 2px;  
+        margin: 0px;       
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); 
         transition: transform 0.3s ease;
+        font-size: 10px;  
     }
 
     .history-sidebar:not(.collapsed) .toggle-btn {
-        transform: translateX(calc(100vw - 60px));
+        transform: translateX(5px);
     }
+
+    .toggle-btn,
+    .toggle-btn:hover,
+    .toggle-btn:focus,
+    .toggle-btn:active {
+        background: rgba(244, 244, 244, 1) !important;
+        outline: none; 
+    }
+
 
     /* Sidebar Content Adaptation */
     .history-container {
