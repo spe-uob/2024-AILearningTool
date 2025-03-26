@@ -41,6 +41,7 @@ export default {
     getTranslation,
     addChat() {
       this.$emit("resetMainContent");
+      this.isCollapsed = true;
     },
     toggleSidebar() {
       this.isCollapsed = !this.isCollapsed;
