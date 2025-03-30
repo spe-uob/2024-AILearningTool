@@ -1,12 +1,6 @@
 <template>
   <main>
     <div class="chat-area">
-      <div v-if="currentChatID.length > 0" class="download-container">
-        <button class="download-btn" @click="downloadChat" title="download chat history">
-          ⬇️
-        </button>
-      </div>
-
       <!-- Welcome Screen with Logo -->
       <div v-if="currentChatID.length === 0" class="welcome-container">
         <img src="../assets/logo.png" alt="Logo" class="logo" />
@@ -313,7 +307,7 @@ export default {
     },
     
     // method for downloading chat history
-    async downloadChat() {
+    async exportChat() {
       if (!this.currentChatID) return;
       
       try {
