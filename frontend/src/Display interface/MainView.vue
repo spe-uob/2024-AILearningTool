@@ -4,6 +4,7 @@
       <HistorySidebar
           @resetMainContent="this.resetMainContent"
           @chatSelected="(id) => this.loadChat(id)"
+          @exportChat="(id) => this.exportChat(id)"
           :currentChatID="this.currentChatID"
           :chats="this.chats"
           :currentLanguage="currentLanguage"
@@ -21,6 +22,7 @@
         @addChat="(a, b) => this.addChat(a, b)"
         @updateChatID="(id) => this.currentChatID = id"
         @setButtonLock="(status) => this.chatInitButtonsDisabled = status"
+        ref="mainContent"
     />
   </div>
 </template>
@@ -66,6 +68,12 @@ export default {
         title: title
       })
       localStorage.setItem("chats", JSON.stringify(this.chats))
+    },
+    // export chat
+    exportChat(chatID) {
+      if (this.$refs.mainContent) {
+        this.$refs.mainContent.exportChat();
+      }
     },
   },
   components: {
