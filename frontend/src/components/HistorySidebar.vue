@@ -229,7 +229,7 @@ export default {
 /* 3 dots Option */
 .chat-options {
   position: absolute;
-  right: 10px;
+  right: 5px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 10;
@@ -239,9 +239,15 @@ export default {
   background: transparent;
   border: none;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 22px; 
   padding: 5px;
   color: var(--text-color);
+  font-weight: bold; 
+  opacity: 0.8; 
+}
+
+.options-btn:hover {
+  opacity: 1; 
 }
 
 .options-menu {
