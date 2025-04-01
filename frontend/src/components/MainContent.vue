@@ -204,9 +204,8 @@ export default {
           throw new Error(data.message || "Failed to create chat");
         }
 
-        this.$emit("updateChatID", data.chatID);
         this.$emit("addChat", data.chatID, chatTitle);
-        this.$emit("addMessage", "user", message);
+        this.$emit("chatSelected", data.chatID);
 
         console.log(data.chatID + " " + this.currentChatID)
 
@@ -218,7 +217,6 @@ export default {
         console.error("Error creating chat:", error);
         alert(error.message || "Failed to create chat");
       }
-      await this.requestChatHistory()
     },
 
 

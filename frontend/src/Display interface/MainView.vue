@@ -17,7 +17,7 @@
         :currentChatID="this.currentChatID"
         @addMessage="(a, b) => addMessage(a, b)"
         @addChat="(a, b) => addChat(a, b)"
-        @updateChatID="(id) => currentChatID = id"
+        @chatSelected="(id) => loadChat(id)"
         :currentLanguage="currentLanguage"
         @setButtonLock="(status) => this.chatInitButtonsDisabled = status"
     />
