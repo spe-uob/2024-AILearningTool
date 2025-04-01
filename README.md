@@ -184,42 +184,39 @@ This flowchart outlines the interaction pathways within the chatbot, guiding use
 To get started with developing or contributing to this project, follow the steps below:
 
 1. **Clone the Repository**:
-   First, ensure you have Git installed on your machine. Then, open your terminal or command prompt and run the following command to clone the repository:
-   ```git clone https://github.com/spe-uob/2024-AILearningTool.git```
+   First, ensure you have [Git installed](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) on your machine. Then, open your terminal or command prompt and run the following command to clone the repository:
+   ```git clone https://github.com/spe-uob/2024-AILearningTool.git```.
 
 2. **Navigate to the Project Directory**:
    After cloning, navigate to the project directory:
-   ```cd 2024-AILearningTool```
+   ```cd 2024-AILearningTool```.
 
-3. **Install Java 21**:
-   The project is built using Java 21, so make sure you have Java 21 installed on your machine. You can download the latest Java Development Kit (JDK) 21 from [here](https://www.oracle.com/uk/java/technologies/downloads/#java21).
+3. **Backend Requirements**:
+   - The backend of this project is built using Java 21, so make sure you have Java 21 installed on your machine. You can download the latest Java Development Kit (JDK) 21 from [here](https://www.oracle.com/uk/java/technologies/downloads/#java21).
+   - The backend uses Maven as the build automation tool. If you don't have Maven installed, download the latest stable release [here](https://maven.apache.org/download.cgi).
 
-4. **Install Maven**:
-   This project uses Maven as the build automation tool. If you don't have Maven installed, download the latest stable release [here](https://maven.apache.org/download.cgi).
-
-5. **Install Vue and Yarn**:
-   The front end of this project is built using Vue 3 and Yarn, so make sure you have them installed: 
-   - Vue 3 installation guide [here](https://vuejs.org/guide/quick-start.html)
-   - Yarn installation guide [here](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)
+5. **Frontend Requirements**:
+   The frontend of this project is built using Vue 3, and it also requires npm and Yarn. Also, the frontend unit tests use Jest. Make sure you have them installed: 
+   - npm installation guide [here](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
+   - Yarn installation guide [here](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable).
+   - Vue 3 installation guide [here](https://vuejs.org/guide/quick-start.html).
+   - Jest installation guide [here](https://jestjs.io/docs/getting-started).
+  
+5. **Continuous Deployment with Docker**:
+   This project uses Docker for Continuous Deployment (CD), so you will need to ensure that Docker is installed on the server (and your local machine if you wish). If it isn't installed, you can do so [here](https://docs.docker.com/engine/install/).
 
 6. **Open the Project in Your IDE**:
-   Open the cloned repository in your preferred Integrated Development Environment (IDE) (we recommend IntelliJ) for further development.
+   Open the cloned repository in your preferred Integrated Development Environment (IDE) (we recommend [IntelliJ](https://www.jetbrains.com/idea/download/?section=windows)) for further development.
 
 7. **Add keystore.p12 file to backend/src/main/resources in the cloned repository**:
     Keystore has to contain both private key and full certificate chain files.
     Not adding the keystore file will result in unencrypted (non-HTTPS) connection.
 
-8. **Test and Run the Server**:
-   - To run the unit tests, use the command ```mvn test```
-   - To start the server, use the script ```startServer.sh```
+8. **Test and Run the Application**:
+   - To run the backend unit tests, use the commands: ```cd backend``` and then ```mvn test```.
+   - To run the frontend unit tests, use the commands: ```cd frontend``` and then ```npm run test:unit```.
+   - To run the application, run the localExecute shell script: ```./localExecute.sh API Key``` where ```API Key``` is the OpenAI API Key being used (replace ```API Key``` with the actual OpenAI API Key).
   
-9. **Continuous Deployment (CD) with Docker and GHCR**:
-  Our project includes Continuous Deployment (CD) with Docker and GitHub Container Registry (GHCR). Every time changes are pushed to the dev branch, a new Docker image is automatically built and pushed to our [GHCR repository](https://ghcr.io/spe-uob/2024-ailearningtool:latest).
-  To pull the latest Docker image from GHCR and update the application on the server, follow these steps:
-    - Start the Docker service: ```sudo systemctl start docker```
-    - Run the pull script: ```./pull-from-ghcr.sh```
-
-
 ## Team Members:
 
 | Name              | GitHub                                                      						| Email                 |
