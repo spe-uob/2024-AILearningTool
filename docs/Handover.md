@@ -40,11 +40,13 @@ AILearningTool is a web-based chatbot developed using **Spring Boot** (backend) 
 - **Framework:** Spring Boot 3.3.4  
 - **Main Functionality:**  
   - User and chat management (signup, chat creation, sending messages, retrieving chat history).
-  - Integration with external AI/TTS APIs.
+  - Integration with external AI APIs.
 - **Key Files:**  
   - `AiLearningToolApplication.java`: Main application file; handles configuration overwrites and SSL keystore setup.
   - `DatabaseController.java`: Manages user and chat data.
   - `SpringController.java`: Exposes REST endpoints for chat interactions.
+  - `main/resources`: Includes static resources such as application properties.
+  - `main/test` Incldes all backend unit tests (in Java).
 - **Dependencies:**  
   - Spring Boot Starter Web, Security, JDBC, Logging.
 
@@ -55,10 +57,13 @@ AILearningTool is a web-based chatbot developed using **Spring Boot** (backend) 
   - Chat UI with a welcome screen, message display (including markdown formatting and animation via the TypingText component), and an input area.
   - Text-to-speech (TTS) functionality using the Web Speech API, with a speaker icon provided for assistant messages.
   - Automated frontend build integrated with the backend using Maven (frontend-maven-plugin).
-- **Key Files & Directories:**  
+- **Key Files & Directories:**
+  - `src/Display interface`: Includes Vue components for login, main view, and cookie management.
   - `src/components/MainContent.vue`: Main chat component.
   - `src/components/helpers/TypingText.vue`: Component to animate assistant messages.
   - `src/assets/`: Contains theme configuration and language translation files.
+  - `src/main`: Initializes the Vue app, imports dependencies, and mounts the root component.
+  - `tests/unit`: Includes all frontend unit tests (in Jest).
 - **Build Process:**  
   - Managed by the frontend-maven-plugin in the Maven build.
   - The frontend build output (from `npm run build`) is copied into `backend/src/main/resources/static`.
@@ -77,24 +82,20 @@ AILearningTool is a web-based chatbot developed using **Spring Boot** (backend) 
 ### Cloning the Repository
 ```bash
 git clone https://github.com/spe-uob/2024-AILearningTool.git
-cd 2024-AILearningTool
 ```
 
 ### Building the Project
 
-**Navigate to backend directory**
+**Navigate to project directory**
 ```bash
-cd backend
+cd 2024-AILearningtool.git
 ```
 
-**Clean and build entire project (includes frontend build)**
+**Clean and build entire project**
 ```bash
-mvn clean package
+./localExecute.sh <OpenAI API Key>
 ```
-**Run Spring Boot application**
-```bash
-mvn spring-boot:run
-```
+
 **Access the Application:**
 
 - Local:
