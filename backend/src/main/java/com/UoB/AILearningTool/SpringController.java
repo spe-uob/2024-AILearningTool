@@ -56,22 +56,26 @@ public class SpringController {
         String password = credentials.get("password");
 
         Optional<UserEntity> userOptional = userRepository.findByUsername(username);
-
+    
         if (userOptional.isPresent() && userOptional.get().getPassword().equals(password)) {
             UserEntity user = userOptional.get();
-            String sessionID = user.getSessionID();
-
+            
+            // Generate a new sessionID on each login
+            String newSessionID = StringTools.generateSessionID();
+            user.setSessionID(newSessionID);
+            userRepository.save(user);
+            
             List<ChatEntity> chats = chatRepository.findByOwner(user);
             List<String> chatIDs = new ArrayList<>();
-
+    
             for (ChatEntity chat : chats) {
                 chatIDs.add(chat.getChatID());
                 // TODO: Chat titles
                 // chat.getMessageHistory(user).getJSONObject(0).getJSONObject(0).getString("content");
             }
-
+    
             return ResponseEntity.ok(Map.of(
-                    "sessionID", sessionID, 
+                    "sessionID", newSessionID, 
                     "chatIDs", chatIDs
             ));
         } else {
