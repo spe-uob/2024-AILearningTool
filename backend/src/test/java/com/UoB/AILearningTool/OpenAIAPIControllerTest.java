@@ -6,8 +6,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-
 @DisplayName("Testing OpenAI API Controller for response handling")
 public class OpenAIAPIControllerTest {
 
@@ -23,7 +21,7 @@ public class OpenAIAPIControllerTest {
     public void initialMessageHistoryRequestTest() {
         String newMessage = "I need help with finding online courses SkillsBuild.";
         OpenAIAPIController OAIC = new OpenAIAPIController();
-        UserEntity user = new UserEntity("testUserLogin1", "testUserPassword1", true);
+        UserEntity user = new UserEntity("testUserLogin1", "testUserPassword1");
         ChatEntity chat = new ChatEntity(user, "Hello there!", OAIC.createThread());
 
         Integer response = OAIC.sendUserMessage(chat, newMessage);

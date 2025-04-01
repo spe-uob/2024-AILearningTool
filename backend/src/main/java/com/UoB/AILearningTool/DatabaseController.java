@@ -6,8 +6,8 @@ import com.UoB.AILearningTool.repository.ChatRepository;
 import com.UoB.AILearningTool.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class DatabaseController {
@@ -24,15 +24,25 @@ public class DatabaseController {
         return userRepository.findById(username).orElse(null);
     }
 
-    public String addUser(String username, String password, boolean optionalConsent) {
-        UserEntity user = new UserEntity(username, password, optionalConsent);
+    // Create a new account
+    public boolean addUser(String username, String password) {
+        if (userRepository.existsById(username)) {
+            return false;
+        }
+
+        UserEntity user = new UserEntity(username, password);
         userRepository.save(user);
-        return user.getSessionID();
+        return true;
     }
 
-    public boolean removeUser(String username) {
-        if (userRepository.existsById(username)) {
-            userRepository.deleteById(username);
+    // Delete existing user account
+    public boolean removeUser(String sessionID) {
+        Optional<UserEntity> user = userRepository.findBySessionID(sessionID);
+
+        // TODO: Delete chats as well
+
+        if (user.isPresent()) {
+            userRepository.delete(user.get());
             return true;
         } else {
             return false;
@@ -56,11 +66,6 @@ public class DatabaseController {
             return true;
         }
         return false;
-    }
-
-    public String getChatIDBySession(String sessionID) {
-        Optional<ChatEntity> chatOpt = chatRepository.findBySessionID(sessionID);
-        return chatOpt.map(ChatEntity::getChatID).orElse(null);
     }
 
     public ChatEntity createChat(String sessionID, String initialMessage) {

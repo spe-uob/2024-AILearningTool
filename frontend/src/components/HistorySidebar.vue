@@ -42,14 +42,14 @@ export default {
     getTranslation,
 
     async fetchChatHistory() {
-      const username = localStorage.getItem("username");
-      if (!username) {
-        console.error("No username found in localStorage.");
+      const sessionID = localStorage.getItem("sessionID");
+      if (!sessionID) {
+        console.error("No sessionID found in localStorage.");
         return;
       }
 
       try {
-        const response = await fetch(`${this.aiServerUrl}/getUserChats?username=${username}`);
+        const response = await fetch(`${this.aiServerUrl}/getUserChats?sessionID=${sessionID}`);
         if (!response.ok) throw new Error("Failed to load chat history.");
 
         const data = await response.json();

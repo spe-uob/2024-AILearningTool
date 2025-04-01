@@ -4,7 +4,7 @@
       <HistorySidebar
           @resetMainContent="resetMainContent"
           @chatSelected="(id) => loadChat(id)"
-          :currentChatID="currentChatID"
+          :currentChatID="this.currentChatID"
           :chats="chats"
           :currentLanguage="currentLanguage"
           @updateChats="updateChatList"
@@ -14,7 +14,7 @@
     <MainContent
         :messages="messages"
         :chats="chats"
-        :currentChatID="currentChatID"
+        :currentChatID="this.currentChatID"
         @addMessage="(a, b) => addMessage(a, b)"
         @addChat="(a, b) => addChat(a, b)"
         @updateChatID="(id) => currentChatID = id"
@@ -51,24 +51,9 @@ export default {
       this.messages = [];
     },
 
-
-
-    processChatHistory(messageHistory) {
-      let messages = [];
-      let lines = messageHistory.split("\n");
-
-      for (let i = 0; i < lines.length; i++) {
-        let sender = "assistant";
-        if (lines[i].startsWith("<|user|>")) sender = "user";
-        else if (lines[i].startsWith("<|assistant|>")) sender = "assistant";
-        else continue;
-
-        let message = lines[i + 1] || "";
-        if (message.trim()) {
-          messages.push({sender, content: message});
-        }
-      }
-      return messages;
+    loadChat(chatID) {
+      this.resetMainContent()
+      this.currentChatID = chatID
     },
 
     addMessage(senderArg, contentArg) {

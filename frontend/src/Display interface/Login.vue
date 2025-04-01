@@ -91,9 +91,9 @@ export default {
   methods: {
     getTranslation,
     checkUserSession() {
-      const userID = localStorage.getItem("userId");
-      if (userID) {
-        console.log("UserID found, redirecting to /main...");
+      const sessionID = localStorage.getItem("sessionID");
+      if (sessionID) {
+        console.log("SessionID found, redirecting to /main...");
         this.$router.push("/main");
       }
     },
@@ -136,14 +136,12 @@ export default {
 
         const data = await response.json();
 
-        if (response.ok && data.success) {
+        if (response.ok) {
           console.log("Login successful. Redirecting to /main...");
-    
           localStorage.setItem("sessionID", data.sessionID);
-          localStorage.setItem("username", data.username);
           this.router.push(`/main?sessionID=${data.sessionID}`);
         } else {
-          alert(data.message || "Login failed!");
+          alert("Login failed!");
         }
       } catch (error) {
         console.error("Login error:", error);
@@ -164,16 +162,15 @@ export default {
         });
         sessionStorage.setItem("username", this.form.username);
 
-        const data = await response.json();
-        if (response.ok && data.success) {
-          alert("Registration successful! Redirecting to login...");
+        if (response.ok) {
+          alert(getTranslation(this.currentLanguage, "REGISTRATION_SUCCESS"));
           this.router.push("/login");
         } else {
-          alert(data.message || "Registration failed!");
+          alert(getTranslation(this.currentLanguage, "REGISTRATION_ERROR"));
         }
       } catch (error) {
-        console.error("Registration error:", error);
-        alert("An error occurred while trying to register.");
+        console.error(getTranslation(this.currentLanguage, "REGISTRATION_FAILED"), error);
+        alert(getTranslation(this.currentLanguage, "REGISTRATION_ERROR"));
       }
     },
   },

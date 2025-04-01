@@ -2,13 +2,13 @@ package com.UoB.AILearningTool;
 
 import com.UoB.AILearningTool.model.ChatEntity;
 import com.UoB.AILearningTool.model.UserEntity;
-import org.junit.jupiter.api.BeforeEach;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.ArrayList;
 
 public class ChatTest {
@@ -23,7 +23,7 @@ public class ChatTest {
     @Test
     @DisplayName("Check if checkOwner method compares owners correctly.")
     public void checkOwnerTest() {
-        UserEntity user = new UserEntity("testUserLogin", "testUserPassword", true);
+        UserEntity user = new UserEntity("testUserLogin", "testUserPassword");
         ChatEntity chat = new ChatEntity(user, "This is a first message.", mockThreadId);
 
         Assertions.assertEquals(user, chat.getOwner());
@@ -33,7 +33,7 @@ public class ChatTest {
     @DisplayName("Check if initial message history is saved correctly.")
     public void initialMessageHistoryTest() {
         String initialMessage = "This is a first message.";
-        UserEntity user = new UserEntity("testUserLogin2", "testUserPassword2", true);
+        UserEntity user = new UserEntity("testUserLogin2", "testUserPassword2");
         ChatEntity chat = new ChatEntity(user, initialMessage, mockThreadId);
 
         JSONArray expectedMessageHistory = new JSONArray();
@@ -51,7 +51,7 @@ public class ChatTest {
     public void addUserMessageTest() {
         String initialMessage = "This is a first message.";
         String extraUserMessage = "Tell me a joke.";
-        UserEntity user = new UserEntity("testUserLogin3", "testUserPassword3", true);
+        UserEntity user = new UserEntity("testUserLogin3", "testUserPassword3");
         ChatEntity chat = new ChatEntity(user, initialMessage, mockThreadId);
 
         // Create expected message history.
@@ -80,7 +80,7 @@ public class ChatTest {
     public void addAIMessageTest() {
         String initialMessage = "I need some assistance with finding courses on IBM SkillsBuild platform.";
         String aiResponse = "Here's a helpful response";
-        UserEntity user = new UserEntity("testUserLogin4", "testUserPassword4", true);
+        UserEntity user = new UserEntity("testUserLogin4", "testUserPassword4");
         ChatEntity chat = new ChatEntity(user, initialMessage, mockThreadId);
 
         chat.addAIMessage(user, aiResponse);
@@ -103,7 +103,7 @@ public class ChatTest {
         ArrayList<ChatEntity> chats = new ArrayList<>();
 
         for (int i = 0; i < 20; i++) {
-            currentUser = new UserEntity("testUserLogin" + i, "testUserPassword" + i, true);
+            currentUser = new UserEntity("testUserLogin" + i, "testUserPassword" + i);
             users.add(currentUser);
             currentChat = new ChatEntity(currentUser, initialMessage, mockThreadId);
             chats.add(currentChat);

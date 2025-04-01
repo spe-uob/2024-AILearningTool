@@ -96,9 +96,8 @@ export default {
   data() {
     return {
       userInput: "",
-      userId: localStorage.getItem("username") || "",  // username
+      sessionID: localStorage.getItem("sessionID") || "",  // username
       aiServerURL: "http://localhost:8080", // API address
-      sessionID: localStorage.getItem("sessionID") || "",
     };
   },
   props: ["messages", "chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
@@ -209,14 +208,17 @@ export default {
         this.$emit("addChat", data.chatID, chatTitle);
         this.$emit("addMessage", "user", message);
 
-        if (data.aiResponse) {
-          this.$emit("addMessage", "assistant", data.aiResponse);
+        console.log(data.chatID + " " + this.currentChatID)
+
+        if (data.content) {
+          this.$emit("addMessage", "assistant", data.content);
         }
 
       } catch (error) {
         console.error("Error creating chat:", error);
         alert(error.message || "Failed to create chat");
       }
+      await this.requestChatHistory()
     },
 
 
@@ -226,7 +228,7 @@ export default {
         return;
       }
 
-      if (!this.userId) {
+      if (!this.sessionID) {
         alert("Login failed, please log in again!");
         return;
       }
@@ -246,7 +248,7 @@ export default {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            username: this.userId,
+            sessionID: this.sessionID,
             chatID: this.currentChatID,
             newMessage: messageContent,
           }),
@@ -258,7 +260,7 @@ export default {
           throw new Error(data.message || "Failed to send message");
         }
 
-        this.$emit("addMessage", "assistant", data.response);
+        this.$emit("addMessage", "assistant", data["content"]);
 
       } catch (error) {
         console.error("Error sending message:", error);
@@ -268,21 +270,26 @@ export default {
 
 
     async requestChatHistory() {
-      if (!this.userId || !this.currentChatID) return;
+      if (!this.sessionID || !this.currentChatID) return;
 
       try {
-        const response = await fetch(`${this.aiServerURL}/getChatHistory?` + new URLSearchParams({
-          username: this.userId,
-          chatID: this.currentChatID
-        }), {
-          method: "GET",
+        const response = await fetch(`${this.aiServerURL}/getChatHistory?`, {
+          method: "POST",
           credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sessionID: this.sessionID,
+            chatID: this.currentChatID
+          })
         });
 
-        if (!response.ok) throw new Error("Failed to load chat history");
+        if (!response.ok) {
+          console.log(response.body)
+          throw new Error("Failed to load chat history");
+        }
 
         const data = await response.json();
-        this.processChatHistory(data.history);
+        await this.processChatHistory(JSON.parse(data["history"]));
       } catch (error) {
         console.error("Error loading chat history:", error);
       }
@@ -292,22 +299,10 @@ export default {
      * Processes retrieved chat history and structures it for display.
      */
     async processChatHistory(messageHistory) {
-      if (!Array.isArray(messageHistory)) {
-        console.error("Invalid chat history format:", messageHistory);
-        return;
-      }
-
       messageHistory.forEach(msg => {
-        if (msg.content.startsWith("<|user|>")) {
-          this.$emit("addMessage", "user", msg.content.replace("<|user|>", "").trim());
-        } else if (msg.content.startsWith("<|assistant|>")) {
-          this.$emit("addMessage", "assistant", msg.content.replace("<|assistant|>", "").trim());
-        } else {
-          this.$emit("addMessage", "system", msg.content);
-        }
+          this.$emit("addMessage", msg["role"], msg["content"]);
       });
 
-      // 解锁按钮，确保 UI 流畅
       this.$emit("setButtonLock", false);
     },
     

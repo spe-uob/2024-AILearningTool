@@ -4,9 +4,6 @@ import com.UoB.AILearningTool.StringTools;
 import jakarta.persistence.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.web.bind.annotation.DeleteMapping;
-
-import java.util.UUID;
 
 @Entity
 @Table(name = "chats")
@@ -19,9 +16,6 @@ public class ChatEntity {
     @JoinColumn(name = "username", nullable = false)
     private UserEntity owner;
 
-    @Column(name = "sessionid", unique = true, nullable = false)
-    private String sessionID;
-
     @Column(name = "threadid", unique = true, nullable = false)
     private String threadID;
 
@@ -31,10 +25,10 @@ public class ChatEntity {
 
     public ChatEntity() {}
 
-    public ChatEntity(UserEntity owner, String initialMessage, String sessionID) {
+    public ChatEntity(UserEntity owner, String initialMessage, String threadID) {
         this.chatID = StringTools.RandomString(32);
         this.owner = owner;
-        this.sessionID = sessionID;
+        this.threadID = threadID;
         this.messageHistory = new JSONArray().put(
                 new JSONObject().put(
                         "role", "user"
@@ -58,13 +52,6 @@ public class ChatEntity {
         return owner;
     }
 
-    public String getSessionID() {
-        return sessionID;
-    }
-
-    public void setSessionID(String sessionID) { 
-        this.sessionID = sessionID;
-    }
 
     public JSONArray getMessageHistory(UserEntity user) {
         if (this.getOwner().equals(user)) {

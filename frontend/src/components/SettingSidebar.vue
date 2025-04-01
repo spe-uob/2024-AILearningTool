@@ -71,7 +71,7 @@ export default {
     Logout() {
       localStorage.removeItem("chats");
       localStorage.removeItem("token");
-      localStorage.removeItem("userId");
+      localStorage.removeItem("sessionID");
 
       document.cookie.split(";").forEach((cookie) => {
         const name = cookie.split("=")[0].trim();
