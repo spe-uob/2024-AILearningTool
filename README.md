@@ -192,8 +192,9 @@ To get started with developing or contributing to this project, follow the steps
    ```cd 2024-AILearningTool```.
 
 3. **Backend Requirements**:
-   - The backend of this project is built using Java 21, so make sure you have Java 21 installed on your machine. You can download the latest Java Development Kit (JDK) 21 from [here](https://www.oracle.com/uk/java/technologies/downloads/#java21).
-   - The backend uses Maven as the build automation tool. If you don't have Maven installed, download the latest stable release [here](https://maven.apache.org/download.cgi).
+   The backend of this project is built using Java 21 and uses Maven as the build automation tool, so make sure you have them installed on your machine:
+   - Latest Java Development Kit (JDK) 21 installation guide [here](https://www.oracle.com/uk/java/technologies/downloads/#java21).
+   - Latest Maven stable release installation guide [here](https://maven.apache.org/download.cgi).
 
 5. **Frontend Requirements**:
    The frontend of this project is built using Vue 3, and it also requires npm and Yarn. Also, the frontend unit tests use Jest. Make sure you have them installed: 
