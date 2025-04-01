@@ -550,4 +550,11 @@ button {
 .tts-button:hover {
 color: var(--accent-color);
 }
+
+/* Ensure links in messages are visible */
+.messages-container a {
+  color: blue;
+  text-decoration: underline;
+}
+
 </style>
