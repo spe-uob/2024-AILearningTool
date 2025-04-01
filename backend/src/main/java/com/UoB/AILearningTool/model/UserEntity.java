@@ -37,8 +37,8 @@ public class UserEntity {
         return username;
     }
 
-    public String getPassword() {
-        return password;
+    public Boolean passwordMatch(String inputPassword) {
+        return this.password.equals(inputPassword);
     }
 
     public String getSessionID() {

@@ -57,7 +57,7 @@ public class SpringController {
 
         Optional<UserEntity> userOptional = userRepository.findByUsername(username);
     
-        if (userOptional.isPresent() && userOptional.get().getPassword().equals(password)) {
+        if (userOptional.isPresent() && userOptional.get().passwordMatch(password)) {
             UserEntity user = userOptional.get();
             
             // Generate a new sessionID on each login
