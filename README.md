@@ -136,40 +136,43 @@ User prompts for the chatbot will be sent using API requests from the Spring Boo
 
 1. **Open the Web App**:  
 
-   Using any device with internet access (smartphone, tablet, laptop, etc.), open a web browser and navigate to the provided link [insert URL here].
+   Using any device with internet access (smartphone, tablet, laptop, etc.), open a web browser and navigate to [ailearningtool.ddns.net](ailearningtool.ddns.net).
 
 2. **Cookie Consent**:  
 
-   Upon opening the website, you will be prompted to accept or decline optional cookies. These cookies help improve your experience by storing preferences and conversation history. You can choose:
-   - **Accept Cookies**: The chatbot will remember your preferences and chat history for future sessions.
-   - **Decline Cookies**: The chatbot will function without storing your preferences or chat history.
+   Upon opening the website, you will see a prompt notifying you that the chatbot uses local storage. By clicking "I Understand", you consent to the use of local storage for saving your preferences and conversation history. This helps the chatbot provide a more personalized experience across sessions.
 
-3. **Start Chatting with the Chatbot**:  
+3. **Login Page**: 
 
-   Once you are in, you can start typing your questions into the chatbox. You can ask about the following topics:
-   - **What is IBM SkillsBuild?**
-   - **What courses are available on SkillsBuild?**
-   - **What free technologies are available on SkillsBuild?**
-   - **General advice or questions related to university life.**
+   To access the chatbot, you must first register an account. Once registered, you can log in using your credentials.
 
-4. **Providing Additional Information**:  
+4. **Start Chatting with the Chatbot**:  
 
-   For certain questions (like available courses or university-related advice), the chatbot may ask for a little more information. This could include:
-   - Your area of interest
-   - Courses you are currently enrolled in  
+   After logging in, you can choose from three chat initialization buttons:
+   - **I need help with choosing a course**
+   - **I need help with the IBM SkillsBuild platform**
+   - **I have questions about university life**
+
+5. **Providing Additional Information**:  
+
+   For certain queries (like "I need help with choosing a course"), the chatbot may ask for a little more information. This could include:
+   - Your current experience level
+   - Your preferred duration for the course
+   - Specific topics or skills you're interested in
+     
    The chatbot only asks what’s necessary to give you the best answer.
 
-5. **Follow-Up Questions**:  
+6. **Follow-Up Questions**:  
 
-   Feel free to ask any follow-up questions after the chatbot provides its initial response. The chatbot can also share useful resources, such as links to courses or articles.
-
-6. **Adjust Preferences (Optional)**:  
-  
-   If you agreed to optional cookies, you can later modify your cookie consent and other settings in the web app’s preferences section. This is completely optional.
+   Feel free to ask any follow-up questions after the chatbot provides its initial response. The chatbot can also share useful resources, such as links to courses.
 
 7. **Returning to the Chat**:  
 
-   If you accepted the optional cookies, your conversation history will be saved for 30 days. You can return to the web app at any time within that period to continue where you left off or ask follow-up questions based on previous conversations.
+   If you click "I Understand", your conversation history and preferences will be saved in local storage. You can return to the web app at any time to continue where you left off or ask follow-up questions based on previous conversations.
+
+8. **Add to Home Screen or Desktop**:
+
+   If you enjoy using our app, feel free to download it to your home screen or desktop. Since we’ve implemented Progressive Web App (PWA) support, you can install the app on your device for quick access without needing to visit the website each time.
 
 ## Chatbot Interaction Flow:
 
