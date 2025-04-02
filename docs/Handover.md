@@ -2,23 +2,23 @@
 
 ---
 ## Table of Contents
-- [Introduction](#1-introduction)
+- [Introduction](#introduction)
 - [Project Structure](#project-structure)
-- [Architecture & Components](#2-architecture--components)
+- [Architecture & Components](#architecture--components)
   - [Backend](#backend)
   - [Frontend](#frontend)
-- [Setup & Installation](#3-setup--installation)
+- [Setup & Installation](#setup--installation)
   - [Prerequisites](#prerequisites)
   - [Cloning the Repository](#cloning-the-repository)
   - [Building the Project](#building-the-project)
-- [Configuration Details](#4-configuration-details)
+- [Configuration Details](#configuration-details)
   - [Application Properties](#application-properties)
   - [Frontend Configuration](#frontend-configuration)
-- [Testing & Troubleshooting](#5-testing--troubleshooting)
+- [Testing & Troubleshooting](#testing--troubleshooting)
 - [License](#license)
 
 
-## 1. Introduction
+## Introduction
 
 This document serves as a guide for new developers to continue working on our project. It includes explanations of the code infrastructure and overall repository structure of our project.
 
@@ -60,7 +60,7 @@ Below is an overview of the key components of the system:
 
 ---
 
-## 2. Architecture & Components
+## Architecture & Components
 
 ![Architecture Diagram](https://github.com/spe-uob/2024-AILearningTool/blob/feature/issue-210/Improve-documentation/docs/Diagrams/architecture_diagram.png)
 ### Backend
@@ -99,7 +99,7 @@ Below is an overview of the key components of the system:
 
 ---
 
-## 3. Setup & Installation
+## Setup & Installation
 
 ### Prerequisites
 - Java JDK 21+  
@@ -135,7 +135,7 @@ http://localhost:8080
 Use the instance’s public IP or DNS with port 8080 (e.g., http://<public-ip>:8080).
 ```
 ---
-## 4. Configuration Details
+## Configuration Details
 ### Application Properties ###
 - Location:
   - backend/src/main/resources/application.properties
@@ -159,7 +159,7 @@ Use the instance’s public IP or DNS with port 8080 (e.g., http://<public-ip>:8
 - Build Automation:
   - The Maven plugin frontend-maven-plugin runs npm install and npm run build from the frontend folder. The output is copied to backend/src/main/resources/static.
 ---
-## 5. Testing & Troubleshooting
+## Testing & Troubleshooting
 - Running backend tests:
   ```bash
   mvn test
