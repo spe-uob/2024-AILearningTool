@@ -36,7 +36,7 @@ describe('HistorySidebar.vue', () => {
     )
   })
   
-  it('renders correctly when expanded', () => {
+  it('renders correctly when expanded', async () => { 
     const wrapper = mount(HistorySidebar, {
       props: {
         chats: [
@@ -126,7 +126,7 @@ describe('HistorySidebar.vue', () => {
     expect(wrapper.emitted().chatSelected[0]).toEqual(['2'])
   })
   
-  it('has a new chat button', async () => {
+  it('has a new chat button', async () => { 
     const wrapper = mount(HistorySidebar, {
       props: {
         chats: [
