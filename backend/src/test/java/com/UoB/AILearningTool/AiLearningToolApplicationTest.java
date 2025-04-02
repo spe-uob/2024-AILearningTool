@@ -26,10 +26,21 @@ class AiLearningToolApplicationTest {
                 "spring.servlet.multipart.max-request-size=50MB",
                 "spring.web.resources.static-locations=classpath:/static/",
                 "",
+                "spring.http.encoding.charset=UTF-8",
+                "spring.http.encoding.enabled=true",
+                "spring.http.encoding.force=true",
+                "",
                 "server.ssl.key-store=classpath:keystore.p12",
                 "server.ssl.key-store-password=ailearntool",
                 "server.ssl.key-store-type=PKCS12",
-                "server.ssl.key-alias=myalias"
+                "server.ssl.key-alias=myalias",
+                
+                "spring.datasource.url=jdbc:sqlite:database.db",
+                "spring.datasource.driver-class-name=org.sqlite.JDBC",
+                "spring.datasource.username=",
+                "spring.datasource.password=",
+                "spring.jpa.database-platform=org.hibernate.dialect.SQLiteDialect",
+                "spring.jpa.hibernate.ddl-auto=update"
         );
         Files.write(propsFile, lines, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE );
     }
@@ -83,10 +94,21 @@ class AiLearningToolApplicationTest {
                 "spring.servlet.multipart.max-request-size=50MB",
                 "spring.web.resources.static-locations=classpath:/static/",
                 "",
+                "spring.http.encoding.charset=UTF-8",
+                "spring.http.encoding.enabled=true",
+                "spring.http.encoding.force=true",
+                "",
                 "server.ssl.key-store=classpath:keystore.p12",
                 "server.ssl.key-store-password=ailearntool",
                 "server.ssl.key-store-type=PKCS12",
-                "server.ssl.key-alias=myalias"
+                "server.ssl.key-alias=myalias",
+                
+                "spring.datasource.url=jdbc:sqlite:database.db",
+                "spring.datasource.driver-class-name=org.sqlite.JDBC",
+                "spring.datasource.username=",
+                "spring.datasource.password=",
+                "spring.jpa.database-platform=org.hibernate.dialect.SQLiteDialect",
+                "spring.jpa.hibernate.ddl-auto=update"
         );
 
         // Verify that the file content is exactly as expected.
