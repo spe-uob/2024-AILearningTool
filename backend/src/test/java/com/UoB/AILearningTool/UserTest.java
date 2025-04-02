@@ -18,6 +18,6 @@ public class UserTest {
     @DisplayName("Checking whether 'User' constructor creates an object without optional consent correctly")
     public void correctRequiredConsentUserCreationTest() {
         UserEntity user = new UserEntity("testUserLogin2", "testUserPassword2");
-        Assertions.assertEquals("testUser2", user.getUsername());
+        Assertions.assertEquals("testUserLogin2", user.getUsername());
     }
 }
