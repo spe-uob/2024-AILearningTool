@@ -18,6 +18,24 @@ jest.mock('@/assets/color.js', () => ({
 }))
 
 describe('HistorySidebar.vue', () => {
+  beforeEach(() => {
+    // Mock localStorage with a valid sessionID to prevent errors
+    Object.defineProperty(window, 'localStorage', {
+      value: {
+        getItem: jest.fn(() => 'test-session-id'),
+        setItem: jest.fn()
+      }
+    })
+    
+    // Mock fetch to prevent actual API calls
+    global.fetch = jest.fn(() => 
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ chatIDs: [] })
+      })
+    )
+  })
+  
   it('renders correctly when expanded', () => {
     const wrapper = mount(HistorySidebar, {
       props: {
