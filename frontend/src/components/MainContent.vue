@@ -1,12 +1,12 @@
 <template>
   <main>
     <div class="chat-area">
-      <!-- Listening status message -->
+      <!-- Status display for speech recognition -->
       <div v-if="listeningStatusMessage" class="listening-status">
         {{ getTranslation(currentLanguage, listeningStatusMessage) }}
       </div>
 
-      <!-- Welcome Screen with Logo -->
+      <!-- Welcome screen with logo and initial options -->
       <div v-if="currentChatID.length === 0" class="welcome-container">
         <img src="../assets/logo.png" alt="Logo" class="logo" />
         <p class="welcome-text">
@@ -15,7 +15,7 @@
         <p class="instruction-text">
           {{ getTranslation(currentLanguage, 'SELECT_INITIAL_TOPIC') }}
         </p>
-        <!-- Buttons for chat initialisation -->
+        <!-- Initial topic selection buttons -->
         <div class="button-container">
           <button
               @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_CHOOSING_A_COURSE'))"
@@ -35,8 +35,9 @@
         </div>
       </div>
 
-      <!-- Chat content -->
+      <!-- Chat UI section -->
       <div v-if="currentChatID.length > 0" class="chat-container">
+        <!-- Message display area -->
         <div class="messages-container" ref="messagesContainer">
           <div v-for="(msg, index) in messages" :key="index">
             <div class="message" :class="{
@@ -47,11 +48,12 @@
               <strong v-if="msg.sender === 'user'">{{ getTranslation(currentLanguage, "USER") }}</strong>
               <strong v-else-if="msg.sender === 'assistant'">{{ getTranslation(currentLanguage, "AI") }}</strong>
               <strong v-else>{{ msg.sender }}</strong>
-              <!-- For assistant messages, use TypingText to animate the output -->
+              <!-- Animated typing effect for assistant response -->
               <TypingText v-if="msg.sender === 'assistant'" :text="formatMessage(msg.content)" :speed="15" />
+              <!-- Regular message rendering with markdown support -->
               <p v-else v-html="formatMessage(msg.content)"></p>
             </div>
-            <!-- TTS Button: For assistant messages, show a speaker icon below the message -->
+            <!-- Text-to-Speech button for assistant message -->
             <div v-if="msg.sender === 'assistant'" class="tts-button-wrapper">
               <button @click="speakMessage(msg.content)" class="tts-button">
                 <i class="fa fa-volume-up"></i>
@@ -60,7 +62,7 @@
           </div>
         </div>
 
-        <!-- Input area for user messages -->
+        <!-- Input area with text and voice support -->
         <div class="input-area">
           <textarea
               v-model="userInput"
@@ -68,10 +70,12 @@
               @keypress.enter.prevent="sendMessage"
           ></textarea>
 
+          <!-- Speech recognition toggle button -->
           <button @click="toggleSpeechRecognition" :class="{ listening: isListening }">
             🎤 {{ isListening ? getTranslation(currentLanguage, 'STOP_VOICE_INPUT') : getTranslation(currentLanguage, 'START_VOICE_INPUT') }}
           </button>
 
+          <!-- Submit message button -->
           <button @click="sendMessage" :disabled="chatInitButtonsDisabled">
             {{ getTranslation(currentLanguage, "SEND") }}
           </button>
@@ -82,6 +86,7 @@
 </template>
 
 <script>
+// Import necessary utilities and components
 import { marked } from "marked";
 import { getTheme } from "../assets/color.js";
 import { getTranslation } from "../assets/language";
@@ -92,18 +97,19 @@ export default {
   components: { TypingText },
   data() {
     return {
-      userInput: "",
-      currentTopic: "",
-      currentTurn: "user",
+      userInput: "",                     // Current user input text
+      currentTopic: "",                  // Current topic (if any)
+      currentTurn: "user",              // Current turn owner (user/assistant)
       userId: localStorage.getItem("userId") || "",
-      currentTheme: "default",// Stores the current UI theme
-      recognition: null,
-      isListening: false,
-      listeningStatusMessage: "" // Display current speech recognition status
+      currentTheme: "default",          // Theme setting
+      recognition: null,                 // Web Speech API recognition instance
+      isListening: false,                // Whether speech recognition is active
+      listeningStatusMessage: ""        // Status message for recognition UI
     };
   },
   props: ["messages", "chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
   watch: {
+    // Dynamically update language for speech recognition
     currentLanguage(newLang) {
       if (this.recognition) {
         const langMap = {
@@ -114,6 +120,7 @@ export default {
         this.recognition.lang = langMap[newLang] || 'en-US';
       }
     },
+    // Scroll to bottom when new messages arrive
     messages() {
       if (this.messages.length === 0 && this.currentChatID.length > 0) {
         this.currentTurn = "user";
@@ -125,6 +132,7 @@ export default {
     }
   },
   mounted() {
+    // Initialize speech recognition if supported
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       this.recognition = new SpeechRecognition();
@@ -139,20 +147,27 @@ export default {
       this.recognition.interimResults = false;
       this.recognition.continuous = true;
 
+      // Handle successful speech recognition
       this.recognition.onresult = (event) => {
         const result = event.results[event.results.length - 1][0].transcript;
         this.userInput = result;
         this.listeningStatusMessage = "LISTENING";
       };
+
+      // Handle recognition errors
       this.recognition.onerror = (event) => {
         console.error("Speech recognition error:", event.error);
         this.isListening = false;
         this.listeningStatusMessage = "VOICE_RECOGNITION_ERROR";
       };
+
+      // Update listening state when recognition starts
       this.recognition.onstart = () => {
         this.isListening = true;
         this.listeningStatusMessage = "LISTENING";
       };
+
+      // Restart recognition if listening was manually enabled
       this.recognition.onend = () => {
         if (this.isListening) {
           this.recognition.start();
@@ -166,10 +181,12 @@ export default {
     getTheme,
     getTranslation,
 
+    // Parse markdown in message content
     formatMessage(message) {
       return marked(message);
     },
 
+    // Speak assistant message using Web Speech API
     speakMessage(text) {
       if (window.speechSynthesis.speaking) {
         window.speechSynthesis.cancel();
@@ -185,7 +202,7 @@ export default {
         let preferredVoice;
         if (utterance.lang.startsWith("en")) {
           preferredVoice = voices.find(
-              (v) => v.lang === "en-GB" && v.name === "Google UK English Female"
+            (v) => v.lang === "en-GB" && v.name === "Google UK English Female"
           ) || voices.find((v) => v.lang === "en-GB") || voices.find((v) => v.lang === "en-US");
         } else {
           preferredVoice = voices.find((v) => v.lang === utterance.lang);
@@ -204,6 +221,7 @@ export default {
       }
     },
 
+    // Toggle speech recognition on/off
     toggleSpeechRecognition() {
       if (!this.recognition) {
         this.listeningStatusMessage = "SPEECH_RECOGNITION_NOT_SUPPORTED";
@@ -227,6 +245,7 @@ export default {
       }
     },
 
+    // Start new conversation with predefined question
     async sendInitialMessage(message) {
       this.$emit("setButtonLock", true);
       let response = await fetch(BACKEND_URL + "/createChat?" + new URLSearchParams({ initialMessage: message }), {
@@ -243,6 +262,7 @@ export default {
       });
     },
 
+    // Request full chat history from backend
     requestChatHistory() {
       fetch(BACKEND_URL + "/getChatHistory?" + new URLSearchParams({ chatID: this.currentChatID }), {
         method: "GET",
@@ -253,6 +273,7 @@ export default {
       });
     },
 
+    // Reconstruct local chat history from server
     async processChatHistory(messageHistory) {
       for (let i = 0; i < messageHistory.length; i++) {
         this.$emit("addMessage", ((i % 2 === 0) ? "user" : "assistant"), messageHistory[i]["content"]);
@@ -260,6 +281,7 @@ export default {
       this.$emit("setButtonLock", false);
     },
 
+    // Send user message and receive assistant reply
     async sendMessage() {
       if (!this.userInput.trim()) {
         alert(getTranslation(localStorage.getItem("langCode"), "PLEASE_ENTER_A_MESSAGE"));
@@ -271,6 +293,7 @@ export default {
       }
       this.$emit("addMessage", "user", this.userInput);
       this.$emit("setButtonLock", true);
+
       const messageToSend = this.userInput.trim();
       this.userInput = "";
 
@@ -289,10 +312,12 @@ export default {
         console.error("Error sending message:", error);
         this.$emit("addMessage", "System", localStorage.getItem("langCode"), "FAILED_TO_SEND_MESSAGE");
       }
+
       this.scrollToBottom();
       this.$emit("setButtonLock", false);
     },
 
+    // Auto scroll to bottom when messages update
     scrollToBottom() {
       this.$nextTick(() => {
         const container = this.$refs.messagesContainer;
@@ -302,6 +327,7 @@ export default {
   }
 };
 </script>
+
 
 
 <style>
