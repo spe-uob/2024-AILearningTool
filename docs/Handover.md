@@ -31,7 +31,6 @@ Below is an overview of the key components of the system:
   - [workflows](/.github/workflows): Contains all CI and CD GitHub Actions.
 - [docs](/docs): Contains all project-related documentation such as diagrams, presentations, UI screenshots, etc... Notable files include:
   - [ETHICS.md](/docs/ETHICS.md): Includes the date of the ethics pre-approval request.
-  - [Handover.md](/docs/Handover.md): Includes key information to facilitate handover to the client.
   - [User-Feedback](/docs/User-Feedback): Includes user feedback from the testing day.
   - [Screenshots](/docs/Screenshots): Includes screenshots showing the evolution of the UI.
 - [frontend](/frontend): Contains all of the frontend code (in Vue 3) and dependencies:
