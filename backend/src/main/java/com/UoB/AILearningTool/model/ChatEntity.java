@@ -22,6 +22,9 @@ public class ChatEntity {
     @Column(name = "message_history", columnDefinition = "TEXT")
     private String messageHistory;
 
+    public void setThreadID(String threadID) {
+        this.threadID = threadID;
+    }
 
     public ChatEntity() {}
 
