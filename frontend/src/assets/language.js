@@ -2,6 +2,7 @@ import {colorSchemes} from "@/assets/color";
 
 const translations = {
     en: {
+        EXPORT: "Export",
         UNDEFINED: "Undefined",
         SETTINGS: "Settings",
         LANGUAGE: "Language",
@@ -44,6 +45,7 @@ const translations = {
         VOICE_RECOGNITION_ERROR: "Voice recognition error. Please try again."
     },
     zh: {
+        EXPORT: "导出",
         UNDEFINED: "未定义",
         SETTINGS: "设置",
         LANGUAGE: "语言",
@@ -86,6 +88,7 @@ const translations = {
         VOICE_RECOGNITION_ERROR: "语音识别出错，请重试。"
     },
     ru: {
+        EXPORT: "экспорт",
         UNDEFINED: "Перевод недоступен",
         SETTINGS: "Настройки",
         LANGUAGE: "Язык",
