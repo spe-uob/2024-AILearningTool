@@ -62,7 +62,7 @@ Below is an overview of the key components of the system:
 
 ## Architecture Diagram:
 
-![Architecture Diagram](/docs/architecture_diagram.png)
+![Architecture Diagram](/docs/Diagrams/architecture_diagram.png)
 
 ## Code Explanation:
 
