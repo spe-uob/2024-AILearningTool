@@ -2,7 +2,7 @@
 
 ---
 ## Table of Contents
-- [Overview](#1-introduction)
+- [Introduction](#1-introduction)
 - [Architecture & Components](#2-architecture--components)
   - [Backend](#backend)
   - [Frontend](#frontend)
