@@ -24,7 +24,7 @@ class OpenAIAPIControllerTest {
 
     @BeforeEach
     void setup() {
-        controller = new OpenAIAPIController(); // 没有依赖注入，直接构造
+        controller = new OpenAIAPIController(); 
     }
 
     @SuppressWarnings("unchecked")
@@ -52,7 +52,7 @@ class OpenAIAPIControllerTest {
     @SuppressWarnings("unchecked")
     @Test
     void initialMessageHistoryRequestTest() throws Exception {
-        // 准备 ChatEntity 和模拟数据
+       
         ChatEntity mockChat = new ChatEntity();
         mockChat.setThreadID("thread_test");
 
