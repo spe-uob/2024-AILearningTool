@@ -15,17 +15,17 @@
         <div v-if="currentChatID.length === 0" class="button-container">
           <button 
             @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_CHOOSING_A_COURSE'))" 
-            :disabled="chatInitButtonsDisabled">
+            :disabled="chatInitButtonsDisabled || isInitializing">
             {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_CHOOSING_A_COURSE") }}
           </button>
           <button 
             @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_PLATFORM'))" 
-            :disabled="chatInitButtonsDisabled">
+            :disabled="chatInitButtonsDisabled || isInitializing">
             {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_PLATFORM") }}
           </button>
           <button 
             @click="sendInitialMessage(getTranslation(currentLanguage, 'I_HAVE_QUESTIONS_ABOUT_UNI_LIFE'))" 
-            :disabled="chatInitButtonsDisabled">
+            :disabled="chatInitButtonsDisabled || isInitializing">
             {{ getTranslation(currentLanguage, "I_HAVE_QUESTIONS_ABOUT_UNI_LIFE") }}
           </button>
         </div>
@@ -98,6 +98,7 @@ export default {
       userInput: "",
       sessionID: localStorage.getItem("sessionID") || "",  // username
       aiServerURL: "http://localhost:8080", // API address
+      isInitializing: false, 
     };
   },
   props: ["messages", "chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
@@ -181,9 +182,12 @@ export default {
      */
     async sendInitialMessage(message) {
       if (!this.sessionID) {
-        alert("Please login!");
+        alert(getTranslation(this.currentLanguage, "LOGIN_REQUIRED"));
         return;
       }
+
+      
+      this.isInitializing = true;
 
       try {
         const chatCount = this.chats.length + 1;
@@ -201,7 +205,18 @@ export default {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || "Failed to create chat");
+          // Handle different HTTP error codes
+          switch (response.status) {
+            case 401:
+              this.$emit("addMessage", "System", getTranslation(this.currentLanguage, "SESSION_EXPIRED"));
+              throw new Error(getTranslation(this.currentLanguage, "SESSION_EXPIRED"));
+            case 429:
+              throw new Error(getTranslation(this.currentLanguage, "TOO_MANY_REQUESTS"));
+            case 500:
+              throw new Error(getTranslation(this.currentLanguage, "SERVER_ERROR"));
+            default:
+              throw new Error(data.message || getTranslation(this.currentLanguage, "CHAT_CREATION_FAILED"));
+          }
         }
 
         this.$emit("addChat", data.chatID, chatTitle);
@@ -216,23 +231,24 @@ export default {
       } catch (error) {
         console.error("Error creating chat:", error);
         alert(error.message || "Failed to create chat");
+      } finally {
+        this.isInitializing = false;
       }
     },
-
-
+    
     async sendMessage() {
       if (!this.userInput.trim()) {
-        alert("Please enter messages");
+        alert(getTranslation(this.currentLanguage, "EMPTY_MESSAGE"));
         return;
       }
 
       if (!this.sessionID) {
-        alert("Login failed, please log in again!");
+        alert(getTranslation(this.currentLanguage, "SESSION_EXPIRED_LOGIN_AGAIN"));
         return;
       }
 
       if (!this.currentChatID) {
-        alert("Please select a chat first!");
+        alert(getTranslation(this.currentLanguage, "SELECT_CHAT_FIRST"));
         return;
       }
 
@@ -255,14 +271,31 @@ export default {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || "Failed to send message");
+          // Handle different HTTP error codes
+          switch (response.status) {
+            case 401:
+              this.$emit("addMessage", "System", getTranslation(this.currentLanguage, "SESSION_EXPIRED"));
+              throw new Error(getTranslation(this.currentLanguage, "SESSION_EXPIRED"));
+            case 404:
+              this.$emit("addMessage", "System", getTranslation(this.currentLanguage, "CHAT_NOT_FOUND"));
+              throw new Error(getTranslation(this.currentLanguage, "CHAT_NOT_FOUND"));
+            case 429:
+              this.$emit("addMessage", "System", getTranslation(this.currentLanguage, "TOO_MANY_REQUESTS"));
+              throw new Error(getTranslation(this.currentLanguage, "TOO_MANY_REQUESTS"));
+            case 500:
+              this.$emit("addMessage", "System", getTranslation(this.currentLanguage, "AI_SERVICE_ERROR"));
+              throw new Error(getTranslation(this.currentLanguage, "AI_SERVICE_ERROR"));
+            default:
+              this.$emit("addMessage", "System", data.message || getTranslation(this.currentLanguage, "MESSAGE_SEND_FAILED"));
+              throw new Error(data.message || getTranslation(this.currentLanguage, "MESSAGE_SEND_FAILED"));
+          }
         }
 
         this.$emit("addMessage", "assistant", data["content"]);
 
       } catch (error) {
         console.error("Error sending message:", error);
-        alert(error.message || "Failed to send message");
+        // Don't show alert as we're already showing system messages in the chat
       }
     },
 
@@ -282,17 +315,34 @@ export default {
         });
 
         if (!response.ok) {
-          console.log(response.body)
-          throw new Error("Failed to load chat history");
+          // Handle different HTTP error codes
+          const errorMessage = await response.text();
+          console.log(errorMessage);
+          
+          switch (response.status) {
+            case 401:
+              this.$emit("addMessage", "System", getTranslation(this.currentLanguage, "SESSION_EXPIRED"));
+              throw new Error(getTranslation(this.currentLanguage, "SESSION_EXPIRED"));
+            case 404:
+              this.$emit("addMessage", "System", getTranslation(this.currentLanguage, "CHAT_HISTORY_NOT_FOUND"));
+              throw new Error(getTranslation(this.currentLanguage, "CHAT_HISTORY_NOT_FOUND"));
+            case 500:
+              this.$emit("addMessage", "System", getTranslation(this.currentLanguage, "SERVER_ERROR"));
+              throw new Error(getTranslation(this.currentLanguage, "SERVER_ERROR"));
+            default:
+              this.$emit("addMessage", "System", getTranslation(this.currentLanguage, "HISTORY_LOAD_FAILED"));
+              throw new Error(getTranslation(this.currentLanguage, "HISTORY_LOAD_FAILED"));
+          }
         }
 
         const data = await response.json();
         await this.processChatHistory(JSON.parse(data["history"]));
       } catch (error) {
         console.error("Error loading chat history:", error);
+        this.$emit("setButtonLock", false);
       }
     },
-
+    
     /**
      * Processes retrieved chat history and structures it for display.
      */
