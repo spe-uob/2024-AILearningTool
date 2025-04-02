@@ -87,7 +87,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 /* Settings button */
 .settings-btn {
   position: fixed;

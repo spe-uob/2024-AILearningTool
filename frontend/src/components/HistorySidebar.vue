@@ -25,15 +25,14 @@
 </template>
 
 <script>
-import { getTheme } from "../assets/color.js";
+import { getTheme } from "@/assets/color.js";
 import { getTranslation } from "@/assets/language";
 
 export default {
   props: ["chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
   data() {
     return {
-      isCollapsed: false, // Controls sidebar visibility
-      aiServerUrl: "http://localhost:8080",
+      isCollapsed: true, // Controls sidebar visibility
       currentTheme: "default", // Tracks the current theme
       themeStyles: {}, // Stores dynamic styles
     };
@@ -42,6 +41,7 @@ export default {
     getTranslation,
     addChat() {
       this.$emit("resetMainContent");
+      this.isCollapsed = true;
     },
     toggleSidebar() {
       this.isCollapsed = !this.isCollapsed;
@@ -92,7 +92,7 @@ export default {
 </script>
 
 
-<style scoped>
+<style>
 /* Sidebar Layout */
 .history-sidebar {
   width: 240px;
@@ -125,7 +125,8 @@ export default {
   cursor: pointer;
   font-size: 22px;
   font-weight: bold;
-  padding: 8px;
+  padding: 4px;
+  margin: 8px;
   transition: opacity 0.3s ease-in-out;
   color: black;
 }

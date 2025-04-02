@@ -18,6 +18,9 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    env:
+      BACKEND_URL: ailearningtool.ddns.net
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
     steps:
     - uses: actions/checkout@v4
@@ -27,8 +30,33 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
+        
+    - name: Adjust the OpenAI API key
+      run: (envsubst < OpenAIAuthenticator.java) > OpenAIAuthenticatorUPD.java && cp OpenAIAuthenticatorUPD.java OpenAIAuthenticator.java && rm OpenAIAuthenticatorUPD.java
+      working-directory: backend/src/main/java/com/UoB/AILearningTool
+      
+    - name: Adjust the backend URL
+      run: | 
+        echo -e "spring.application.name=AILearningTool\n\
+        server.port=443\n\
+        spring.servlet.multipart.max-file-size=50MB\n\
+        spring.servlet.multipart.max-request-size=50MB\n\
+        spring.web.resources.static-locations=classpath:/static/\n\
+        server.servlet.encoding.charset=UTF-8\n\
+        server.servlet.encoding.enabled=true\n\
+        server.servlet.encoding.force=true\n\
+        server.ssl.key-store=./file:keystore.p12\n\
+        server.ssl.key-store-password=ailearntool" > application.properties
+      working-directory: backend/src/main/resources
+
+    - name: Update frontend BACKEND_URL constant
+      run : echo "const BACKEND_URL = 'http://$BACKEND_URL';
+            export { BACKEND_URL };" > globalConstants.js
+      working-directory: frontend/src/assets
+      
     - name: Build with Maven
       run: mvn -B clean compile --file backend/pom.xml
+      
     - name: Test with Maven
       run: mvn -B test --file backend/pom.xml
 

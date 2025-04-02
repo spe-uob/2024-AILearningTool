@@ -2,58 +2,80 @@
   <main>
     <div class="chat-area">
       <!-- Welcome Screen with Logo -->
-      <div v-if="this.currentChatID.length === 0" class="welcome-container">
+      <div v-if="currentChatID.length === 0" class="welcome-container">
         <img src="../assets/logo.png" alt="Logo" class="logo" />
         <p class="welcome-text">
           {{ getTranslation(currentLanguage, 'WELCOME_TO_WATSONX_AI') }}
         </p>
-        <p v-if="this.currentChatID.length === 0" class="instruction-text">
+        <p v-if="currentChatID.length === 0" class="instruction-text">
           {{ getTranslation(currentLanguage, 'SELECT_INITIAL_TOPIC') }}
         </p>
 
         <!-- Buttons for chat initialisation -->
-        <div v-if="this.currentChatID.length === 0" class="button-container">
-          <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_CHOOSING_A_COURSE'))" :disabled="chatInitButtonsDisabled">
+        <div v-if="currentChatID.length === 0" class="button-container">
+          <button 
+            @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_CHOOSING_A_COURSE'))" 
+            :disabled="chatInitButtonsDisabled">
             {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_CHOOSING_A_COURSE") }}
           </button>
-          <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_PLATFORM'))" :disabled="chatInitButtonsDisabled">
-            {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_PLATFORM")}}
+          <button 
+            @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_PLATFORM'))" 
+            :disabled="chatInitButtonsDisabled">
+            {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_PLATFORM") }}
           </button>
-          <button @click="sendInitialMessage(getTranslation(currentLanguage, 'I_HAVE_QUESTIONS_ABOUT_UNI_LIFE'))" :disabled="chatInitButtonsDisabled">
-            {{getTranslation(currentLanguage, "I_HAVE_QUESTIONS_ABOUT_UNI_LIFE")}}
+          <button 
+            @click="sendInitialMessage(getTranslation(currentLanguage, 'I_HAVE_QUESTIONS_ABOUT_UNI_LIFE'))" 
+            :disabled="chatInitButtonsDisabled">
+            {{ getTranslation(currentLanguage, "I_HAVE_QUESTIONS_ABOUT_UNI_LIFE") }}
           </button>
         </div>
       </div>
 
       <!-- Display all messages in the conversation -->
-      <div v-if="this.currentChatID.length > 0" class="chat-container">
+      <div v-if="currentChatID.length > 0" class="chat-container">
         <!-- Scrollable message area -->
         <div class="messages-container" ref="messagesContainer">
-          <div
-              v-for="(msg, index) in messages"
-              :key="index"
+          <div v-for="(msg, index) in messages" :key="index">
+            <div 
               class="message"
               :class="{
-              'user-message': msg.sender === 'user',
-              'assistant-message': msg.sender === 'assistant',
-              'system-message': msg.sender === 'System'
-            }"
-          >
-            <strong v-if="msg.sender === 'user'">{{ getTranslation(currentLanguage, "USER") }}</strong>
-            <strong v-else-if="msg.sender === 'assistant'">{{ getTranslation(currentLanguage, "AI") }}</strong>
-            <strong v-else>{{ msg.sender }}</strong>
-            <!-- Use TypingText for assistant messages instead of static output -->
-            <TypingText v-if="msg.sender === 'assistant'" :text="formatMessage(msg.content)" :speed="15" />
-            <p v-else v-html="formatMessage(msg.content)"></p>
+                'user-message': msg.sender === 'user',
+                'assistant-message': msg.sender === 'assistant',
+                'system-message': msg.sender === 'System'
+              }"
+            >
+              <strong v-if="msg.sender === 'user'">{{ getTranslation(currentLanguage, "USER") }}</strong>
+              <strong v-else-if="msg.sender === 'assistant'">{{ getTranslation(currentLanguage, "AI") }}</strong>
+              <strong v-else>{{ msg.sender }}</strong>
+              <!-- For assistant messages, use TypingText to animate the output -->
+              <div v-if="msg.sender === 'assistant'">
+              <TypingText 
+                v-if="!getFinishedMessage(index)" 
+                :text="formatMessage(msg.content)" 
+                :speed="15" 
+                @finished="setFinishedMessage(index, formatMessage(msg.content))"
+              />
+              <!-- Otherwise, render the static text from localStorage -->
+              <p v-else v-html="getFinishedMessage(index)"></p>
+              </div>
+              <!-- For non-assistant messages, render markdown as HTML -->
+              <p v-else v-html="formatMessage(msg.content)"></p>
+            </div>
+            <!-- TTS Button: For assistant messages, show a speaker icon below the message -->
+            <div v-if="msg.sender === 'assistant'" class="tts-button-wrapper">
+              <button @click="speakMessage(msg.content)" class="tts-button">
+                <i class="fa fa-volume-up"></i>
+              </button>
+            </div>
           </div>
         </div>
 
         <!-- Input area for user messages -->
         <div class="input-area">
           <textarea
-              v-model="userInput"
-              :placeholder="getTranslation(currentLanguage, 'TYPE_YOUR_MESSAGE')"
-              @keypress.enter.prevent="sendMessage"
+            v-model="userInput"
+            :placeholder="getTranslation(currentLanguage, 'TYPE_YOUR_MESSAGE')"
+            @keypress.enter.prevent="sendMessage"
           ></textarea>
           <button @click="sendMessage" :disabled="chatInitButtonsDisabled">
             {{ getTranslation(currentLanguage, "SEND") }}
@@ -64,15 +86,18 @@
   </main>
 </template>
 
+
+
 <script>
 import { marked } from "marked";
 import { getTheme } from "../assets/color.js";
 import {getTranslation} from "../assets/language";
+import { BACKEND_URL } from "@/assets/globalConstants"
 import TypingText from "../components/helpers/TypingText.vue";
 
 export default {
   components: {
-    TypingText
+    TypingText,
   },
   data() {
     return {
@@ -80,7 +105,6 @@ export default {
       currentTopic: "",
       currentTurn: "user", // Tracks conversation turn (user or AI)
       userId: localStorage.getItem("userId") || "",
-      aiServerURL: "http://localhost:8080", // API endpoint for AI server
       currentTheme: "default", // Stores the current UI theme
     };
   },
@@ -108,12 +132,59 @@ export default {
       // Use marked to convert markdown to HTML.
       return marked(message);
     },
+
+        /**
+     * Uses the Web Speech API to speak the given text.
+     */
+    speakMessage(text) {
+      // If something is currently being spoken, cancel it and return.
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+        return;
+      }
+
+      // Create a new utterance with the provided text.
+      const utterance = new SpeechSynthesisUtterance(text);
+      // Set the rate and pitch.
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      // Set the language from currentLanguage (or default to 'en-US').
+      utterance.lang = this.currentLanguage || "en-US";
+
+      // Function to select and assign a voice, then speak the utterance.
+      const assignVoice = () => {
+        const voices = window.speechSynthesis.getVoices();
+        let preferredVoice;
+        // If the language is English, try to select the preferred English voice.
+        if (utterance.lang.startsWith("en")) {
+          preferredVoice = voices.find(
+            (v) => v.lang === "en-GB" && v.name === "Google UK English Female"
+          ) || voices.find((v) => v.lang === "en-GB") || voices.find((v) => v.lang === "en-US");
+        } else {
+          // Otherwise, select a voice that matches the utterance language.
+          preferredVoice = voices.find((v) => v.lang === utterance.lang);
+        }
+        if (preferredVoice) {
+          utterance.voice = preferredVoice;
+        }
+        window.speechSynthesis.speak(utterance);
+      };
+
+      // Get the voices list. If it's empty, wait for voices to be loaded.
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length === 0) {
+        window.speechSynthesis.onvoiceschanged = assignVoice;
+      } else {
+        assignVoice();
+      }
+    },
+    
     /**
      * Initializes a new chat with a predefined message.
      */
     async sendInitialMessage(message) {
       this.$emit("setButtonLock", true)
-      let response = await fetch(this.aiServerURL + "/createChat?" + new URLSearchParams({
+      let response = await fetch(BACKEND_URL + "/createChat?" + new URLSearchParams({
         "initialMessage": message
       }),{
             method: "GET",
@@ -132,12 +203,23 @@ export default {
       });
     },
 
+    // Returns the finished message text for a given index if it exists in localStorage.
+  getFinishedMessage(index) {
+    const key = `finishedMessage_${this.currentChatID}_${index}`;
+    return localStorage.getItem(key);
+  },
+  // Saves the finished message text for a given index into localStorage.
+  setFinishedMessage(index, text) {
+    const key = `finishedMessage_${this.currentChatID}_${index}`;
+    localStorage.setItem(key, text);
+  },
+
     /**
      * Requests chat history from the server based on the current chat ID.
      */
     requestChatHistory() {
       fetch(
-          this.aiServerURL +
+          BACKEND_URL +
           "/getChatHistory?" +
           new URLSearchParams({
             chatID: this.currentChatID,
@@ -191,7 +273,7 @@ export default {
       this.userInput = "";
 
       try {
-        let response = await fetch(this.aiServerURL + "/sendMessage?" + new URLSearchParams({
+        let response = await fetch(BACKEND_URL + "/sendMessage?" + new URLSearchParams({
           "userID": this.userId,
           "chatID": this.currentChatID,
           "newMessage": messageToSend,
@@ -228,7 +310,7 @@ export default {
 </script>
 
 
-<style scoped>
+<style>
 /* Adjust the main area height to make the chat window more compact */
 main {
   flex-grow: 1;
@@ -451,4 +533,21 @@ button {
   transform: scale(0.96);
 }
 
+.tts-button-wrapper {
+  margin-top: 5px;
+  text-align: left;
+}
+
+.tts-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2em;
+  color: var(--accent-color);
+  padding: 2px;
+}
+
+.tts-button:hover {
+color: var(--accent-color);
+}
 </style>
