@@ -3,6 +3,7 @@
 ---
 ## Table of Contents
 - [Introduction](#1-introduction)
+- [Project Structure](#project-structure)
 - [Architecture & Components](#2-architecture--components)
   - [Backend](#backend)
   - [Frontend](#frontend)
@@ -20,6 +21,42 @@
 ## 1. Introduction
 
 This document serves as a guide for new developers to continue working on our project. It includes explanations of the code infrastructure and overall repository structure of our project.
+
+---
+
+## Project Structure:
+Below is an overview of the key components of the system:
+
+- [.github](/.github): Contains all GitHub templates.
+  - [workflows](/.github/workflows): Contains all CI and CD GitHub Actions.
+- [docs](/docs): Contains all project-related documentation such as diagrams, presentations, UI screenshots, etc... Notable files include:
+  - [ETHICS.md](/docs/ETHICS.md): Includes the date of the ethics pre-approval request.
+  - [Handover.md](/docs/Handover.md): Includes key information to facilitate handover to the client.
+  - [User-Feedback](/docs/User-Feedback): Includes user feedback from the testing day.
+  - [Screenshots](/docs/Screenshots): Includes screenshots showing the evolution of the UI.
+- [frontend](/frontend): Contains all of the frontend code (in Vue 3) and dependencies:
+  - [node](/frontend/node): Includes Node.js runtime and package managers.
+  - [public](/frontend/public): Includes our logo in various sizes, a favicon, and documents for PWA support.
+  - [src](/frontend/src): Includes the frontend code:
+    - [Display interface](/frontend/src/Display%20interface): Includes Vue components for login, main view, and cookie management.
+    - [assets](/frontend/src/assets): Includes JavaScript and CSS global constants such as colors, languages, and responsive UI constants.
+    - [components](/frontend/src/components): Includes the main UI components such as HistorySidebar, MainContent, and SettingSidebar for structuring the interface.
+      - [helpers](/frontend/src/components/helpers): Includes helper classes used in the main components such as TypingText (used for "typing-like" AI responses).
+    - [App](/frontend/src/App.vue): The root component that structures the entire application layout.
+    - [main](/frontend/src/main.js): Initializes the Vue app, imports dependencies, and mounts the root component.
+    - [registerServiceWorker](/frontend/src/registerServiceWorker.js): Registers the service worker to enable PWA features.
+  - [unit](/frontend/tests/unit): Includes all frontend unit tests (in Jest).
+- [backend](/backend): Contains all of the backend code (in Java), Maven config, and documents:
+  - [main](/backend/src/main): Includes the backend code:
+    - [AILearningTool](/backend/src/main/java/com/UoB/AILearningTool): Contains all core application logic, including API controllers, database management, and AI integration.
+    - [resources](/backend/src/main/resources): Includes static resources such as application properties.
+  - [test](/backend/src/test/java/com/UoB/AILearningTool): Includes all backend unit tests (in Java).
+  - [mvnw](/backend/mvnw), [mvnw.cmd](/backend/mvnw.cmd)  and [pom.xml](/backend/pom.xml): Documents for Maven.
+- [LICENSE](/LICENSE): Includes the project's MIT license.
+- [.gitignore](/.gitignore): Includes files that should be ignored by Git when making a commit.
+- [Dockerfile](/Dockerfile): Includes steps to assemble a Docker image (for CD).
+- [HELP.md](/HELP.md): Contains official documentation to help with learning Maven and Spring Boot.
+- [localExecute.sh](/localExecute.sh): Shell script used to run the application.
 
 ---
 
