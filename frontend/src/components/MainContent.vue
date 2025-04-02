@@ -658,7 +658,6 @@ button {
 color: var(--accent-color);
 }
 
-/* 添加下载按钮样式 */
 .download-container {
   position: absolute;
   top: 20px;
