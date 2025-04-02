@@ -621,4 +621,10 @@ color: var(--accent-color);
 .download-btn:hover {
   background-color: var(--border-color);
 }
+
+/* Ensure links in messages are visible */
+.messages-container a {
+  color: blue;
+  text-decoration: underline;
+}
 </style>
