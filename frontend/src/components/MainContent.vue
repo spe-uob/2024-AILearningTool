@@ -95,7 +95,7 @@ export default {
       currentTheme: "default",
       recognition: null,
       isListening: false,
-      listeningStatusMessage: "" // 显示当前语音识别状态
+      listeningStatusMessage: "" // Display current speech recognition status
     };
   },
   props: ["messages", "chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
@@ -541,7 +541,7 @@ button {
 color: var(--accent-color);
 }
 
-/* 添加下载按钮样式 */
+/* Add download button style */
 .download-container {
   position: absolute;
   top: 20px;
