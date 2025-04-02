@@ -41,29 +41,45 @@ AILearningTool is a web-based chatbot developed using **Spring Boot** (backend) 
 - **Main Functionality:**  
   - User and chat management (signup, chat creation, sending messages, retrieving chat history).
   - Integration with external AI APIs.
-- **Key Files:**  
-  - `AiLearningToolApplication.java`: Main application file; handles configuration overwrites and SSL keystore setup.
-  - `DatabaseController.java`: Manages user and chat data.
-  - `SpringController.java`: Exposes REST endpoints for chat interactions.
-  - `main/resources`: Includes static resources such as application properties.
-  - `main/test` Incldes all backend unit tests (in Java).
+- **Key Files:**
+  - `backend/src/main/java/com/UoB/AILearningTool/`: 
+    - `model/`: Stores definitions for user and chat SQL database tables.
+    - `repository/`: Stores `repository` interfaces - they allow to search for records conveniently, in Java.
+    - `AiLearningToolApplication.java`: Main application file; Start the backend server.
+    - `DatabaseController.java`: Manages user and chat data.
+    - `OpenAIAPIAuthenticator.java`: Stores the API key, fetches Bearer token.
+    - `OpenAIAPIController.java`: Implements backend <-> OpenAI communication.
+    - `SpringController.java`: Exposes REST endpoints for chat interactions.
+    - `StringTools.java`: Includes legacy pre-JSON string parsing methods and random string generators.
+    - `WatsonxResponse.java`: Abstracts the status code and response value from other API request information, mostly used in some unit tests.
+  - `backend/src/test`: Includes all backend unit tests.
+  - `backend/src/main/resources/`:
+    - `application.properties` - Stores Spring Boot parameters, such as port, paths and SSL configuration.
+    - `static/` - Stores assembled Vue.js frontend code.
 - **Dependencies:**  
-  - Spring Boot Starter Web, Security, JDBC, Logging.
+  - Spring Boot Starter Web, JDBC, Logging.
 
 ### Frontend
 
 - **Framework:** Vue.js  
 - **Key Features:**  
-  - Chat UI with a welcome screen, message display (including markdown formatting and animation via the TypingText component), and an input area.
+  - Chatbot UI with a welcome screen, message display (including Markdown formatting and animation via the TypingText component), and an input area.
   - Text-to-speech (TTS) functionality using the Web Speech API, with a speaker icon provided for assistant messages.
-  - Automated frontend build integrated with the backend using Maven (frontend-maven-plugin).
+  - SQLite database, used to store chat information in case of server failures.
 - **Key Files & Directories:**
-  - `src/Display interface`: Includes Vue components for login, main view, and cookie management.
-  - `src/components/MainContent.vue`: Main chat component.
-  - `src/components/helpers/TypingText.vue`: Component to animate assistant messages.
-  - `src/assets/`: Contains theme configuration and language translation files.
-  - `src/main`: Initializes the Vue app, imports dependencies, and mounts the root component.
-  - `tests/unit`: Includes all frontend unit tests (in Jest).
+  - `src/`: 
+    - `Display interface/`: Includes Vue components for login, main view, and cookie management.
+    - `components/`:
+      - `MainContent.vue`: Main chat component.
+      - `helpers/TypingText.vue`: Component to animate assistant messages.
+    - `assets/`:
+      - `color.js` - contains standard and high contrast colour scheme constants.
+      - `language.js` - contains translations of UI.
+      - `globalConstants.js` - contains the backend URL.
+      - `logo.png` - contains the project logo.
+      - `responsive.css` - contains stylesheet used for responsive UI.
+    - `main.js`: Initializes the Vue app, imports dependencies, and mounts the root component.
+    - `tests/unit`: Includes all frontend unit tests (in Jest).
 - **Build Process:**  
   - Managed by the frontend-maven-plugin in the Maven build.
   - The frontend build output (from `npm run build`) is copied into `backend/src/main/resources/static`.
@@ -93,30 +109,34 @@ cd 2024-AILearningtool.git
 
 **Clean and build entire project**
 ```bash
-./localExecute.sh <OpenAI API Key>
+./localExecute.sh <OpenAI API Key> <Port number>
 ```
 
 **Access the Application:**
 
-- Local:
+- Local execution with `localExecute.sh apikey 8080`:
 ```bash
 http://localhost:8080
 ```
-- On AWS/EC2:
-```bash
-Use the instance’s public IP or DNS with port 8080 (e.g., http://<public-ip>:8080).
-```
+- On remote server with Docker deployment:
+
+`https://<URL defined in BACKEND_URL environment variable of GitHub workflow>`
+
 ---
 ## 4. Configuration Details
 ### Application Properties ###
 - Location:
   - backend/src/main/resources/application.properties
 - Key Settings:
-  - server.port: Default is 8080.
-  - SSL settings (keystore, key alias, etc.) if HTTPS is enabled.
+  - `server.port`: Default is 8080 on local, non-Docker execution.
+  - SSL settings (keystore, key alias, etc.) if HTTPS is enabled:
+    ```
+    server.port=443
+    server.ssl.key-store=./file:keystore.p12
+    server.ssl.key-store-password=ailearntool"
+    ```
   - Encoding settings:
-    ``` bash
-    Copy
+    ```
     spring.http.encoding.charset=UTF-8
     spring.http.encoding.enabled=true
     spring.http.encoding.force=true
@@ -133,15 +153,17 @@ Use the instance’s public IP or DNS with port 8080 (e.g., http://<public-ip>:8
 ---
 ## 5. Testing & Troubleshooting
 - Running backend tests:
+  - `localExecute.sh` does the testing for you before execution, but if you already launched this at least once, you can also do:
   ```bash
   mvn test
   ```
-- Running frontend tests:
+- Running frontend tests (only works after `localExecute.sh` or if you have substituted variable names with values manually):
   ```bash
   npm run test:unit
   ```
 - Debugging:
-  - Use browser developer tools to inspect console errors, network requests, and verify resource loading.
+  - Use developer tools of your browser to inspect console errors, network requests, and verify resource loading.
+  - Make sure to clear your browser's cache before you try to debug new version of your code.
   - For backend debugging, enable Spring Boot DevTools for live reload.
 ---
 ## License
