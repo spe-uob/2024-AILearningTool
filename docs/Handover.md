@@ -1,10 +1,10 @@
 # AILearningTool - Project Handover Document
 
 ---
-## Table of Contents
+## Table of Contents:
 - [Introduction](#introduction)
-- [Project Structure](#project-structure)
-- [Architecture & Components](#architecture--components)
+- [Architecture Diagram](#architecture-diagram)
+- [Code Explanation](#code-explanation)
   - [Backend](#backend)
   - [Frontend](#frontend)
 - [Setup & Installation](#setup--installation)
@@ -18,7 +18,7 @@
 - [License](#license)
 
 
-## Introduction
+## Introduction:
 
 This document serves as a guide for new developers to continue working on our project. It includes explanations of the code infrastructure and overall repository structure of our project.
 
@@ -60,10 +60,13 @@ Below is an overview of the key components of the system:
 
 ---
 
-## Architecture & Components
+## Architecture Diagram:
 
 ![Architecture Diagram](https://github.com/spe-uob/2024-AILearningTool/blob/feature/issue-210/Improve-documentation/docs/Diagrams/architecture_diagram.png)
-### Backend
+
+## Code Explanation:
+
+### Backend:
 
 - **Framework:** Spring Boot 3.3.4  
 - **Main Functionality:**  
@@ -78,7 +81,7 @@ Below is an overview of the key components of the system:
 - **Dependencies:**  
   - Spring Boot Starter Web, Security, JDBC, Logging.
 
-### Frontend
+### Frontend:
 
 - **Framework:** Vue.js  
 - **Key Features:**  
@@ -99,20 +102,20 @@ Below is an overview of the key components of the system:
 
 ---
 
-## Setup & Installation
+## Setup & Installation:
 
-### Prerequisites
+### Prerequisites:
 - Java JDK 21+  
 - Maven 3.6+  
 - Node.js (recommended v18+) & npm (managed by frontend-maven-plugin)  
 - Git
 
-### Cloning the Repository
+### Cloning the Repository:
 ```bash
 git clone https://github.com/spe-uob/2024-AILearningTool.git
 ```
 
-### Building the Project
+### Building the Project:
 
 **Navigate to project directory**
 ```bash
@@ -135,7 +138,7 @@ http://localhost:8080
 Use the instance’s public IP or DNS with port 8080 (e.g., http://<public-ip>:8080).
 ```
 ---
-## Configuration Details
+## Configuration Details:
 ### Application Properties ###
 - Location:
   - backend/src/main/resources/application.properties
@@ -159,7 +162,7 @@ Use the instance’s public IP or DNS with port 8080 (e.g., http://<public-ip>:8
 - Build Automation:
   - The Maven plugin frontend-maven-plugin runs npm install and npm run build from the frontend folder. The output is copied to backend/src/main/resources/static.
 ---
-## Testing & Troubleshooting
+## Testing & Troubleshooting:
 - Running backend tests:
   ```bash
   mvn test
@@ -172,6 +175,6 @@ Use the instance’s public IP or DNS with port 8080 (e.g., http://<public-ip>:8
   - Use browser developer tools to inspect console errors, network requests, and verify resource loading.
   - For backend debugging, enable Spring Boot DevTools for live reload.
 ---
-## License
+## License:
 The project is licensed under the following [MIT License.](https://github.com/spe-uob/2024-AILearningTool/blob/feature/issue-210/Improve-documentation/LICENSE)
 
