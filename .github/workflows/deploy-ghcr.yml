@@ -46,7 +46,7 @@ jobs:
 
       # Step 5: Adjust the frontend BACKEND_URL constant
       - name: Update frontend BACKEND_URL constant
-        run : echo "const BACKEND_URL = 'http://$BACKEND_URL';
+        run : echo "const BACKEND_URL = 'https://$BACKEND_URL';
               export { BACKEND_URL };" > globalConstants.js
         working-directory: frontend/src/assets
         
