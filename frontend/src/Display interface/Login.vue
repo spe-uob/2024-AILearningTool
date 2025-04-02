@@ -141,7 +141,23 @@ export default {
           localStorage.setItem("sessionID", data.sessionID);
           this.router.push(`/main?sessionID=${data.sessionID}`);
         } else {
-          alert("Login failed!");
+          // Handle different HTTP error codes
+          switch (response.status) {
+            case 401:
+              alert(getTranslation(this.currentLanguage, "INVALID_CREDENTIALS"));
+              break;
+            case 404:
+              alert(getTranslation(this.currentLanguage, "USER_NOT_FOUND"));
+              break;
+            case 429:
+              alert(getTranslation(this.currentLanguage, "TOO_MANY_ATTEMPTS"));
+              break;
+            case 500:
+              alert(getTranslation(this.currentLanguage, "SERVER_ERROR"));
+              break;
+            default:
+              alert(getTranslation(this.currentLanguage, "LOGIN_FAILED"));
+          }
         }
       } catch (error) {
         console.error("Login error:", error);
@@ -166,7 +182,20 @@ export default {
           alert(getTranslation(this.currentLanguage, "REGISTRATION_SUCCESS"));
           this.router.push("/login");
         } else {
-          alert(getTranslation(this.currentLanguage, "REGISTRATION_ERROR"));
+          // Handle different HTTP error codes
+          switch (response.status) {
+            case 409:
+              alert(getTranslation(this.currentLanguage, "USERNAME_TAKEN"));
+              break;
+            case 400:
+              alert(getTranslation(this.currentLanguage, "INVALID_INPUT"));
+              break;
+            case 500:
+              alert(getTranslation(this.currentLanguage, "SERVER_ERROR"));
+              break;
+            default:
+              alert(getTranslation(this.currentLanguage, "REGISTRATION_ERROR"));
+          }
         }
       } catch (error) {
         console.error(getTranslation(this.currentLanguage, "REGISTRATION_FAILED"), error);
