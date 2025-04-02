@@ -48,11 +48,16 @@
               <strong v-else-if="msg.sender === 'assistant'">{{ getTranslation(currentLanguage, "AI") }}</strong>
               <strong v-else>{{ msg.sender }}</strong>
               <!-- For assistant messages, use TypingText to animate the output -->
+              <div v-if="msg.sender === 'assistant'">
               <TypingText 
-                v-if="msg.sender === 'assistant'" 
+                v-if="!getFinishedMessage(index)" 
                 :text="formatMessage(msg.content)" 
                 :speed="15" 
+                @finished="setFinishedMessage(index, formatMessage(msg.content))"
               />
+              <!-- Otherwise, render the static text from localStorage -->
+              <p v-else v-html="getFinishedMessage(index)"></p>
+              </div>
               <!-- For non-assistant messages, render markdown as HTML -->
               <p v-else v-html="formatMessage(msg.content)"></p>
             </div>
@@ -87,6 +92,7 @@
 import { marked } from "marked";
 import { getTheme } from "../assets/color.js";
 import {getTranslation} from "../assets/language";
+import { BACKEND_URL } from "@/assets/globalConstants"
 import TypingText from "../components/helpers/TypingText.vue";
 
 export default {
@@ -361,13 +367,57 @@ export default {
           container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
         }
       });
-    }
+    },
+    
+    // method for downloading chat history
+    async exportChat() {
+      if (!this.currentChatID) return;
+      
+      try {
+        const response = await fetch(
+          BACKEND_URL + "/getChatHistory?" +
+          new URLSearchParams({
+            chatID: this.currentChatID,
+          }),
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("cannot find history");
+        }
+
+        const messages = await response.json();
+        
+        const formattedChat = messages.map((msg, index) => {
+          const role = index % 2 === 0 ? "User" : "AI";
+          return `${role}: ${msg.content}\n`;
+        }).join('\n');
+
+        // create download link
+        const blob = new Blob([formattedChat], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `chat-${this.currentChatID}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } catch (error) {
+        console.error("error:", error);
+        alert("download failed");
+      }
+    },
+    
   }
 };
 </script>
 
 
-<style scoped>
+<style>
 /* Adjust the main area height to make the chat window more compact */
 main {
   flex-grow: 1;
@@ -606,5 +656,38 @@ button {
 
 .tts-button:hover {
 color: var(--accent-color);
+}
+
+/* 添加下载按钮样式 */
+.download-container {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+}
+
+.download-btn {
+  padding: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.download-btn:hover {
+  background-color: var(--border-color);
+}
+
+/* Ensure links in messages are visible */
+.messages-container a {
+  color: blue;
+  text-decoration: underline;
 }
 </style>

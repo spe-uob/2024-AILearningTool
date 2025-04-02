@@ -67,6 +67,7 @@
 import { useRouter } from "vue-router";
 import Cookie from '../Display interface/Cookie.vue';
 import {getTranslation} from "../assets/language";
+import { BACKEND_URL } from "@/assets/globalConstants"
 
 export default {
   components: { Cookie },
