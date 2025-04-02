@@ -62,7 +62,7 @@ Below is an overview of the key components of the system:
 
 ## Architecture Diagram:
 
-![Architecture Diagram](https://github.com/spe-uob/2024-AILearningTool/blob/feature/issue-210/Improve-documentation/docs/Diagrams/architecture_diagram.png)
+![Architecture Diagram](/docs/architecture_diagram.png)
 
 ## Code Explanation:
 
