@@ -195,28 +195,45 @@ To get started with developing or contributing to this project, follow the steps
    The backend of this project is built using Java 21 and uses Maven as the build automation tool, so make sure you have them installed on your machine:
    - Latest Java Development Kit (JDK) 21 installation guide [here](https://www.oracle.com/uk/java/technologies/downloads/#java21).
    - Latest Maven stable release installation guide [here](https://maven.apache.org/download.cgi).
+   - Linux-based operating system with Bash support (for `localExecute.sh` support).
 
-5. **Frontend Requirements**:
+4. **Frontend Requirements**:
    The frontend of this project is built using Vue 3, and it also requires npm and Yarn. Also, the frontend unit tests use Jest. Make sure you have them installed: 
    - npm installation guide [here](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
    - Yarn installation guide [here](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable).
    - Vue 3 installation guide [here](https://vuejs.org/guide/quick-start.html).
    - Jest installation guide [here](https://jestjs.io/docs/getting-started).
-  
+
 5. **Continuous Deployment with Docker**:
-   This project uses Docker for Continuous Deployment (CD), so you will need to ensure that Docker is installed on the server (and your local machine if you wish). If it isn't installed, you can do so [here](https://docs.docker.com/engine/install/).
+This project uses Docker for Continuous Deployment (CD), so you will need to ensure that Docker is installed on the server (and your local machine if you wish). If it isn't installed, you can do so [here](https://docs.docker.com/engine/install/).
+CD is implemented using `deploy-ghcr.yml` GitHub workflow.
+The workflow initialises the latest version of Ubuntu OS, sets up Java 21 and Maven;
+substitutes the `$OPENAI_API_KEY` in `OpenAIAuthenticator.java` file to the OpenAI API key;
+replaces `application.properties` file with a one that enables HTTPS and uses `keystore.p12`;
+replaces `$BACKEND_URL` variable in frontend;
+builds the `.jar` file and a container with it, pushes the container to GHCR;
+connects to your server using `ssh`, pull the container from GHCR and runs it.
 
-6. **Open the Project in Your IDE**:
+It uses the following "secrets":
+- `OPENAI_API_KEY` - stores OpenAI API key, can be obtained [here](https://platform.openai.com/api-keys).
+- `CONTAINER_REGISTRY_PAT` - PAT for GHCR.
+- `SERVER_IP` - IP address of your server.
+- `SERVER_USER` - Username that the workflow can ssh to your server with.
+- `SSH_PRIVATE_KEY` - Private key that can be used to authenticate to your server.
+It also uses `BACKEND_URL` environment variable, which is defined on line 13.
+
+6. **(For CD execution) Add keystore.p12 file to the root of your server**:
+   You can obtain private key and full certificate chain files for free using [Certbot](https://certbot.eff.org/) - software that helps with issuing Let's Encrypt certificates.
+   You then have to create `keystore.p12` that has to contain both private key and full certificate chain files, protected by password noted in `application.properties` (default:`ailearntool`).
+   If you don't want to use SSL - don't use the Docker image, but run the server using `localExecute.sh` instead.
+
+7. **Open the Project in Your IDE**:
    Open the cloned repository in your preferred Integrated Development Environment (IDE) (we recommend [IntelliJ](https://www.jetbrains.com/idea/download/?section=windows)) for further development.
-
-7. **Add keystore.p12 file to backend/src/main/resources in the cloned repository**:
-    Keystore has to contain both private key and full certificate chain files.
-    Not adding the keystore file will result in unencrypted (non-HTTPS) connection.
 
 8. **Test and Run the Application**:
    - To run the backend unit tests, use the commands: ```cd backend``` and then ```mvn test```.
    - To run the frontend unit tests, use the commands: ```cd frontend``` and then ```npm run test:unit```.
-   - To run the application, run the localExecute shell script: ```./localExecute.sh API Key``` where ```API Key``` is the OpenAI API Key being used (replace ```API Key``` with the actual OpenAI API Key).
+   - To run the application, run the localExecute shell script: ```./localExecute.sh OpenAI_API_Key Port_number```.
   
 ## Team Members:
 
