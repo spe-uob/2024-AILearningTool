@@ -136,7 +136,7 @@ User prompts for the chatbot will be sent using API requests from the Spring Boo
 
 1. **Open the Web App**:  
 
-   Using any device with internet access (smartphone, tablet, laptop, etc.), open a web browser and navigate to [ailearningtool.ddns.net](ailearningtool.ddns.net).
+   Using any device with internet access (smartphone, tablet, laptop, etc.), open a web browser and navigate to [https://ailearningtool.ddns.net](https://ailearningtool.ddns.net).
 
 2. **Cookie Consent**:  
 
@@ -192,10 +192,10 @@ To get started with developing or contributing to this project, follow the steps
    ```cd 2024-AILearningTool```.
 
 3. **Backend Requirements**:
-   The backend of this project is built using Java 21 and uses Maven as the build automation tool, so make sure you have them installed on your machine:
+   The backend of this project is built using Java 21 and uses Maven as the build automation tool. Shell scripts are also required to build the backend, so make sure you have the following installed on your machine:
    - Latest Java Development Kit (JDK) 21 installation guide [here](https://www.oracle.com/uk/java/technologies/downloads/#java21).
    - Latest Maven stable release installation guide [here](https://maven.apache.org/download.cgi).
-   - Linux-based operating system with Bash support (for `localExecute.sh` support).
+   - Linux-based operating system with Bash support (to execute `localExecute.sh` shell script).
 
 4. **Frontend Requirements**:
    The frontend of this project is built using Vue 3, and it also requires npm and Yarn. Also, the frontend unit tests use Jest. Make sure you have them installed: 
@@ -205,25 +205,26 @@ To get started with developing or contributing to this project, follow the steps
    - Jest installation guide [here](https://jestjs.io/docs/getting-started).
 
 5. **Continuous Deployment with Docker**:
-This project uses Docker for Continuous Deployment (CD), so you will need to ensure that Docker is installed on the server (and your local machine if you wish). If it isn't installed, you can do so [here](https://docs.docker.com/engine/install/).
-CD is implemented using `deploy-ghcr.yml` GitHub workflow.
-The workflow initialises the latest version of Ubuntu OS, sets up Java 21 and Maven;
-substitutes the `$OPENAI_API_KEY` in `OpenAIAuthenticator.java` file to the OpenAI API key;
-replaces `application.properties` file with a one that enables HTTPS and uses `keystore.p12`;
-replaces `$BACKEND_URL` variable in frontend;
-builds the `.jar` file and a container with it, pushes the container to GHCR;
-connects to your server using `ssh`, pull the container from GHCR and runs it.
+     This project uses Docker for Continuous Deployment (CD), so you will need to ensure that Docker is installed on the server (and your local machine if you wish). If it 
+     isn't installed, you can do so [here](https://docs.docker.com/engine/install/).
+     CD is implemented using `deploy-ghcr.yml` GitHub workflow.
+     The workflow initialises the latest version of Ubuntu OS, sets up Java 21 and Maven;
+     substitutes the `$OPENAI_API_KEY` in `OpenAIAuthenticator.java` file to the OpenAI API key;
+     replaces `application.properties` file with a one that enables HTTPS and uses `keystore.p12`;
+     replaces `$BACKEND_URL` variable in frontend;
+     builds the `.jar` file and a container with it, pushes the container to GHCR;
+     connects to your server using `ssh`, pull the container from GHCR and runs it.
 
-It uses the following "secrets":
-- `OPENAI_API_KEY` - stores OpenAI API key, can be obtained [here](https://platform.openai.com/api-keys).
-- `CONTAINER_REGISTRY_PAT` - PAT for GHCR.
-- `SERVER_IP` - IP address of your server.
-- `SERVER_USER` - Username that the workflow can ssh to your server with.
-- `SSH_PRIVATE_KEY` - Private key that can be used to authenticate to your server.
-It also uses `BACKEND_URL` environment variable, which is defined on line 13.
+     It uses the following "secrets":
+     - `OPENAI_API_KEY` - stores OpenAI API key, can be obtained [here](https://platform.openai.com/api-keys).
+     - `CONTAINER_REGISTRY_PAT` - PAT for GHCR.
+     - `SERVER_IP` - IP address of your server.
+     - `SERVER_USER` - Username that the workflow can ssh to your server with.
+     - `SSH_PRIVATE_KEY` - Private key that can be used to authenticate to your server.
+     It also uses `BACKEND_URL` environment variable, which is defined on line 13.
 
 6. **(For CD execution) Add keystore.p12 file to the root of your server**:
-   You can obtain private key and full certificate chain files for free using [Certbot](https://certbot.eff.org/) - software that helps with issuing Let's Encrypt certificates.
+   You can obtain private key and full certificate chain files for free using [Certbot](https://certbot.eff.org/) - a software that helps with issuing Let's Encrypt certificates.
    You then have to create `keystore.p12` that has to contain both private key and full certificate chain files, protected by password noted in `application.properties` (default:`ailearntool`).
    If you don't want to use SSL - don't use the Docker image, but run the server using `localExecute.sh` instead.
 
@@ -233,7 +234,7 @@ It also uses `BACKEND_URL` environment variable, which is defined on line 13.
 8. **Test and Run the Application**:
    - To run the backend unit tests, use the commands: ```cd backend``` and then ```mvn test```.
    - To run the frontend unit tests, use the commands: ```cd frontend``` and then ```npm run test:unit```.
-   - To run the application, run the localExecute shell script: ```./localExecute.sh OpenAI_API_Key Port_number```.
+   - To run the application, run the localExecute shell script: ```./localExecute.sh OpenAI_API_Key Port_number``` (replace OpenAI_API_Key and Port_number with their respective values).
   
 ## Team Members:
 
