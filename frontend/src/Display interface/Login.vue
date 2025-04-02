@@ -69,6 +69,7 @@
 <script>
 import Cookie from '../Display interface/Cookie.vue';
 import {getTranslation} from "../assets/language";
+import { BACKEND_URL } from "@/assets/globalConstants"
 
 export default {
   components: { Cookie },
@@ -136,7 +137,7 @@ export default {
         if (!cookies.userID) {
           console.log("No userID found in cookies. Signing up...");
 
-          const response = await fetch("http://localhost:8080/signup", {
+          const response = await fetch(BACKEND_URL + "/signup", {
             method: "GET",
             credentials: "include",
           });
@@ -170,7 +171,7 @@ export default {
     },
 
     login() {
-      fetch('/login', {
+      fetch(BACKEND_URL + '/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -198,7 +199,7 @@ export default {
     },
 
     register() {
-      fetch('/register', {
+      fetch(BACKEND_URL + '/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

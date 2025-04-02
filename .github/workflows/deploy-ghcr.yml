@@ -9,6 +9,9 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      BACKEND_URL: ailearningtool.ddns.net
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     steps:
       # Step 1: Checkout the repository
       - name: Checkout repository
@@ -21,16 +24,42 @@ jobs:
           java-version: '21'  
           distribution: 'temurin'
 
-      # Step 3: Build the JAR file with Maven
+      # Step 3: Adjust OpenAI API key.
+      - name: Adjust the OpenAI API key
+        run: (envsubst < OpenAIAuthenticator.java) > OpenAIAuthenticatorUPD.java && cp OpenAIAuthenticatorUPD.java OpenAIAuthenticator.java && rm OpenAIAuthenticatorUPD.java
+        working-directory: backend/src/main/java/com/UoB/AILearningTool
+
+      # Step 4: Adjust the backend application parameters
+      - name: Adjust the backend URL
+        run: | 
+          echo -e "spring.application.name=AILearningTool\n\
+          server.port=443\n\
+          spring.servlet.multipart.max-file-size=50MB\n\
+          spring.servlet.multipart.max-request-size=50MB\n\
+          spring.web.resources.static-locations=classpath:/static/\n\
+          server.servlet.encoding.charset=UTF-8\n\
+          server.servlet.encoding.enabled=true\n\
+          server.servlet.encoding.force=true\n\
+          server.ssl.key-store=./file:keystore.p12\n\
+          server.ssl.key-store-password=ailearntool" > application.properties
+        working-directory: backend/src/main/resources
+
+      # Step 5: Adjust the frontend BACKEND_URL constant
+      - name: Update frontend BACKEND_URL constant
+        run : echo "const BACKEND_URL = 'https://$BACKEND_URL';
+              export { BACKEND_URL };" > globalConstants.js
+        working-directory: frontend/src/assets
+        
+      # Step 6: Build the JAR file with Maven
       - name: Build JAR
         run: mvn clean package
         working-directory: backend
 
-      # Step 4: Log in to GitHub Container Registry
+      # Step 7: Log in to GitHub Container Registry
       - name: Log in to GHCR
         run: echo "${{ secrets.CONTAINER_REGISTRY_PAT }}" | docker login ghcr.io -u GerardChabaBristol --password-stdin
 
-      # Step 5: Build and push the Docker image
+      # Step 8: Build and push the Docker image
       - name: Publish Docker image to GHCR
         uses: docker/build-push-action@v3
         with:
@@ -39,7 +68,7 @@ jobs:
           push: true
           tags: ghcr.io/spe-uob/2024-ailearningtool:latest
 
-      # Step 6: Pull the image and deploy on the server
+      # Step 9: Pull the image and deploy on the server
       - name: Deploy to Server
         uses: appleboy/ssh-action@master
         with:
@@ -50,5 +79,5 @@ jobs:
             docker pull ghcr.io/spe-uob/2024-ailearningtool:latest
             docker stop ailearningtool || true
             docker rm ailearningtool || true
-            docker run -d --name ailearningtool -p 8080:8080 ghcr.io/spe-uob/2024-ailearningtool:latest
+            sudo docker run -d --name ailearningtool -p 443:443 -v $(pwd)/keystore.p12:/keystore.p12 ghcr.io/spe-uob/2024-ailearningtool:latest
 

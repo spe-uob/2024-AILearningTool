@@ -2,6 +2,7 @@ import {colorSchemes} from "@/assets/color";
 
 const translations = {
     en: {
+        EXPORT: "Export",
         UNDEFINED: "Undefined",
         SETTINGS: "Settings",
         LANGUAGE: "Language",
@@ -39,6 +40,7 @@ const translations = {
         FAILED_TO_SEND_MESSAGE: "Failed to send message. Please try again."
     },
     zh: {
+        EXPORT: "导出",
         UNDEFINED: "未定义",
         SETTINGS: "设置",
         LANGUAGE: "语言",
@@ -76,6 +78,7 @@ const translations = {
         FAILED_TO_SEND_MESSAGE: "发送信息失败！请重试。"
     },
     ru: {
+        EXPORT: "экспорт",
         UNDEFINED: "Перевод недоступен",
         SETTINGS: "Настройки",
         LANGUAGE: "Язык",
