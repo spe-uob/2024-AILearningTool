@@ -15,6 +15,7 @@
         <p class="instruction-text">
           {{ getTranslation(currentLanguage, 'SELECT_INITIAL_TOPIC') }}
         </p>
+        <!-- Buttons for chat initialisation -->
         <div class="button-container">
           <button
               @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_CHOOSING_A_COURSE'))"
@@ -46,9 +47,11 @@
               <strong v-if="msg.sender === 'user'">{{ getTranslation(currentLanguage, "USER") }}</strong>
               <strong v-else-if="msg.sender === 'assistant'">{{ getTranslation(currentLanguage, "AI") }}</strong>
               <strong v-else>{{ msg.sender }}</strong>
+              <!-- For assistant messages, use TypingText to animate the output -->
               <TypingText v-if="msg.sender === 'assistant'" :text="formatMessage(msg.content)" :speed="15" />
               <p v-else v-html="formatMessage(msg.content)"></p>
             </div>
+            <!-- TTS Button: For assistant messages, show a speaker icon below the message -->
             <div v-if="msg.sender === 'assistant'" class="tts-button-wrapper">
               <button @click="speakMessage(msg.content)" class="tts-button">
                 <i class="fa fa-volume-up"></i>
@@ -57,6 +60,7 @@
           </div>
         </div>
 
+        <!-- Input area for user messages -->
         <div class="input-area">
           <textarea
               v-model="userInput"
@@ -92,7 +96,7 @@ export default {
       currentTopic: "",
       currentTurn: "user",
       userId: localStorage.getItem("userId") || "",
-      currentTheme: "default",
+      currentTheme: "default",// Stores the current UI theme
       recognition: null,
       isListening: false,
       listeningStatusMessage: "" // Display current speech recognition status
