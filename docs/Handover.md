@@ -136,5 +136,5 @@ Use the instance’s public IP or DNS with port 8080 (e.g., http://<public-ip>:8
   - For backend debugging, enable Spring Boot DevTools for live reload.
 ---
 ## License
-The project is licensed under the [MIT License.](https://github.com/spe-uob/2024-AILearningTool/blob/feature/issue-210/Improve-documentation/LICENSE)
+The project is licensed under the following [MIT License.](https://github.com/spe-uob/2024-AILearningTool/blob/feature/issue-210/Improve-documentation/LICENSE)
 
