@@ -2,7 +2,7 @@
 
 ---
 ## Table of Contents
-- [Overview](#1-overview)
+- [Overview](#1-introduction)
 - [Architecture & Components](#2-architecture--components)
   - [Backend](#backend)
   - [Frontend](#frontend)
@@ -17,18 +17,9 @@
 - [License](#license)
 
 
-## 1. Overview
+## 1. Introduction
 
-**Project Name:** AILearningTool  
-
-**Description:**  
-AILearningTool is a web-based chatbot developed using **Spring Boot** (backend) and **Vue.js** (frontend). The chatbot would provide information that a university student wished they knew when they first arrived at your university. The content of the chatbot could be targeted to serve the students of a particular course - or it could be usable by every university student at your university. Content can include:
-
-- what is IBM SkillsBuild
-- what courses are available on SkillsBuild
-- what free technologies are available on SkillsBuild
-- allow the student to enter details of their course details - and provide links to relevant SkillsBuild resources.
-
+This document serves as a guide for new developers to continue working on our project. It includes explanations of the code infrastructure and overall repository structure of our project.
 
 ---
 
