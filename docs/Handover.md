@@ -1,41 +1,72 @@
 # AILearningTool - Project Handover Document
 
 ---
-## Table of Contents
-- [Overview](#1-overview)
-- [Architecture & Components](#2-architecture--components)
+## Table of Contents:
+- [Introduction](#introduction)
+- [Architecture Diagram](#architecture-diagram)
+- [Code Explanation](#code-explanation)
   - [Backend](#backend)
   - [Frontend](#frontend)
-- [Setup & Installation](#3-setup--installation)
+- [Setup & Installation](#setup--installation)
   - [Prerequisites](#prerequisites)
   - [Cloning the Repository](#cloning-the-repository)
   - [Building the Project](#building-the-project)
-- [Configuration Details](#4-configuration-details)
+- [Configuration Details](#configuration-details)
   - [Application Properties](#application-properties)
   - [Frontend Configuration](#frontend-configuration)
-- [Testing & Troubleshooting](#5-testing--troubleshooting)
+- [Testing & Troubleshooting](#testing--troubleshooting)
 - [License](#license)
 
 
-## 1. Overview
+## Introduction:
 
-**Project Name:** AILearningTool  
-
-**Description:**  
-AILearningTool is a web-based chatbot developed using **Spring Boot** (backend) and **Vue.js** (frontend). The chatbot would provide information that a university student wished they knew when they first arrived at your university. The content of the chatbot could be targeted to serve the students of a particular course - or it could be usable by every university student at your university. Content can include:
-
-- what is IBM SkillsBuild
-- what courses are available on SkillsBuild
-- what free technologies are available on SkillsBuild
-- allow the student to enter details of their course details - and provide links to relevant SkillsBuild resources.
-
+This document serves as a guide for new developers to continue working on our project. It includes explanations of the code infrastructure and overall repository structure of our project.
 
 ---
 
-## 2. Architecture & Components
+## Project Structure:
+Below is an overview of the key components of the system:
 
-![Architecture Diagram](https://github.com/spe-uob/2024-AILearningTool/blob/feature/issue-210/Improve-documentation/docs/Diagrams/architecture_diagram.png)
-### Backend
+- [.github](/.github): Contains all GitHub templates.
+  - [workflows](/.github/workflows): Contains all CI and CD GitHub Actions.
+- [docs](/docs): Contains all project-related documentation such as diagrams, presentations, UI screenshots, etc... Notable files include:
+  - [ETHICS.md](/docs/ETHICS.md): Includes the date of the ethics pre-approval request.
+  - [Handover.md](/docs/Handover.md): Includes key information to facilitate handover to the client.
+  - [User-Feedback](/docs/User-Feedback): Includes user feedback from the testing day.
+  - [Screenshots](/docs/Screenshots): Includes screenshots showing the evolution of the UI.
+- [frontend](/frontend): Contains all of the frontend code (in Vue 3) and dependencies:
+  - [node](/frontend/node): Includes Node.js runtime and package managers.
+  - [public](/frontend/public): Includes our logo in various sizes, a favicon, and documents for PWA support.
+  - [src](/frontend/src): Includes the frontend code:
+    - [Display interface](/frontend/src/Display%20interface): Includes Vue components for login, main view, and cookie management.
+    - [assets](/frontend/src/assets): Includes JavaScript and CSS global constants such as colors, languages, and responsive UI constants.
+    - [components](/frontend/src/components): Includes the main UI components such as HistorySidebar, MainContent, and SettingSidebar for structuring the interface.
+      - [helpers](/frontend/src/components/helpers): Includes helper classes used in the main components such as TypingText (used for "typing-like" AI responses).
+    - [App](/frontend/src/App.vue): The root component that structures the entire application layout.
+    - [main](/frontend/src/main.js): Initializes the Vue app, imports dependencies, and mounts the root component.
+    - [registerServiceWorker](/frontend/src/registerServiceWorker.js): Registers the service worker to enable PWA features.
+  - [unit](/frontend/tests/unit): Includes all frontend unit tests (in Jest).
+- [backend](/backend): Contains all of the backend code (in Java), Maven config, and documents:
+  - [main](/backend/src/main): Includes the backend code:
+    - [AILearningTool](/backend/src/main/java/com/UoB/AILearningTool): Contains all core application logic, including API controllers, database management, and AI integration.
+    - [resources](/backend/src/main/resources): Includes static resources such as application properties.
+  - [test](/backend/src/test/java/com/UoB/AILearningTool): Includes all backend unit tests (in Java).
+  - [mvnw](/backend/mvnw), [mvnw.cmd](/backend/mvnw.cmd)  and [pom.xml](/backend/pom.xml): Documents for Maven.
+- [LICENSE](/LICENSE): Includes the project's MIT license.
+- [.gitignore](/.gitignore): Includes files that should be ignored by Git when making a commit.
+- [Dockerfile](/Dockerfile): Includes steps to assemble a Docker image (for CD).
+- [HELP.md](/HELP.md): Contains official documentation to help with learning Maven and Spring Boot.
+- [localExecute.sh](/localExecute.sh): Shell script used to run the application.
+
+---
+
+## Architecture Diagram:
+
+![Architecture Diagram](/docs/Diagrams/architecture_diagram.png)
+
+## Code Explanation:
+
+### Backend:
 
 - **Framework:** Spring Boot 3.3.4  
 - **Main Functionality:**  
@@ -59,7 +90,7 @@ AILearningTool is a web-based chatbot developed using **Spring Boot** (backend) 
 - **Dependencies:**  
   - Spring Boot Starter Web, JDBC, Logging.
 
-### Frontend
+### Frontend:
 
 - **Framework:** Vue.js  
 - **Key Features:**  
@@ -87,20 +118,20 @@ AILearningTool is a web-based chatbot developed using **Spring Boot** (backend) 
 
 ---
 
-## 3. Setup & Installation
+## Setup & Installation:
 
-### Prerequisites
+### Prerequisites:
 - Java JDK 21+  
 - Maven 3.6+  
 - Node.js (recommended v18+) & npm (managed by frontend-maven-plugin)  
 - Git
 
-### Cloning the Repository
+### Cloning the Repository:
 ```bash
 git clone https://github.com/spe-uob/2024-AILearningTool.git
 ```
 
-### Building the Project
+### Building the Project:
 
 **Navigate to project directory**
 ```bash
@@ -123,7 +154,7 @@ http://localhost:8080
 `https://<URL defined in BACKEND_URL environment variable of GitHub workflow>`
 
 ---
-## 4. Configuration Details
+## Configuration Details:
 ### Application Properties ###
 - Location:
   - backend/src/main/resources/application.properties
@@ -151,7 +182,7 @@ http://localhost:8080
 - Build Automation:
   - The Maven plugin frontend-maven-plugin runs npm install and npm run build from the frontend folder. The output is copied to backend/src/main/resources/static.
 ---
-## 5. Testing & Troubleshooting
+## Testing & Troubleshooting:
 - Running backend tests:
   - `localExecute.sh` does the testing for you before execution, but if you already launched this at least once, you can also do:
   ```bash
@@ -166,16 +197,6 @@ http://localhost:8080
   - Make sure to clear your browser's cache before you try to debug new version of your code.
   - For backend debugging, enable Spring Boot DevTools for live reload.
 ---
-## License
-The project is licensed under the [MIT License.](https://github.com/spe-uob/2024-AILearningTool/blob/feature/issue-210/Improve-documentation/LICENSE)
----
-## Team Members
+## License:
+The project is licensed under the following [MIT License.](https://github.com/spe-uob/2024-AILearningTool/blob/feature/issue-210/Improve-documentation/LICENSE)
 
-| Name              | GitHub                                                      						| Email                 |
-|-------------------|-----------------------------------------------------------------------------------------------------------|-----------------------|                           
-| Vlad Kirilovics   | [vladislav-k1](https://github.com/vladislav-k1) and [kirilovich-vlad](https://github.com/kirilovich-vlad) | fi23561@bristol.ac.uk |
-| Gerard Chaba      | [GerardChabaBristol](https://github.com/GerardChabaBristol) 						| tl23383@bristol.ac.uk |  
-| Mohammed Elzobair | [yi23484](https://github.com/yi23484)	                  						| yi23484@bristol.ac.uk | 
-| Weifan Liu 	    | [Liuwf4319](https://github.com/Liuwf4319)		          						| au22116@bristol.ac.uk |
-| Zixuan Zhu 	    | [RainBOY-ZZX](https://github.com/RainBOY-ZZX)	          						| kh23199@bristol.ac.uk | 
-| Siyuan Zhang 	    | [Siyuan106](https://github.com/Siyuan106)		          						| gr23994@bristol.ac.uk |
