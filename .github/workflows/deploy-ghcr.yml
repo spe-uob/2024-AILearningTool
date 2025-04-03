@@ -40,6 +40,12 @@ jobs:
           server.servlet.encoding.charset=UTF-8\n\
           server.servlet.encoding.enabled=true\n\
           server.servlet.encoding.force=true\n\
+          spring.datasource.url=jdbc:sqlite:database.db\n\
+          spring.datasource.driver-class-name=org.sqlite.JDBC\n\
+          spring.jpa.database-platform=org.hibernate.community.dialect.SQLiteDialect\n\
+          spring.jpa.hibernate.ddl-auto=update\n\
+          spring.datasource.username=\n\
+          spring.datasource.password=\n\
           server.ssl.key-store=./file:keystore.p12\n\
           server.ssl.key-store-password=ailearntool" > application.properties
         working-directory: backend/src/main/resources
@@ -79,11 +85,8 @@ jobs:
             docker pull ghcr.io/spe-uob/2024-ailearningtool:latest
             docker stop ailearningtool || true
             docker rm ailearningtool || true
-            # Create database directory if it doesn't exist
-            mkdir -p $(pwd)/ailearningtool-data
-            # Run container with database volume mounted
             sudo docker run -d --name ailearningtool -p 443:443 \
               -v $(pwd)/keystore.p12:/keystore.p12 \
-              -v $(pwd)/ailearningtool-data:/app/data \
+              -v $(pwd)/database.db:/database.db \
               ghcr.io/spe-uob/2024-ailearningtool:latest
 
