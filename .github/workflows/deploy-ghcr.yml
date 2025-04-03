@@ -79,5 +79,11 @@ jobs:
             docker pull ghcr.io/spe-uob/2024-ailearningtool:latest
             docker stop ailearningtool || true
             docker rm ailearningtool || true
-            sudo docker run -d --name ailearningtool -p 443:443 -v $(pwd)/keystore.p12:/keystore.p12 ghcr.io/spe-uob/2024-ailearningtool:latest
+            # Create database directory if it doesn't exist
+            mkdir -p $(pwd)/ailearningtool-data
+            # Run container with database volume mounted
+            sudo docker run -d --name ailearningtool -p 443:443 \
+              -v $(pwd)/keystore.p12:/keystore.p12 \
+              -v $(pwd)/ailearningtool-data:/app/data \
+              ghcr.io/spe-uob/2024-ailearningtool:latest
 
