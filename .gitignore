@@ -4,6 +4,7 @@ backend/src/main/resources/keystore.p12
 backend/src/main/java/com/UoB/AILearningTool/OpenAIAuthenticator.java
 backend/database.db
 backend/src/main/resources/static/*
+backend/database.db
 
 frontend/dist
 frontend/node_modules
