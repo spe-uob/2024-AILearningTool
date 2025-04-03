@@ -50,7 +50,7 @@
               <!-- For assistant messages, use TypingText to animate the output -->
               <div v-if="msg.sender === 'assistant'">
               <TypingText 
-                v-if="msg.sender === 'assistant'"
+                v-if="!getFinishedMessage(index)"
                 :text="formatMessage(msg.content)" 
                 :speed="15" 
                 @finished="setFinishedMessage(index, formatMessage(msg.content))"
