@@ -48,8 +48,14 @@
               <strong v-else>{{ msg.sender }}</strong>
               <!-- For assistant messages, use TypingText to animate the output -->
               <div v-if="msg.sender === 'assistant'">
-                <TypingText v-if="msg.sender === 'assistant'" :text="formatMessage(msg.content)" :speed="15" @finished="setFinishedMessage(index, formatMessage(msg.content))" />
-                <p v-else v-html="getFinishedMessage(index)"></p>
+              <TypingText 
+                v-if="!getFinishedMessage(index)" 
+                :text="formatMessage(msg.content)" 
+                :speed="15" 
+                @finished="setFinishedMessage(index, formatMessage(msg.content))"
+              />
+              <!-- Otherwise, render the static text from localStorage -->
+              <p v-else v-html="getFinishedMessage(index)"></p>
               </div>
               <p v-else v-html="formatMessage(msg.content)"></p>
             </div>
