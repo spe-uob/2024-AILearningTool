@@ -91,6 +91,7 @@ import TypingText from "../components/helpers/TypingText.vue";
 export default {
   components: { TypingText },
   data() {
+    // Component internal state
     return {
       userInput: "",
       currentTopic: "",
@@ -103,7 +104,8 @@ export default {
       listeningStatusMessage: ""
     };
   },
-  props: ["messages", "chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
+  // Props passed from parent component
+  props: ["messages", "chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"], // Props passed from parent component
   watch: {
     currentLanguage(newLang) {
       if (this.recognition) {
@@ -128,7 +130,7 @@ export default {
   mounted() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
-      this.recognition = new SpeechRecognition();
+      this.recognition = new SpeechRecognition(); // Initialize speech recognition instance
 
       const langMap = {
         en: 'en-US',
@@ -136,24 +138,24 @@ export default {
         ru: 'ru-RU'
       };
 
-      this.recognition.lang = langMap[this.currentLanguage] || 'en-US';
-      this.recognition.interimResults = false;
-      this.recognition.continuous = true;
+      this.recognition.lang = langMap[this.currentLanguage] || 'en-US'; // Set recognition language based on current language
+      this.recognition.interimResults = false; // Disable partial (interim) results
+      this.recognition.continuous = true; // Enable continuous listening
 
-      this.recognition.onresult = (event) => {
+      this.recognition.onresult = (event) => { // Handle speech recognition result
         const result = event.results[event.results.length - 1][0].transcript;
         this.userInput = result;
       };
-      this.recognition.onerror = (event) => {
+      this.recognition.onerror = (event) => { // Handle speech recognition error
         console.error("Speech recognition error:", event.error);
         this.isListening = false;
         this.speechButtonLocked = false;
       };
-      this.recognition.onstart = () => {
+      this.recognition.onstart = () => { // Triggered when speech recognition starts
         this.isListening = true;
         this.speechButtonLocked = false;
       };
-      this.recognition.onend = () => {
+      this.recognition.onend = () => { // Restart if still listening (continuous mode)
         if (this.isListening) {
           this.recognition.start();
         }
@@ -166,7 +168,8 @@ export default {
     getTheme,
     getTranslation,
 
-    formatMessage(message) {
+    // Convert markdown message content to HTML
+    formatMessage(message) { // Convert markdown message content to HTML
       return marked(message);
     },
 
@@ -204,7 +207,8 @@ export default {
       }
     },
 
-    toggleSpeechRecognition() {
+    // Toggle speech recognition on/off with lock
+    toggleSpeechRecognition() { // Toggle speech recognition on/off with lock
       if (this.speechButtonLocked) return;
       this.speechButtonLocked = true;
 
@@ -229,7 +233,7 @@ export default {
       }
     },
 
-    async sendInitialMessage(message) {
+    async sendInitialMessage(message) { // Send one of the default topic messages to start chat
       this.$emit("setButtonLock", true);
       let response = await fetch(BACKEND_URL + "/createChat?" + new URLSearchParams({ initialMessage: message }), {
         method: "GET",
@@ -245,7 +249,8 @@ export default {
       });
     },
 
-    requestChatHistory() {
+    // Request message history for current chat from backend
+    requestChatHistory() { // Request message history for current chat from backend
       fetch(BACKEND_URL + "/getChatHistory?" + new URLSearchParams({ chatID: this.currentChatID }), {
         method: "GET",
         credentials: "include",
@@ -255,14 +260,14 @@ export default {
       });
     },
 
-    async processChatHistory(messageHistory) {
+    async processChatHistory(messageHistory) { // Populate messages from backend chat history
       for (let i = 0; i < messageHistory.length; i++) {
         this.$emit("addMessage", ((i % 2 === 0) ? "user" : "assistant"), messageHistory[i]["content"]);
       }
       this.$emit("setButtonLock", false);
     },
 
-    async sendMessage() {
+    async sendMessage() { // Handle user sending a message
       if (!this.userInput.trim()) {
         alert(getTranslation(localStorage.getItem("langCode"), "PLEASE_ENTER_A_MESSAGE"));
         return;
@@ -297,18 +302,21 @@ export default {
       this.$emit("setButtonLock", false);
     },
 
-    scrollToBottom() {
+    // Automatically scroll chat to the bottom
+    scrollToBottom() { // Automatically scroll chat to the bottom
       this.$nextTick(() => {
         const container = this.$refs.messagesContainer;
         if (container) container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
       });
     },
 
-    getFinishedMessage(index) {
+    // Retrieve finished assistant message from localStorage
+    getFinishedMessage(index) { // Retrieve finished assistant message from localStorage
       const key = `finishedMessage_${this.currentChatID}_${index}`;
       return localStorage.getItem(key);
     },
-    setFinishedMessage(index, text) {
+    // Save assistant message to localStorage for re-render
+    setFinishedMessage(index, text) { // Save assistant message to localStorage for re-render
       const key = `finishedMessage_${this.currentChatID}_${index}`;
       localStorage.setItem(key, text);
     },
