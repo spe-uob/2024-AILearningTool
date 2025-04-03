@@ -135,6 +135,17 @@ export default {
       this.$emit('updateChatID', '');
     },
 
+    // Returns the finished message text for a given index if it exists in localStorage.
+    getFinishedMessage(index) {
+      const key = `finishedMessage_${this.currentChatID}_${index}`;
+      return localStorage.getItem(key);
+    },
+
+    // Saves the finished message text for a given index into localStorage.
+    setFinishedMessage(index, text) {
+      const key = `finishedMessage_${this.currentChatID}_${index}`;
+      localStorage.setItem(key, text);
+    },
 
         /**
      * Uses the Web Speech API to speak the given text.
