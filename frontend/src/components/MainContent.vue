@@ -126,6 +126,18 @@ export default {
         this.scrollToBottom();
       });
     },
+
+    currentChatID(newVal, oldVal) {
+    if (newVal !== oldVal && oldVal) {
+      if (this.isListening) {
+        this.isListening = false;
+        if (this.recognition) {
+          this.recognition.stop();
+        }
+      }
+    }
+  },
+    
     currentLanguage(newLang) {
       const langMap = {
         en: 'en-US',
