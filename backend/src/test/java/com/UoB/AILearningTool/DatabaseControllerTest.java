@@ -67,29 +67,31 @@ public class DatabaseControllerTest {
     @Test
     void testAddUser_UserAlreadyExists() {
         // Given
-        when(userRepository.existsById("testUser")).thenReturn(true);
+        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(testUser));
 
         // When
         boolean result = databaseController.addUser("testUser", "newPassword");
 
         // Then
         assertFalse(result);
-        verify(userRepository, times(1)).existsById("testUser");
+        verify(userRepository, times(1)).findByUsername("testUser");
     }
+
 
     @Test
     void testAddUser_UserDoesNotExist() {
         // Given
-        when(userRepository.existsById("newUser")).thenReturn(false);
+        when(userRepository.findByUsername("newUser")).thenReturn(Optional.empty());
 
         // When
         boolean result = databaseController.addUser("newUser", "newPassword");
 
         // Then
         assertTrue(result);
-        verify(userRepository, times(1)).existsById("newUser");
+        verify(userRepository, times(1)).findByUsername("newUser");
         verify(userRepository, times(1)).save(any(UserEntity.class));
     }
+
 
     @Test
     void testCreateChat_Success() {
