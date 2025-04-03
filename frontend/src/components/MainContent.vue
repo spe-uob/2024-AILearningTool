@@ -1,6 +1,11 @@
 <template>
   <main>
     <div class="chat-area">
+      <!-- Listening status message -->
+      <div v-if="isListening" class="listening-status">
+        {{ getTranslation(currentLanguage, 'LISTENING') }}
+      </div>
+
       <!-- Welcome Screen with Logo -->
       <div v-if="currentChatID.length === 0" class="welcome-container">
         <img src="../assets/logo.png" alt="Logo" class="logo" />
@@ -13,19 +18,19 @@
 
         <!-- Buttons for chat initialisation -->
         <div v-if="currentChatID.length === 0" class="button-container">
-          <button 
-            @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_CHOOSING_A_COURSE'))" 
-            :disabled="chatInitButtonsDisabled || isInitializing">
+          <button
+              @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_CHOOSING_A_COURSE'))"
+              :disabled="chatInitButtonsDisabled || isInitializing">
             {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_CHOOSING_A_COURSE") }}
           </button>
-          <button 
-            @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_PLATFORM'))" 
-            :disabled="chatInitButtonsDisabled || isInitializing">
+          <button
+              @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_PLATFORM'))"
+              :disabled="chatInitButtonsDisabled || isInitializing">
             {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_PLATFORM") }}
           </button>
-          <button 
-            @click="sendInitialMessage(getTranslation(currentLanguage, 'I_HAVE_QUESTIONS_ABOUT_UNI_LIFE'))" 
-            :disabled="chatInitButtonsDisabled || isInitializing">
+          <button
+              @click="sendInitialMessage(getTranslation(currentLanguage, 'I_HAVE_QUESTIONS_ABOUT_UNI_LIFE'))"
+              :disabled="chatInitButtonsDisabled || isInitializing">
             {{ getTranslation(currentLanguage, "I_HAVE_QUESTIONS_ABOUT_UNI_LIFE") }}
           </button>
         </div>
@@ -36,9 +41,9 @@
         <!-- Scrollable message area -->
         <div class="messages-container" ref="messagesContainer">
           <div v-for="(msg, index) in messages" :key="index">
-            <div 
-              class="message"
-              :class="{
+            <div
+                class="message"
+                :class="{
                 'user-message': msg.sender === 'user',
                 'assistant-message': msg.sender === 'assistant',
                 'system-message': msg.sender === 'System'
@@ -49,14 +54,14 @@
               <strong v-else>{{ msg.sender }}</strong>
               <!-- For assistant messages, use TypingText to animate the output -->
               <div v-if="msg.sender === 'assistant'">
-              <TypingText 
-                v-if="!getFinishedMessage(index)"
-                :text="formatMessage(msg.content)" 
-                :speed="15" 
-                @finished="setFinishedMessage(index, formatMessage(msg.content))"
-              />
-              <!-- Otherwise, render the static text from localStorage -->
-              <p v-else v-html="getFinishedMessage(index)"></p>
+                <TypingText
+                    v-if="!getFinishedMessage(index)"
+                    :text="formatMessage(msg.content)"
+                    :speed="15"
+                    @finished="setFinishedMessage(index, formatMessage(msg.content))"
+                />
+                <!-- Otherwise, render the static text from localStorage -->
+                <p v-else v-html="getFinishedMessage(index)"></p>
               </div>
               <!-- For non-assistant messages, render markdown as HTML -->
               <p v-else v-html="formatMessage(msg.content)"></p>
@@ -73,10 +78,13 @@
         <!-- Input area for user messages -->
         <div class="input-area">
           <textarea
-            v-model="userInput"
-            :placeholder="getTranslation(currentLanguage, 'TYPE_YOUR_MESSAGE')"
-            @keypress.enter.prevent="sendMessage"
+              v-model="userInput"
+              :placeholder="getTranslation(currentLanguage, 'TYPE_YOUR_MESSAGE')"
+              @keypress.enter.prevent="sendMessage"
           ></textarea>
+          <button @click="toggleSpeechRecognition" :class="{ listening: isListening }">
+            🎤 {{ isListening ? getTranslation(currentLanguage, 'STOP_VOICE_INPUT') : getTranslation(currentLanguage, 'START_VOICE_INPUT') }}
+          </button>
           <button @click="sendMessage" :disabled="chatInitButtonsDisabled">
             {{ getTranslation(currentLanguage, "SEND") }}
           </button>
@@ -103,7 +111,9 @@ export default {
     return {
       userInput: "",
       sessionID: localStorage.getItem("sessionID") || "",  // username
-      isInitializing: false, 
+      isInitializing: false,
+      recognition: null, // Web Speech API recognition instance
+      isListening: false, // Whether currently listening
     };
   },
   props: ["messages", "chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
@@ -115,11 +125,83 @@ export default {
       this.$nextTick(() => {
         this.scrollToBottom();
       });
+    },
+
+    currentChatID(newVal, oldVal) {
+    if (newVal !== oldVal && oldVal) {
+      if (this.isListening) {
+        this.isListening = false;
+        if (this.recognition) {
+          this.recognition.stop();
+        }
+      }
     }
   },
+    
+    currentLanguage(newLang) {
+      const langMap = {
+        en: 'en-US',
+        zh: 'zh-CN',
+        ru: 'ru-RU'
+      };
+      if (this.recognition) {
+        this.recognition.lang = langMap[newLang] || 'en-US';
+      }
+    }
+  },
+  mounted() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      this.recognition = new SpeechRecognition();
+      const langMap = {
+        en: 'en-US',
+        zh: 'zh-CN',
+        ru: 'ru-RU'
+      };
+      this.recognition.lang = langMap[this.currentLanguage] || 'en-US';
+      this.recognition.interimResults = false;
+      this.recognition.continuous = true;
+
+      this.recognition.onresult = (event) => {
+        const result = event.results[event.results.length - 1][0].transcript;
+        this.userInput = result;
+      };
+
+      this.recognition.onerror = (event) => {
+        console.error("Speech recognition error:", event.error);
+        this.isListening = false;
+      };
+
+      this.recognition.onstart = () => {
+        this.isListening = true;
+      };
+
+      this.recognition.onend = () => {
+        if (this.isListening) this.recognition.start();
+      };
+    }
+  },
+
   methods: {
     getTheme,
     getTranslation,
+
+    toggleSpeechRecognition() {
+      if (!this.recognition) return alert("Speech recognition not supported");
+
+      if (this.isListening) {
+        this.recognition.stop();
+        this.isListening = false;
+      } else {
+        const langMap = {
+          en: 'en-US',
+          zh: 'zh-CN',
+          ru: 'ru-RU'
+        };
+        this.recognition.lang = langMap[this.currentLanguage] || 'en-US';
+        this.recognition.start();
+      }
+    },
 
     updateChatList(newChats) {
       this.chats = newChats;
@@ -158,10 +240,14 @@ export default {
       }
 
       // Create a new utterance with the provided text.
+
       const utterance = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(utterance);
+
       // Set the rate and pitch.
       utterance.rate = 1.0;
       utterance.pitch = 1.0;
+
       // Set the language from currentLanguage (or default to 'en-US').
       utterance.lang = this.currentLanguage || "en-US";
 
@@ -250,6 +336,7 @@ export default {
       } finally {
         this.isInitializing = false;
       }
+      console.log("Sending initial message:", message);
     },
     
     async sendMessage() {
@@ -313,6 +400,7 @@ export default {
         console.error("Error sending message:", error);
         // Don't show alert as we're already showing system messages in the chat
       }
+      console.log("Sending message:", this.userInput);
     },
 
 
@@ -656,5 +744,25 @@ color: var(--accent-color);
 .messages-container a {
   color: blue;
   text-decoration: underline;
+}
+
+.listening-status {
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.1em;
+  color: var(--accent-color);
+  padding: 10px;
+}
+
+.listening {
+  animation: pulse 1s infinite;
+  border: 2px solid var(--accent-color);
+  box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.3);
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.015); }
+  100% { transform: scale(1); }
 }
 </style>
