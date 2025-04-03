@@ -158,6 +158,8 @@ Below is an overview of the key components of the system:
      - `SSH_PRIVATE_KEY` - Private key that can be used to authenticate to your server.
      It also uses `BACKEND_URL` environment variable, which is defined on line 13.
 
+    Please ensure that you have a `database.db` file in the SSH user directory on the server. If the file does not exist, create one using: ```touch database.db```.
+
 6. **(For CD execution) Add keystore.p12 file to the root of your server**:
    You can obtain private key and full certificate chain files for free using [Certbot](https://certbot.eff.org/) - a software that helps with issuing Let's Encrypt certificates.
    You then have to create `keystore.p12` that has to contain both private key and full certificate chain files, protected by password noted in `application.properties` (default:`ailearntool`).
