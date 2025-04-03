@@ -41,7 +41,7 @@ const translations = {
         DELETE_ACCOUNT: "Delete the account",
         DELETE_ACCOUNT_CONFIRMATION: "Are you sure that you want to delete your account?",
         ACCOUNT_DELETED: "Account has been deleted",
-        ACCOUNT_NOT_DELETED: "Unable to delete the account",
+        ACCOUNT_NOT_DELETED: "Unable to delete the account"
     },
     zh: {
         EXPORT: "导出",
@@ -81,7 +81,9 @@ const translations = {
         PLEASE_ENTER_A_MESSAGE: "请输入信息！",
         FAILED_TO_SEND_MESSAGE: "发送信息失败！请重试。",
         DELETE_ACCOUNT: "UNDEFINED",
-        DELETE_ACCOUNT_CONFIRMATION: "UNDEFINED"
+        DELETE_ACCOUNT_CONFIRMATION: "UNDEFINED",
+        ACCOUNT_DELETED: "UNDEFINED",
+        ACCOUNT_NOT_DELETED: "UNDEFINED",
     },
     ru: {
         EXPORT: "экспорт",
@@ -120,7 +122,8 @@ const translations = {
         PLEASE_ENTER_A_MESSAGE: "Пожалуйста введите сообщение!",
         FAILED_TO_SEND_MESSAGE: "Не удалось отправить сообщение. Пожалуйста, попробуйте ещё раз.",
         DELETE_ACCOUNT: "Удалить аккаунт",
-        DELETE_ACCOUNT_CONFIRMATION: "Вы уверены, что хотите удалить ваш аккаунт?"
+        DELETE_ACCOUNT_CONFIRMATION: "Вы уверены, что хотите удалить ваш аккаунт?",
+        I_NEED_HELP_WITH_PLATFORM: "Мне нужна помощь с платформой IBM SkillsBuild"
     }
 };
 
