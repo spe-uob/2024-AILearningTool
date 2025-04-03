@@ -56,26 +56,26 @@ public class SpringController {
         String password = credentials.get("password");
 
         Optional<UserEntity> userOptional = userRepository.findByUsername(username);
-    
+
         if (userOptional.isPresent() && userOptional.get().passwordMatch(password)) {
             UserEntity user = userOptional.get();
-            
+
             // Generate a new sessionID on each login
             String newSessionID = StringTools.generateSessionID();
             user.setSessionID(newSessionID);
             userRepository.save(user);
-            
+
             List<ChatEntity> chats = chatRepository.findByOwner(user);
             List<String> chatIDs = new ArrayList<>();
-    
+
             for (ChatEntity chat : chats) {
                 chatIDs.add(chat.getChatID());
                 // TODO: Chat titles
                 // chat.getMessageHistory(user).getJSONObject(0).getJSONObject(0).getString("content");
             }
-    
+
             return ResponseEntity.ok(Map.of(
-                    "sessionID", newSessionID, 
+                    "sessionID", newSessionID,
                     "chatIDs", chatIDs
             ));
         } else {
@@ -95,9 +95,12 @@ public class SpringController {
         }
     }
 
-    // Delete user
-    @GetMapping("/revokeConsent")
-    public ResponseEntity<Map<String, Object>> revokeConsent(@RequestParam String sessionID) {
+    // If user revokes their consent for data storage / optional cookies,
+    // remove all data stored about them.
+    @DeleteMapping("/revokeConsent")
+    public ResponseEntity<Map<String, Object>> revokeConsent(@RequestBody Map<String, String> request) {
+        String sessionID = request.get("sessionID");
+
         boolean success = DBC.removeUser(sessionID);
 
         if (success) {
@@ -120,9 +123,9 @@ public class SpringController {
             return ResponseEntity.status(401)
                 .body(Collections.singletonMap("message", "Invalid session"));
         }
-    
+
         UserEntity user = userOptional.get();
-        
+
         ChatEntity chat = new ChatEntity(user, initialMessage, this.OAIC.createThread());
         chatRepository.save(chat);
         String chatID = chat.getChatID();
@@ -153,12 +156,12 @@ public class SpringController {
 
         chat.addAIMessage(user, AIResponse.responseText);
         chatRepository.save(chat);
-    
+
         return ResponseEntity.ok(Map.of(
             "chatID", chatID));
     }
-    
-    
+
+
     @PostMapping("/sendMessage")
     public ResponseEntity<Map<String, Object>> sendMessage(@RequestBody Map<String, String> request) {
         String sessionID = request.get("sessionID");
@@ -170,7 +173,7 @@ public class SpringController {
             return ResponseEntity.status(401)
                 .body(Collections.singletonMap("message", "User not found"));
         }
-    
+
         ChatEntity chat = chatRepository.findById(chatID).orElse(null);
         if (chat == null || !chat.getOwner().getSessionID().equals(sessionID)) {
             return ResponseEntity.status(404)
@@ -241,14 +244,14 @@ public class SpringController {
         if (user.isEmpty()) {
             return ResponseEntity.status(401).body(Collections.singletonMap("message", "User not found"));
         }
-    
+
         List<ChatEntity> chats = chatRepository.findByOwner(user.get());
         List<Map<String, String>> chatList = new ArrayList<>();
-    
+
         for (ChatEntity chat : chats) {
             chatList.add(Map.of("chatID", chat.getChatID(), "title", chat.getMessageHistory(user.get()).getJSONObject(0).getString("content")));
         }
-    
+
         return ResponseEntity.ok(Collections.singletonMap("chatList", chatList));
     }
 

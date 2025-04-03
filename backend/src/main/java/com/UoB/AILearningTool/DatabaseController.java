@@ -26,7 +26,7 @@ public class DatabaseController {
 
     // Create a new account
     public boolean addUser(String username, String password) {
-        if (userRepository.existsById(username)) {
+        if (userRepository.findByUsername(username).isPresent()) {
             return false;
         }
 

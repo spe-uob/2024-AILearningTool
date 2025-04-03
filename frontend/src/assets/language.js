@@ -43,6 +43,10 @@ const translations = {
         STOP_VOICE_INPUT: "Stop voice input",
         LISTENING: "Listening...",
         VOICE_RECOGNITION_ERROR: "Voice recognition error. Please try again."
+        DELETE_ACCOUNT: "Delete the account",
+        DELETE_ACCOUNT_CONFIRMATION: "Are you sure that you want to delete your account?",
+        ACCOUNT_DELETED: "Account has been deleted",
+        ACCOUNT_NOT_DELETED: "Unable to delete the account"
     },
     zh: {
         EXPORT: "导出",
@@ -86,6 +90,10 @@ const translations = {
         STOP_VOICE_INPUT: "停止语音输入",
         LISTENING: "正在聆听...",
         VOICE_RECOGNITION_ERROR: "语音识别出错，请重试。"
+        DELETE_ACCOUNT: "删除账户",
+        DELETE_ACCOUNT_CONFIRMATION: "您确定要删除您的账户吗？",
+        ACCOUNT_DELETED: "账户已删除",
+        ACCOUNT_NOT_DELETED: "无法删除账户",
     },
     ru: {
         EXPORT: "экспорт",
@@ -129,6 +137,10 @@ const translations = {
         STOP_VOICE_INPUT: "Остановить голосовой ввод",
         LISTENING: "Слушаю...",
         VOICE_RECOGNITION_ERROR: "Ошибка распознавания речи. Пожалуйста, попробуйте еще раз."
+        DELETE_ACCOUNT: "Удалить аккаунт",
+        DELETE_ACCOUNT_CONFIRMATION: "Вы уверены, что хотите удалить ваш аккаунт?",
+        ACCOUNT_DELETED: "Аккаунт удалён",
+        ACCOUNT_NOT_DELETED: "Не удалось удалить аккаунт",
     }
 };
 
