@@ -123,6 +123,8 @@ const translations = {
         FAILED_TO_SEND_MESSAGE: "Не удалось отправить сообщение. Пожалуйста, попробуйте ещё раз.",
         DELETE_ACCOUNT: "Удалить аккаунт",
         DELETE_ACCOUNT_CONFIRMATION: "Вы уверены, что хотите удалить ваш аккаунт?",
+        ACCOUNT_DELETED: "Аккаунт удалён",
+        ACCOUNT_NOT_DELETED: "Не удалось удалить аккаунт",
         I_NEED_HELP_WITH_PLATFORM: "Мне нужна помощь с платформой IBM SkillsBuild"
     }
 };
