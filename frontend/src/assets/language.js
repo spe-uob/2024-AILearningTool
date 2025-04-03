@@ -2,6 +2,7 @@ import {colorSchemes} from "@/assets/color";
 
 const translations = {
     en: {
+        EXPORT: "Export",
         UNDEFINED: "Undefined",
         SETTINGS: "Settings",
         LANGUAGE: "Language",
@@ -41,6 +42,7 @@ const translations = {
         DELETE_ACCOUNT_CONFIRMATION: "Are you sure that you want to delete your account?"
     },
     zh: {
+        EXPORT: "导出",
         UNDEFINED: "未定义",
         SETTINGS: "设置",
         LANGUAGE: "语言",
@@ -80,6 +82,7 @@ const translations = {
         DELETE_ACCOUNT_CONFIRMATION: "UNDEFINED"
     },
     ru: {
+        EXPORT: "экспорт",
         UNDEFINED: "Перевод недоступен",
         SETTINGS: "Настройки",
         LANGUAGE: "Язык",

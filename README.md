@@ -91,116 +91,151 @@ As a university student, I want the AI chatbot to explain course concepts and fo
 ## Project Structure:
 Below is an overview of the key components of the system:
 
-- [workflows](/.github/workflows): Contains Maven Continuous Integration.
-- [docs](/docs): Contains all project-related documentation. Notable files include:
+- [.github](/.github): Contains all GitHub templates.
+  - [workflows](/.github/workflows): Contains all CI and CD GitHub Actions.
+- [docs](/docs): Contains all project-related documentation such as diagrams, presentations, UI screenshots, etc... Notable files include:
   - [ETHICS.md](/docs/ETHICS.md): Includes the date of the ethics pre-approval request.
-  - All diagrams/flowcharts.
-- [frontend](/frontend): Contains all of the front-end code (in Vue 3 and Yarn) and documents (not used in the MVP stage):
-  - [api](/frontend/api): Includes the cookies API.
-  - [public](/frontend/public): Includes some front-end documents.
-  - [src](/frontend/src): Includes the front-end code.
-- [backend](/backend): Contains all of the back-end code (in Java), Maven config and documents:
-  - [src/main](/backend/src/main): Includes the back-end Java code.
-  - [src/main/static](/backend/src/main/resources/static): Includes all static documents, including index.html of the front-end.
-  - [src/test/java/com/UoB/AILearningTool](/backend/src/test/java/com/UoB/AILearningTool): Includes all backend Java the unit tests.
-  - [mvnw]((/backend/mvnw)), [mvnw.cmd]((/backend/mvnw.cmd))  and [pom.xml](/backend/pom.xml): Documents for Maven.
-- [LICENSE](/LICENSE): Includes the project's MIT license file.
+  - [Handover.md](/docs/Handover.md): Includes key information to facilitate handover to the client.
+  - [User-Feedback](/docs/User-Feedback): Includes user feedback from the testing day.
+  - [Screenshots](/docs/Screenshots): Includes screenshots showing the evolution of the UI.
+- [frontend](/frontend): Contains all of the frontend code (in Vue 3) and dependencies:
+  - [node](/frontend/node): Includes Node.js runtime and package managers.
+  - [public](/frontend/public): Includes our logo in various sizes, a favicon, and documents for PWA support.
+  - [src](/frontend/src): Includes the frontend code:
+    - [Display interface](/frontend/src/Display%20interface): Includes Vue components for login, main view, and cookie management.
+    - [assets](/frontend/src/assets): Includes JavaScript and CSS global constants such as colors, languages, and responsive UI constants.
+    - [components](/frontend/src/components): Includes the main UI components such as HistorySidebar, MainContent, and SettingSidebar for structuring the interface.
+      - [helpers](/frontend/src/components/helpers): Includes helper classes used in the main components such as TypingText (used for "typing-like" AI responses).
+    - [App](/frontend/src/App.vue): The root component that structures the entire application layout.
+    - [main](/frontend/src/main.js): Initializes the Vue app, imports dependencies, and mounts the root component.
+    - [registerServiceWorker](/frontend/src/registerServiceWorker.js): Registers the service worker to enable PWA features.
+  - [unit](/frontend/tests/unit): Includes all frontend unit tests (in Jest).
+- [backend](/backend): Contains all of the backend code (in Java), Maven config, and documents:
+  - [main](/backend/src/main): Includes the backend code:
+    - [AILearningTool](/backend/src/main/java/com/UoB/AILearningTool): Contains all core application logic, including API controllers, database management, and AI integration.
+    - [resources](/backend/src/main/resources): Includes static resources such as application properties.
+  - [test](/backend/src/test/java/com/UoB/AILearningTool): Includes all backend unit tests (in Java).
+  - [mvnw](/backend/mvnw), [mvnw.cmd](/backend/mvnw.cmd)  and [pom.xml](/backend/pom.xml): Documents for Maven.
+- [LICENSE](/LICENSE): Includes the project's MIT license.
+- [.gitignore](/.gitignore): Includes files that should be ignored by Git when making a commit.
+- [Dockerfile](/Dockerfile): Includes steps to assemble a Docker image (for CD).
+- [HELP.md](/HELP.md): Contains official documentation to help with learning Maven and Spring Boot.
+- [localExecute.sh](/localExecute.sh): Shell script used to run the application.
 
 ## Tech Stack:
 ### Frontend
 The front end is a JavaScript Vue 3-based web application. It makes requests to the backend using HTTP requests.
 ### Backend
-The backend is based on Spring Boot (open-source Java framework).
-Data will be stored in a MariaDB database.
+The backend is based on Spring Boot (an open-source Java framework).
+Data will be stored in a SQLite database.
 User prompts for the chatbot will be sent using API requests from the Spring Boot backend to the OpenAI language model.
 
-![architecture_diagram](/docs/architecture_diagram.png)
+![architecture_diagram](/docs/Diagrams/architecture_diagram.png)
 
 ## User Instructions:
 
 1. **Open the Web App**:  
 
-   Using any device with internet access (smartphone, tablet, laptop, etc.), open a web browser and navigate to the provided link [insert URL here].
+   Using any device with internet access (smartphone, tablet, laptop, etc.), open a web browser and navigate to [https://ailearningtool.ddns.net](https://ailearningtool.ddns.net).
 
 2. **Cookie Consent**:  
 
-   Upon opening the website, you will be prompted to accept or decline optional cookies. These cookies help improve your experience by storing preferences and conversation history. You can choose:
-   - **Accept Cookies**: The chatbot will remember your preferences and chat history for future sessions.
-   - **Decline Cookies**: The chatbot will function without storing your preferences or chat history.
+   Upon opening the website, you will see a prompt notifying you that the chatbot uses local storage. By clicking "I Understand", you consent to the use of local storage for saving your preferences and conversation history. This helps the chatbot provide a more personalized experience across sessions.
 
-3. **Start Chatting with the Chatbot**:  
+3. **Login Page**: 
 
-   Once you are in, you can start typing your questions into the chatbox. You can ask about the following topics:
-   - **What is IBM SkillsBuild?**
-   - **What courses are available on SkillsBuild?**
-   - **What free technologies are available on SkillsBuild?**
-   - **General advice or questions related to university life.**
+   To access the chatbot, you must first register an account. Once registered, you can log in using your credentials.
 
-4. **Providing Additional Information**:  
+4. **Start Chatting with the Chatbot**:  
 
-   For certain questions (like available courses or university-related advice), the chatbot may ask for a little more information. This could include:
-   - Your area of interest
-   - Courses you are currently enrolled in  
+   After logging in, you can choose from three chat initialization buttons:
+   - **I need help with choosing a course**
+   - **I need help with the IBM SkillsBuild platform**
+   - **I have questions about university life**
+
+5. **Providing Additional Information**:  
+
+   For certain queries (like "I need help with choosing a course"), the chatbot may ask for a little more information. This could include:
+   - Your current experience level
+   - Your preferred duration for the course
+   - Specific topics or skills you're interested in
+     
    The chatbot only asks what’s necessary to give you the best answer.
 
-5. **Follow-Up Questions**:  
+6. **Follow-Up Questions**:  
 
-   Feel free to ask any follow-up questions after the chatbot provides its initial response. The chatbot can also share useful resources, such as links to courses or articles.
-
-6. **Adjust Preferences (Optional)**:  
-  
-   If you agreed to optional cookies, you can later modify your cookie consent and other settings in the web app’s preferences section. This is completely optional.
+   Feel free to ask any follow-up questions after the chatbot provides its initial response. The chatbot can also share useful resources, such as links to courses.
 
 7. **Returning to the Chat**:  
 
-   If you accepted the optional cookies, your conversation history will be saved for 30 days. You can return to the web app at any time within that period to continue where you left off or ask follow-up questions based on previous conversations.
+   If you click "I Understand", your conversation history and preferences will be saved in local storage. You can return to the web app at any time to continue where you left off or ask follow-up questions based on previous conversations.
+
+8. **Add to Home Screen or Desktop**:
+
+   If you enjoy using our app, feel free to download it to your home screen or desktop. Since we’ve implemented Progressive Web App (PWA) support, you can install the app on your device for quick access without needing to visit the website each time.
 
 ## Chatbot Interaction Flow:
 
 This flowchart outlines the interaction pathways within the chatbot, guiding users through key topics such as SkillsBuild courses, university life questions, and IBM SkillsBuild platform information. Each pathway details the chatbot's prompts, and user responses, providing an overview of the chatbot’s functionality.
 
-![watson_flow](/docs/watson_flow.png)
+![watson_flow](/docs/Diagrams/watson_flow.png)
 
 ## Developer Instructions:
 To get started with developing or contributing to this project, follow the steps below:
 
 1. **Clone the Repository**:
-   First, ensure you have Git installed on your machine. Then, open your terminal or command prompt and run the following command to clone the repository:
-   ```git clone https://github.com/spe-uob/2024-AILearningTool.git```
+   First, ensure you have [Git installed](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) on your machine. Then, open your terminal or command prompt and run the following command to clone the repository:
+   ```git clone https://github.com/spe-uob/2024-AILearningTool.git```.
 
 2. **Navigate to the Project Directory**:
    After cloning, navigate to the project directory:
-   ```cd 2024-AILearningTool```
+   ```cd 2024-AILearningTool```.
 
-3. **Install Java 21**:
-   The project is built using Java 21, so make sure you have Java 21 installed on your machine. You can download the latest Java Development Kit (JDK) 21 from [here](https://www.oracle.com/uk/java/technologies/downloads/#java21).
+3. **Backend Requirements**:
+   The backend of this project is built using Java 21 and uses Maven as the build automation tool. Shell scripts are also required to build the backend, so make sure you have the following installed on your machine:
+   - Latest Java Development Kit (JDK) 21 installation guide [here](https://www.oracle.com/uk/java/technologies/downloads/#java21).
+   - Latest Maven stable release installation guide [here](https://maven.apache.org/download.cgi).
+   - Linux-based operating system with Bash support (to execute `localExecute.sh` shell script).
 
-4. **Install Maven**:
-   This project uses Maven as the build automation tool. If you don't have Maven installed, download the latest stable release [here](https://maven.apache.org/download.cgi).
+4. **Frontend Requirements**:
+   The frontend of this project is built using Vue 3, and it also requires npm and Yarn. Also, the frontend unit tests use Jest. Make sure you have them installed: 
+   - npm installation guide [here](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
+   - Yarn installation guide [here](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable).
+   - Vue 3 installation guide [here](https://vuejs.org/guide/quick-start.html).
+   - Jest installation guide [here](https://jestjs.io/docs/getting-started).
 
-5. **Install Vue and Yarn**:
-   The front end of this project is built using Vue 3 and Yarn, so make sure you have them installed: 
-   - Vue 3 installation guide [here](https://vuejs.org/guide/quick-start.html)
-   - Yarn installation guide [here](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)
+5. **Continuous Deployment with Docker**:
+     This project uses Docker for Continuous Deployment (CD), so you will need to ensure that Docker is installed on the server (and your local machine if you wish). If it 
+     isn't installed, you can do so [here](https://docs.docker.com/engine/install/).
+     CD is implemented using `deploy-ghcr.yml` GitHub workflow.
+     The workflow initialises the latest version of Ubuntu OS, sets up Java 21 and Maven;
+     substitutes the `$OPENAI_API_KEY` in `OpenAIAuthenticator.java` file to the OpenAI API key;
+     replaces `application.properties` file with a one that enables HTTPS and uses `keystore.p12`;
+     replaces `$BACKEND_URL` variable in frontend;
+     builds the `.jar` file and a container with it, pushes the container to GHCR;
+     connects to your server using `ssh`, pull the container from GHCR and runs it.
 
-6. **Open the Project in Your IDE**:
-   Open the cloned repository in your preferred Integrated Development Environment (IDE) (we recommend IntelliJ) for further development.
+     It uses the following "secrets":
+     - `OPENAI_API_KEY` - stores OpenAI API key, can be obtained [here](https://platform.openai.com/api-keys).
+     - `CONTAINER_REGISTRY_PAT` - PAT for GHCR.
+     - `SERVER_IP` - IP address of your server.
+     - `SERVER_USER` - Username that the workflow can ssh to your server with.
+     - `SSH_PRIVATE_KEY` - Private key that can be used to authenticate to your server.
+     It also uses `BACKEND_URL` environment variable, which is defined on line 13.
 
-7. **Add keystore.p12 file to backend/src/main/resources in the cloned repository**:
-    Keystore has to contain both private key and full certificate chain files.
-    Not adding the keystore file will result in unencrypted (non-HTTPS) connection.
+6. **(For CD execution) Add keystore.p12 file to the root of your server**:
+   You can obtain private key and full certificate chain files for free using [Certbot](https://certbot.eff.org/) - a software that helps with issuing Let's Encrypt certificates.
+   You then have to create `keystore.p12` that has to contain both private key and full certificate chain files, protected by password noted in `application.properties` (default:`ailearntool`).
+   If you don't want to use SSL - don't use the Docker image, but run the server using `localExecute.sh` instead.
 
-8. **Test and Run the Server**:
-   - To run the unit tests, use the command ```mvn test```
-   - To start the server, use the script ```startServer.sh```
+7. **Open the Project in Your IDE**:
+   Open the cloned repository in your preferred Integrated Development Environment (IDE) (we recommend [IntelliJ](https://www.jetbrains.com/idea/download/?section=windows)) for further development.
+
+8. **Test and Run the Application**:
+   - To run the backend unit tests, use the commands: ```cd backend``` and then ```mvn test```.
+   - To run the frontend unit tests, use the commands: ```cd frontend``` and then ```npm run test:unit```.
+   - To run the application, run the localExecute shell script: ```./localExecute.sh OpenAI_API_Key Port_number``` (replace OpenAI_API_Key and Port_number with their respective values).
   
-9. **Continuous Deployment (CD) with Docker and GHCR**:
-  Our project includes Continuous Deployment (CD) with Docker and GitHub Container Registry (GHCR). Every time changes are pushed to the dev branch, a new Docker image is automatically built and pushed to our [GHCR repository](https://ghcr.io/spe-uob/2024-ailearningtool:latest).
-  To pull the latest Docker image from GHCR and update the application on the server, follow these steps:
-    - Start the Docker service: ```sudo systemctl start docker```
-    - Run the pull script: ```./pull-from-ghcr.sh```
-
-
 ## Team Members:
 
 | Name              | GitHub                                                      						| Email                 |

@@ -11,17 +11,16 @@ import java.nio.file.*;
 import java.util.Arrays;
 import java.util.List;
 
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class, SecurityAutoConfiguration.class })
+@SpringBootApplication(exclude = {
+		SecurityAutoConfiguration.class
+})
 public class AiLearningToolApplication {
 
 	public static void main(String[] args) {
-		//  disable SSL if launched without keystore.p12
 		if (!Files.exists(Paths.get("keystore.p12"))) {
-			// Force disable SSL
 			System.out.println("keystore.p12 not found");
 			System.setProperty("server.ssl.enabled", "false");
 		}
 		SpringApplication.run(AiLearningToolApplication.class, args);
 	}
-
 }

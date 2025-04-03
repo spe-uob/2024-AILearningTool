@@ -8,7 +8,7 @@ jest.mock('@/assets/language', () => ({
 
 // Mock marked
 jest.mock('marked', () => ({
-  parse: jest.fn(text => `<p>${text}</p>`)
+  marked: jest.fn(text => `<p>${text}</p>`)
 }))
 
 // Mock getTheme
@@ -19,9 +19,36 @@ jest.mock('@/assets/color.js', () => ({
   }))
 }))
 
+// Mock SpeechSynthesis API
+Object.defineProperty(window, 'speechSynthesis', {
+  value: {
+    speaking: false,
+    getVoices: jest.fn(() => []),
+    speak: jest.fn(),
+    cancel: jest.fn(),
+    onvoiceschanged: null
+  }
+})
+
 describe('MainContent.vue', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    
+    // Mock localStorage with sessionID
+    Object.defineProperty(window, 'localStorage', {
+      value: {
+        getItem: jest.fn(() => 'test-session-id'),
+        setItem: jest.fn()
+      }
+    })
+    
+    // Mock fetch
+    global.fetch = jest.fn(() => 
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ content: 'AI response', chatID: '123' })
+      })
+    )
   })
   
   it('renders correctly', () => {
@@ -32,6 +59,11 @@ describe('MainContent.vue', () => {
         currentChatID: '',
         currentLanguage: 'en',
         chatInitButtonsDisabled: false
+      },
+      global: {
+        stubs: {
+          TypingText: true // Stub the TypingText component
+        }
       }
     })
     
@@ -39,7 +71,6 @@ describe('MainContent.vue', () => {
     expect(wrapper.exists()).toBe(true)
   })
   
-  // Add more basic tests that don't rely on complex component structure
   it('has message input when chat is active', () => {
     const wrapper = mount(MainContent, {
       props: {

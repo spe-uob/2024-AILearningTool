@@ -15,17 +15,17 @@
         <div v-if="currentChatID.length === 0" class="button-container">
           <button 
             @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_CHOOSING_A_COURSE'))" 
-            :disabled="chatInitButtonsDisabled">
+            :disabled="chatInitButtonsDisabled || isInitializing">
             {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_CHOOSING_A_COURSE") }}
           </button>
           <button 
             @click="sendInitialMessage(getTranslation(currentLanguage, 'I_NEED_HELP_WITH_PLATFORM'))" 
-            :disabled="chatInitButtonsDisabled">
+            :disabled="chatInitButtonsDisabled || isInitializing">
             {{ getTranslation(currentLanguage, "I_NEED_HELP_WITH_PLATFORM") }}
           </button>
           <button 
             @click="sendInitialMessage(getTranslation(currentLanguage, 'I_HAVE_QUESTIONS_ABOUT_UNI_LIFE'))" 
-            :disabled="chatInitButtonsDisabled">
+            :disabled="chatInitButtonsDisabled || isInitializing">
             {{ getTranslation(currentLanguage, "I_HAVE_QUESTIONS_ABOUT_UNI_LIFE") }}
           </button>
         </div>
@@ -50,7 +50,7 @@
               <!-- For assistant messages, use TypingText to animate the output -->
               <div v-if="msg.sender === 'assistant'">
               <TypingText 
-                v-if="!getFinishedMessage(index)" 
+                v-if="!getFinishedMessage(index)"
                 :text="formatMessage(msg.content)" 
                 :speed="15" 
                 @finished="setFinishedMessage(index, formatMessage(msg.content))"
@@ -102,18 +102,14 @@ export default {
   data() {
     return {
       userInput: "",
-      currentTopic: "",
-      currentTurn: "user", // Tracks conversation turn (user or AI)
-      userId: localStorage.getItem("userId") || "",
-      currentTheme: "default", // Stores the current UI theme
+      sessionID: localStorage.getItem("sessionID") || "",  // username
+      isInitializing: false, 
     };
   },
   props: ["messages", "chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
   watch: {
-    // Automatically scroll to the bottom when new messages arrive
     messages() {
       if (this.messages.length === 0 && this.currentChatID.length > 0) {
-        this.currentTurn = "user";
         this.requestChatHistory();
       }
       this.$nextTick(() => {
@@ -125,12 +121,30 @@ export default {
     getTheme,
     getTranslation,
 
-    /**
-     * Converts markdown format to HTML.
-     */
+    updateChatList(newChats) {
+      this.chats = newChats;
+      this.$emit('updateChats', newChats);
+    },
+
     formatMessage(message) {
-      // Use marked to convert markdown to HTML.
       return marked(message);
+    },
+
+    resetContent() {
+      this.messages = [];
+      this.$emit('updateChatID', '');
+    },
+
+    // Returns the finished message text for a given index if it exists in localStorage.
+    getFinishedMessage(index) {
+      const key = `finishedMessage_${this.currentChatID}_${index}`;
+      return localStorage.getItem(key);
+    },
+
+    // Saves the finished message text for a given index into localStorage.
+    setFinishedMessage(index, text) {
+      const key = `finishedMessage_${this.currentChatID}_${index}`;
+      localStorage.setItem(key, text);
     },
 
         /**
@@ -183,118 +197,177 @@ export default {
      * Initializes a new chat with a predefined message.
      */
     async sendInitialMessage(message) {
-      this.$emit("setButtonLock", true)
-      let response = await fetch(BACKEND_URL + "/createChat?" + new URLSearchParams({
-        "initialMessage": message
-      }),{
-            method: "GET",
-            credentials: "include",
-          }
-      );
-
-      if (!response.ok) {
-        throw new Error("Non-200 backend API response");
+      if (!this.sessionID) {
+        alert(getTranslation(this.currentLanguage, "LOGIN_REQUIRED"));
+        return;
       }
 
-      this.$emit("updateChatID", await response.text());
-      await this.$nextTick(() => {
-        this.$emit("addChat", this.currentChatID, message);
-        this.requestChatHistory();
-      });
-    },
+      
+      this.isInitializing = true;
 
-    // Returns the finished message text for a given index if it exists in localStorage.
-  getFinishedMessage(index) {
-    const key = `finishedMessage_${this.currentChatID}_${index}`;
-    return localStorage.getItem(key);
-  },
-  // Saves the finished message text for a given index into localStorage.
-  setFinishedMessage(index, text) {
-    const key = `finishedMessage_${this.currentChatID}_${index}`;
-    localStorage.setItem(key, text);
-  },
+      try {
+        const chatCount = this.chats.length + 1;
+        const chatTitle = `Chat ${chatCount}`;
 
-    /**
-     * Requests chat history from the server based on the current chat ID.
-     */
-    requestChatHistory() {
-      fetch(
-          BACKEND_URL +
-          "/getChatHistory?" +
-          new URLSearchParams({
-            chatID: this.currentChatID,
-          }),
-          {
-            method: "GET",
-            credentials: "include",
-          }
-      ).then(async (response) => {
+        const response = await fetch(`${BACKEND_URL}/createChat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sessionID: this.sessionID,
+            initialMessage: message
+          })
+        });
+
+        const data = await response.json();
+
         if (!response.ok) {
-          throw new Error("Non-200 backend API response");
-        } else {
-          await this.processChatHistory(await response.json());
+          // Handle different HTTP error codes
+          switch (response.status) {
+            case 401:
+              this.$emit("addMessage", "System", getTranslation(this.currentLanguage, "SESSION_EXPIRED"));
+              throw new Error(getTranslation(this.currentLanguage, "SESSION_EXPIRED"));
+            case 429:
+              throw new Error(getTranslation(this.currentLanguage, "TOO_MANY_REQUESTS"));
+            case 500:
+              throw new Error(getTranslation(this.currentLanguage, "SERVER_ERROR"));
+            default:
+              throw new Error(data.message || getTranslation(this.currentLanguage, "CHAT_CREATION_FAILED"));
+          }
         }
-      });
+
+        this.$emit("addChat", data.chatID, chatTitle);
+        this.$emit("chatSelected", data.chatID);
+
+        console.log(data.chatID + " " + this.currentChatID)
+
+        if (data.content) {
+          this.$emit("addMessage", "assistant", data.content);
+        }
+
+      } catch (error) {
+        console.error("Error creating chat:", error);
+        alert(error.message || "Failed to create chat");
+      } finally {
+        this.isInitializing = false;
+      }
+    },
+    
+    async sendMessage() {
+      if (!this.userInput.trim()) {
+        alert(getTranslation(this.currentLanguage, "EMPTY_MESSAGE"));
+        return;
+      }
+
+      if (!this.sessionID) {
+        alert(getTranslation(this.currentLanguage, "SESSION_EXPIRED_LOGIN_AGAIN"));
+        return;
+      }
+
+      if (!this.currentChatID) {
+        alert(getTranslation(this.currentLanguage, "SELECT_CHAT_FIRST"));
+        return;
+      }
+
+      const messageContent = this.userInput.trim();
+      this.userInput = "";
+
+      try {
+        this.$emit("addMessage", "user", messageContent);
+
+        const response = await fetch(`${BACKEND_URL}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sessionID: this.sessionID,
+            chatID: this.currentChatID,
+            newMessage: messageContent,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          // Handle different HTTP error codes
+          switch (response.status) {
+            case 401:
+              this.$emit("addMessage", "System", getTranslation(this.currentLanguage, "SESSION_EXPIRED"));
+              throw new Error(getTranslation(this.currentLanguage, "SESSION_EXPIRED"));
+            case 404:
+              this.$emit("addMessage", "System", getTranslation(this.currentLanguage, "CHAT_NOT_FOUND"));
+              throw new Error(getTranslation(this.currentLanguage, "CHAT_NOT_FOUND"));
+            case 429:
+              this.$emit("addMessage", "System", getTranslation(this.currentLanguage, "TOO_MANY_REQUESTS"));
+              throw new Error(getTranslation(this.currentLanguage, "TOO_MANY_REQUESTS"));
+            case 500:
+              this.$emit("addMessage", "System", getTranslation(this.currentLanguage, "AI_SERVICE_ERROR"));
+              throw new Error(getTranslation(this.currentLanguage, "AI_SERVICE_ERROR"));
+            default:
+              this.$emit("addMessage", "System", data.message || getTranslation(this.currentLanguage, "MESSAGE_SEND_FAILED"));
+              throw new Error(data.message || getTranslation(this.currentLanguage, "MESSAGE_SEND_FAILED"));
+          }
+        }
+
+        this.$emit("addMessage", "assistant", data["content"]);
+
+      } catch (error) {
+        console.error("Error sending message:", error);
+        // Don't show alert as we're already showing system messages in the chat
+      }
     },
 
+
+    async requestChatHistory() {
+      if (!this.sessionID || !this.currentChatID) return;
+
+      try {
+        const response = await fetch(`${BACKEND_URL}/getChatHistory?`, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sessionID: this.sessionID,
+            chatID: this.currentChatID
+          })
+        });
+
+        if (!response.ok) {
+          // Handle different HTTP error codes
+          const errorMessage = await response.text();
+          console.log(errorMessage);
+          
+          switch (response.status) {
+            case 401:
+              this.$emit("addMessage", "System", getTranslation(this.currentLanguage, "SESSION_EXPIRED"));
+              throw new Error(getTranslation(this.currentLanguage, "SESSION_EXPIRED"));
+            case 404:
+              this.$emit("addMessage", "System", getTranslation(this.currentLanguage, "CHAT_HISTORY_NOT_FOUND"));
+              throw new Error(getTranslation(this.currentLanguage, "CHAT_HISTORY_NOT_FOUND"));
+            case 500:
+              this.$emit("addMessage", "System", getTranslation(this.currentLanguage, "SERVER_ERROR"));
+              throw new Error(getTranslation(this.currentLanguage, "SERVER_ERROR"));
+            default:
+              this.$emit("addMessage", "System", getTranslation(this.currentLanguage, "HISTORY_LOAD_FAILED"));
+              throw new Error(getTranslation(this.currentLanguage, "HISTORY_LOAD_FAILED"));
+          }
+        }
+
+        const data = await response.json();
+        await this.processChatHistory(JSON.parse(data["history"]));
+      } catch (error) {
+        console.error("Error loading chat history:", error);
+        this.$emit("setButtonLock", false);
+      }
+    },
+    
     /**
      * Processes retrieved chat history and structures it for display.
      */
     async processChatHistory(messageHistory) {
-      // New code starts here
-      for (let i = 0; i < messageHistory.length; i++) {
-        this.$emit("addMessage", ((i % 2 === 0) ? "user" : "assistant"), messageHistory[i]["content"]);
-      }
-      // New code ends here
-      this.$emit("setButtonLock", false)
-    },
+      messageHistory.forEach(msg => {
+          this.$emit("addMessage", msg["role"], msg["content"]);
+      });
 
-    /**
-     * Sends a user message to the AI server and processes the response.
-     */
-    async sendMessage() {
-      if (!this.userInput.trim()) {
-        alert(
-            getTranslation(localStorage.getItem("langCode"), "PLEASE_ENTER_A_MESSAGE")
-        );
-        return;
-      }
-
-      // "if" below can be removed later
-      if (!this.currentChatID) {
-        alert("ChatId is not set. Please start a new chat.");
-        return;
-      }
-
-      this.$emit("addMessage", "user", this.userInput);
-      this.$emit("setButtonLock", true)
-
-      const messageToSend = this.userInput.trim();
-      this.userInput = "";
-
-      try {
-        let response = await fetch(BACKEND_URL + "/sendMessage?" + new URLSearchParams({
-          "userID": this.userId,
-          "chatID": this.currentChatID,
-          "newMessage": messageToSend,
-        }),{
-              method: "GET",
-              credentials: "include",
-            }
-        );
-
-        if (! response.ok) {
-          throw new Error(`Unexpected response code: ${response.status}`);
-        }
-        let responseJSON = await response.json();
-        this.$emit("addMessage", "assistant", (responseJSON["content"]));
-      } catch (error) {
-        console.error("Error sending message:", error);
-        this.$emit("addMessage", "System",
-            localStorage.getItem("langCode"), "FAILED_TO_SEND_MESSAGE");
-      }
-      this.scrollToBottom();
-      this.$emit("setButtonLock", false)
+      this.$emit("setButtonLock", false);
     },
     
     scrollToBottom() {
@@ -305,6 +378,7 @@ export default {
         }
       });
     },
+    
   }
 };
 </script>
@@ -549,5 +623,38 @@ button {
 
 .tts-button:hover {
 color: var(--accent-color);
+}
+
+/* Download button styles */
+.download-container {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+}
+
+.download-btn {
+  padding: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.download-btn:hover {
+  background-color: var(--border-color);
+}
+
+/* Ensure links in messages are visible */
+.messages-container a {
+  color: blue;
+  text-decoration: underline;
 }
 </style>

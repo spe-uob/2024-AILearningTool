@@ -14,8 +14,10 @@ public class OpenAIAuthenticator {
 
     // Constructor that initializes the API key
     public OpenAIAuthenticator() {
+
           this.apiKey = "$OPENAI_API_KEY";
           log.info("OpenAI API key set.");
+
     }
 
     // Returns the API key as a "Bearer token" (used in authorization headers)
