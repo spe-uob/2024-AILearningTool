@@ -103,7 +103,6 @@ export default {
     return {
       userInput: "",
       sessionID: localStorage.getItem("sessionID") || "",  // username
-      aiServerURL: "http://localhost:8080", // API address
       isInitializing: false, 
     };
   },
@@ -199,7 +198,7 @@ export default {
         const chatCount = this.chats.length + 1;
         const chatTitle = `Chat ${chatCount}`;
 
-        const response = await fetch(`${this.aiServerURL}/createChat`, {
+        const response = await fetch(`${BACKEND_URL}/createChat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -264,7 +263,7 @@ export default {
       try {
         this.$emit("addMessage", "user", messageContent);
 
-        const response = await fetch(`${this.aiServerURL}/sendMessage`, {
+        const response = await fetch(`${BACKEND_URL}/sendMessage`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -310,7 +309,7 @@ export default {
       if (!this.sessionID || !this.currentChatID) return;
 
       try {
-        const response = await fetch(`${this.aiServerURL}/getChatHistory?`, {
+        const response = await fetch(`${BACKEND_URL}/getChatHistory?`, {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },

@@ -42,12 +42,12 @@
 <script>
 import { getTheme } from "@/assets/color.js";
 import { getTranslation } from "@/assets/language";
+import { BACKEND_URL } from "@/assets/globalConstants";
 
 export default {
   props: ["chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
   data() {
     return {
-      aiServerUrl: "http://localhost:8080", // URL of the AI server
       isCollapsed: true, // Controls sidebar visibility
       currentTheme: "default", // Tracks the current theme
       themeStyles: {}, // Stores dynamic styles
@@ -65,7 +65,7 @@ export default {
       }
 
       try {
-        const response = await fetch(`${this.aiServerUrl}/getUserChats?sessionID=${sessionID}`);
+        const response = await fetch(`${BACKEND_URL}/getUserChats?sessionID=${sessionID}`);
         if (!response.ok) throw new Error("Failed to load chat history.");
 
         const data = await response.json();
@@ -118,7 +118,7 @@ export default {
         }
         
         // Fetch chat history for the specific chat
-        const response = await fetch(`${this.aiServerUrl}/getChatHistory`, {
+        const response = await fetch(`${BACKEND_URL}/getChatHistory`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionID, chatID })

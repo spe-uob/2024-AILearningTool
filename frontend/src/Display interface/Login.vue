@@ -126,7 +126,7 @@ export default {
 
     async login() {
       try {
-        const response = await fetch("http://localhost:8080/login", {
+        const response = await fetch(BACKEND_URL + "/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -169,7 +169,7 @@ export default {
 
        async register() {
       try {
-        const response = await fetch("http://localhost:8080/register", {
+        const response = await fetch(BACKEND_URL + "/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

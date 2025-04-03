@@ -37,7 +37,6 @@ export default {
       isSettingsOpen: false,
       chats: [], // Stores id-title pair for every chat
       currentChatID: "",
-      aiServerUrl: "http://localhost:8080",
     };
   },
   props: ["currentLanguage"],
