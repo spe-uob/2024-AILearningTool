@@ -119,8 +119,10 @@ public class SpringControllerTest {
     void testRevokeConsent_Success() throws Exception {
         Mockito.when(databaseController.removeUser("validSession")).thenReturn(true);
 
+        String json = "{\"sessionID\": \"validSession\"}";
         mockMvc.perform(delete("/revokeConsent")
-                        .param("sessionID", "validSession"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
                 .andExpect(status().isOk());
     }
 
@@ -128,8 +130,10 @@ public class SpringControllerTest {
     void testRevokeConsent_Fail() throws Exception {
         Mockito.when(databaseController.removeUser("invalidSession")).thenReturn(false);
 
+        String json = "{\"sessionID\": \"validSession\"}";
         mockMvc.perform(delete("/revokeConsent")
-                        .param("sessionID", "invalidSession"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
                 .andExpect(status().isNotFound());
     }
 
