@@ -573,6 +573,38 @@ button {
   color: var(--accent-color);
 }
 
+.download-container {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+}
+
+.download-btn {
+  padding: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.download-btn:hover {
+  background-color: var(--border-color);
+}
+
+/* Ensure links in messages are visible */
+.messages-container a {
+  color: blue;
+  text-decoration: underline;
+}
+
 .listening {
   animation: pulse 1s infinite;
   border: 2px solid var(--accent-color);
