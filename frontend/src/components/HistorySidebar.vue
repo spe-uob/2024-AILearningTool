@@ -14,18 +14,10 @@
 
       <!-- Chat History List -->
       <div class="history-list-wrapper">
-        <div v-for="chat in chats" :key="chat.chatID" class="chat-item-container">
+        <div v-for="chat in chats" :key="chat.chatID">
           <button class="chat-item selectable-chat" @click="selectChat(chat.chatID)" :class="{ 'selected': currentChatID === chat.chatID }"  :disabled="chatInitButtonsDisabled">
             {{ chat.title }}
           </button>
-          <!-- three dots options-->
-          <div v-if="currentChatID === chat.chatID" class="chat-options">
-            <button class="options-btn" @click="toggleOptions(chat.chatID)">⋮</button>
-            <!-- options menu -->
-            <div v-if="showOptionsFor === chat.chatID" class="options-menu">
-              <button @click="exportChat(chat.chatID)">{{ getTranslation(currentLanguage, "EXPORT") }}</button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -40,10 +32,10 @@ export default {
   props: ["chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
   data() {
     return {
+      aiServerUrl: "http://localhost:8080", // URL of the AI server
       isCollapsed: true, // Controls sidebar visibility
       currentTheme: "default", // Tracks the current theme
       themeStyles: {}, // Stores dynamic styles
-      showOptionsFor: null, // Options menu visibility
     };
   },
   methods: {
@@ -100,20 +92,6 @@ export default {
       window.addEventListener("themeChange", (event) => {
         this.applyTheme(event.detail.themeName);
       });
-    },
-    // Toggle Options Menu
-    toggleOptions(chatID) {
-      if (this.showOptionsFor === chatID) {
-        this.showOptionsFor = null;
-      } else {
-        this.showOptionsFor = chatID;
-      }
-    },
-    
-    // export chat
-    exportChat(chatID) {
-      this.$emit("exportChat", chatID);
-      this.showOptionsFor = null; 
     },
   },
   computed: {
@@ -202,13 +180,6 @@ export default {
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.08);
 }
 
-.chat-item-container {
-  display: flex;
-  align-items: center;
-  margin: 10px 0;
-  position: relative;
-}
-
 .chat-item {
   width: 100%;
   padding: 14px;
@@ -250,55 +221,5 @@ export default {
 /* Clicked (Selected) effect - Original color */
 .selectable-chat.selected {
   background-color: var(--primary-color);
-}
-
-/* 3 dots Option */
-.chat-options {
-  position: absolute;
-  right: 5px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
-}
-
-.options-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 22px; 
-  padding: 5px;
-  color: var(--text-color);
-  font-weight: bold; 
-  opacity: 0.8; 
-}
-
-.options-btn:hover {
-  opacity: 1; 
-}
-
-.options-menu {
-  position: absolute;
-  right: 0;
-  top: 100%;
-  background-color: var(--background-color);
-  border: 1px solid var(--border-color);
-  border-radius: 5px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  z-index: 20;
-  min-width: 120px;
-}
-
-.options-menu button {
-  width: 100%;
-  text-align: left;
-  padding: 8px 12px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: var(--text-color);
-}
-
-.options-menu button:hover {
-  background-color: var(--accent-color);
 }
 </style>

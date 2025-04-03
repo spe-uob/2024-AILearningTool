@@ -5,7 +5,6 @@
           @resetMainContent="resetMainContent"
           @chatSelected="(id) => loadChat(id)"
           :currentChatID="this.currentChatID"
-          @exportChat="(id) => this.exportChat(id)"
           :chats="chats"
           :currentLanguage="currentLanguage"
           @updateChats="updateChatList"
@@ -21,7 +20,6 @@
         @chatSelected="(id) => loadChat(id)"
         :currentLanguage="currentLanguage"
         @setButtonLock="(status) => this.chatInitButtonsDisabled = status"
-        ref="mainContent"
     />
   </div>
 </template>
@@ -74,13 +72,6 @@ export default {
 
     toggleSettings(isOpen) {
       this.isSettingsOpen = isOpen;
-    },
-
-    // export chat
-    exportChat(chatID) {
-      if (this.$refs.mainContent) {
-        this.$refs.mainContent.exportChat();
-      }
     },
   },
   components: {

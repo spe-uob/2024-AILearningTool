@@ -50,7 +50,7 @@
               <!-- For assistant messages, use TypingText to animate the output -->
               <div v-if="msg.sender === 'assistant'">
               <TypingText 
-                v-if="!getFinishedMessage(index)" 
+                v-if="msg.sender === 'assistant'"
                 :text="formatMessage(msg.content)" 
                 :speed="15" 
                 @finished="setFinishedMessage(index, formatMessage(msg.content))"
@@ -369,49 +369,6 @@ export default {
       });
     },
     
-    // method for downloading chat history
-    async exportChat() {
-      if (!this.currentChatID) return;
-      
-      try {
-        const response = await fetch(
-          BACKEND_URL + "/getChatHistory?" +
-          new URLSearchParams({
-            chatID: this.currentChatID,
-          }),
-          {
-            method: "GET",
-            credentials: "include",
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("cannot find history");
-        }
-
-        const messages = await response.json();
-        
-        const formattedChat = messages.map((msg, index) => {
-          const role = index % 2 === 0 ? "User" : "AI";
-          return `${role}: ${msg.content}\n`;
-        }).join('\n');
-
-        // create download link
-        const blob = new Blob([formattedChat], { type: 'text/plain' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `chat-${this.currentChatID}.txt`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      } catch (error) {
-        console.error("error:", error);
-        alert("download failed");
-      }
-    },
-    
   }
 };
 </script>
@@ -658,6 +615,7 @@ button {
 color: var(--accent-color);
 }
 
+/* Download button styles */
 .download-container {
   position: absolute;
   top: 20px;
