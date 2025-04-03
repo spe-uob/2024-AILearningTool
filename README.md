@@ -178,7 +178,7 @@ User prompts for the chatbot will be sent using API requests from the Spring Boo
 
 This flowchart outlines the interaction pathways within the chatbot, guiding users through key topics such as SkillsBuild courses, university life questions, and IBM SkillsBuild platform information. Each pathway details the chatbot's prompts, and user responses, providing an overview of the chatbot’s functionality.
 
-![watson_flow](https://github.com/spe-uob/2024-AILearningTool/blob/feature/issue-210/Improve-documentation/docs/Diagrams/watson_flow.png)
+![watson_flow](/docs/Diagrams/watson_flow.png)
 
 ## Developer Instructions:
 To get started with developing or contributing to this project, follow the steps below:
