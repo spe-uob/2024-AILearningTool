@@ -39,7 +39,9 @@ const translations = {
         PLEASE_ENTER_A_MESSAGE: "Please enter a message!",
         FAILED_TO_SEND_MESSAGE: "Failed to send message. Please try again.",
         DELETE_ACCOUNT: "Delete the account",
-        DELETE_ACCOUNT_CONFIRMATION: "Are you sure that you want to delete your account?"
+        DELETE_ACCOUNT_CONFIRMATION: "Are you sure that you want to delete your account?",
+        ACCOUNT_DELETED: "Account has been deleted",
+        ACCOUNT_NOT_DELETED: "Unable to delete the account",
     },
     zh: {
         EXPORT: "导出",

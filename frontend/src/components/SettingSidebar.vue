@@ -38,6 +38,7 @@
 <script>
 import { getTheme } from "@/assets/color";
 import { getTranslation } from "@/assets/language";
+import {BACKEND_URL} from "@/assets/globalConstants";
 
 export default {
   data() {
@@ -80,14 +81,18 @@ export default {
           "http://localhost:8080/revokeConsent",
           {
             method: "DELETE",
+            headers: { "Content-Type": "application/json" },
             credentials: "include",
+            body: JSON.stringify({
+              sessionID: localStorage.getItem("sessionID")
+            })
           }
       ).then(async (response) => {
         if (response.ok) {
-          alert("Account has been deleted")
+          alert(getTranslation(this.currentLanguage, "ACCOUNT_DELETED"))
           this.Logout()
         } else {
-          alert("Unable to delete the account")
+          alert(getTranslation(this.currentLanguage, "ACCOUNT_NOT_DELETED"))
         }
       });
     },
