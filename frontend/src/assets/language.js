@@ -91,6 +91,7 @@ const translations = {
         CLOSE: "Закрыть",
         NEW_CONVERSATION: "Новый чат",
         I_NEED_HELP_WITH_CHOOSING_A_COURSE: "Мне нужна помощь с выбором онлайн-курса",
+        I_NEED_HELP_WITH_PLATFORM: "Мне нужна помощь с платформой IBM SkillsBuild",
         I_HAVE_QUESTIONS_ABOUT_UNI_LIFE: "У меня есть вопросы про университетскую жизнь",
         USER: "Пользователь",
         AI: "ИИ",
