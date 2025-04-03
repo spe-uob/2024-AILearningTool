@@ -2,8 +2,8 @@
   <main>
     <div class="chat-area">
       <!-- Listening status message -->
-      <div v-if="listeningStatusMessage" class="listening-status">
-        {{ getTranslation(currentLanguage, listeningStatusMessage) }}
+      <div v-if="isListening" class="listening-status">
+        {{ getTranslation(currentLanguage, 'LISTENING') }}
       </div>
 
       <!-- Welcome Screen with Logo -->
@@ -48,8 +48,7 @@
               <strong v-else>{{ msg.sender }}</strong>
               <!-- For assistant messages, use TypingText to animate the output -->
               <div v-if="msg.sender === 'assistant'">
-              <TypingText v-if="msg.sender === 'assistant'" :text="formatMessage(msg.content)" :speed="15" @finished="setFinishedMessage(index, formatMessage(msg.content))" />
-                <!-- Otherwise, render the static text from localStorage -->
+                <TypingText v-if="msg.sender === 'assistant'" :text="formatMessage(msg.content)" :speed="15" @finished="setFinishedMessage(index, formatMessage(msg.content))" />
                 <p v-else v-html="getFinishedMessage(index)"></p>
               </div>
               <p v-else v-html="formatMessage(msg.content)"></p>
@@ -69,7 +68,7 @@
               @keypress.enter.prevent="sendMessage"
           ></textarea>
 
-          <button @click="toggleSpeechRecognition" :class="{ listening: isListening }">
+          <button @click="toggleSpeechRecognition" :class="{ listening: isListening }" :disabled="speechButtonLocked">
             🎤 {{ isListening ? getTranslation(currentLanguage, 'STOP_VOICE_INPUT') : getTranslation(currentLanguage, 'START_VOICE_INPUT') }}
           </button>
 
@@ -100,7 +99,8 @@ export default {
       currentTheme: "default",
       recognition: null,
       isListening: false,
-      listeningStatusMessage: "" // 显示当前语音识别状态
+      speechButtonLocked: false,
+      listeningStatusMessage: ""
     };
   },
   props: ["messages", "chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
@@ -143,16 +143,15 @@ export default {
       this.recognition.onresult = (event) => {
         const result = event.results[event.results.length - 1][0].transcript;
         this.userInput = result;
-        this.listeningStatusMessage = "LISTENING";
       };
       this.recognition.onerror = (event) => {
         console.error("Speech recognition error:", event.error);
         this.isListening = false;
-        this.listeningStatusMessage = "VOICE_RECOGNITION_ERROR";
+        this.speechButtonLocked = false;
       };
       this.recognition.onstart = () => {
         this.isListening = true;
-        this.listeningStatusMessage = "LISTENING";
+        this.speechButtonLocked = false;
       };
       this.recognition.onend = () => {
         if (this.isListening) {
@@ -206,15 +205,18 @@ export default {
     },
 
     toggleSpeechRecognition() {
+      if (this.speechButtonLocked) return;
+      this.speechButtonLocked = true;
+
       if (!this.recognition) {
-        this.listeningStatusMessage = "SPEECH_RECOGNITION_NOT_SUPPORTED";
         alert(this.getTranslation(this.currentLanguage, 'SPEECH_RECOGNITION_NOT_SUPPORTED'));
+        this.speechButtonLocked = false;
         return;
       }
       if (this.isListening) {
         this.recognition.stop();
         this.isListening = false;
-        this.listeningStatusMessage = "";
+        this.speechButtonLocked = false;
       } else {
         const langMap = {
           en: 'en-US',
@@ -223,8 +225,7 @@ export default {
         };
         this.recognition.lang = langMap[this.currentLanguage] || 'en-US';
         this.recognition.start();
-        this.isListening = true;
-        this.listeningStatusMessage = "LISTENING";
+        // unlock in onstart
       }
     },
 
@@ -272,6 +273,7 @@ export default {
       }
       this.$emit("addMessage", "user", this.userInput);
       this.$emit("setButtonLock", true);
+
       const messageToSend = this.userInput.trim();
       this.userInput = "";
 
@@ -290,6 +292,7 @@ export default {
         console.error("Error sending message:", error);
         this.$emit("addMessage", "System", localStorage.getItem("langCode"), "FAILED_TO_SEND_MESSAGE");
       }
+
       this.scrollToBottom();
       this.$emit("setButtonLock", false);
     },
@@ -301,12 +304,10 @@ export default {
       });
     },
 
-    // Returns the finished message text for a given index if it exists in localStorage.
     getFinishedMessage(index) {
       const key = `finishedMessage_${this.currentChatID}_${index}`;
       return localStorage.getItem(key);
     },
-    // Saves the finished message text for a given index into localStorage.
     setFinishedMessage(index, text) {
       const key = `finishedMessage_${this.currentChatID}_${index}`;
       localStorage.setItem(key, text);
