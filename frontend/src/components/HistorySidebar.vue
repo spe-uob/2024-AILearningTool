@@ -15,16 +15,23 @@
       <!-- Chat History List -->
       <div class="history-list-wrapper">
         <div v-for="chat in chats" :key="chat.chatID" class="chat-item-container">
-          <button class="chat-item selectable-chat" @click="selectChat(chat.chatID)" :class="{ 'selected': currentChatID === chat.chatID }"  :disabled="chatInitButtonsDisabled">
+          <div
+            class="chat-item selectable-chat"
+            :class="{ selected: chat.chatID === currentChatID }"
+            @click="selectChat(chat.chatID)"
+          >
             {{ chat.title }}
+          </div>
+          <!-- Add three dots menu button -->
+          <button class="three-dots-btn" @click.stop="toggleOptions(chat.chatID)">
+            <i class="fa fa-ellipsis-v"></i>
           </button>
-          <!-- three dots options-->
-          <div v-if="currentChatID === chat.chatID" class="chat-options">
-            <button class="options-btn" @click="toggleOptions(chat.chatID)">⋮</button>
-            <!-- options menu -->
-            <div v-if="showOptionsFor === chat.chatID" class="options-menu">
-              <button @click="exportChat(chat.chatID)">{{ getTranslation(currentLanguage, "EXPORT") }}</button>
-            </div>
+          
+          <!-- Options menu -->
+          <div v-if="showOptionsFor === chat.chatID" class="options-menu">
+            <button @click.stop="exportChat(chat.chatID, chat.title)">
+              <i class="fa fa-download"></i> Export
+            </button>
           </div>
         </div>
       </div>
@@ -35,6 +42,7 @@
 <script>
 import { getTheme } from "@/assets/color.js";
 import { getTranslation } from "@/assets/language";
+import { BACKEND_URL } from "@/assets/globalConstants";
 
 export default {
   props: ["chats", "currentChatID", "currentLanguage", "chatInitButtonsDisabled"],
@@ -43,11 +51,34 @@ export default {
       isCollapsed: true, // Controls sidebar visibility
       currentTheme: "default", // Tracks the current theme
       themeStyles: {}, // Stores dynamic styles
-      showOptionsFor: null, // Options menu visibility
+      showOptionsFor: null, // Track which chat's options are visible
     };
   },
   methods: {
     getTranslation,
+
+    async fetchChatHistory() {
+      const sessionID = localStorage.getItem("sessionID");
+      if (!sessionID) {
+        console.error("No sessionID found in localStorage.");
+        return;
+      }
+
+      try {
+        const response = await fetch(`${BACKEND_URL}/getUserChats?sessionID=${sessionID}`);
+        if (!response.ok) throw new Error("Failed to load chat history.");
+
+        const data = await response.json();
+        if (data.chatList && Array.isArray(data.chatList)) {
+          this.$emit("updateChats", data.chatList);
+        }
+      } catch (error) {
+        console.error("Error loading chat history:", error);
+      }
+    },
+
+
+
     addChat() {
       this.$emit("resetMainContent");
       this.isCollapsed = true;
@@ -78,20 +109,87 @@ export default {
         this.applyTheme(event.detail.themeName);
       });
     },
-    // Toggle Options Menu
-    toggleOptions(chatID) {
-      if (this.showOptionsFor === chatID) {
+    async exportChat(chatID, title) {
+      try {
+        const sessionID = localStorage.getItem("sessionID");
+        if (!sessionID) {
+          console.error("No sessionID found in localStorage.");
+          return;
+        }
+        
+        // Fetch chat history for the specific chat
+        const response = await fetch(`${BACKEND_URL}/getChatHistory`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionID, chatID })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch chat history for export. Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log("Received chat data:", data);
+        
+        // Handle the case where history is a JSON string
+        let messages = [];
+        if (data.history && typeof data.history === 'string') {
+          try {
+            messages = JSON.parse(data.history);
+          } catch (e) {
+            console.error("Failed to parse history JSON:", e);
+            throw new Error("Invalid chat history format");
+          }
+        } else if (data.messages && Array.isArray(data.messages)) {
+          messages = data.messages;
+        } else if (Array.isArray(data)) {
+          messages = data;
+        } else {
+          console.error("Unexpected data format:", data);
+          throw new Error("Invalid chat data format.");
+        }
+        
+        if (!Array.isArray(messages) || messages.length === 0) {
+          throw new Error("No messages found in chat history");
+        }
+        
+        // Format the chat messages
+        let content = `# ${title}\n\n`;
+        
+        messages.forEach(msg => {
+          // Handle different possible message formats
+          const sender = msg.sender || msg.role || msg.user || "Unknown";
+          const messageContent = msg.content || msg.message || msg.text || "";
+          const role = sender.toLowerCase() === "user" ? "User" : "Assistant";
+          
+          content += `## ${role}:\n${messageContent}\n\n`;
+        });
+        
+        // Create and download the file
+        const blob = new Blob([content], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${title.replace(/[^a-z0-9]/gi, '_')}_chat.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        // Close the options menu
         this.showOptionsFor = null;
-      } else {
-        this.showOptionsFor = chatID;
+      } catch (error) {
+        console.error("Error exporting chat:", error);
+        alert("Failed to export chat. Please try again.");
       }
     },
-    
-    // export chat
-    exportChat(chatID) {
-      this.$emit("exportChat", chatID);
-      this.showOptionsFor = null; 
+    toggleOptions(chatID) {
+      this.showOptionsFor = this.showOptionsFor === chatID ? null : chatID;
     },
+    // Close options menu when clicking outside
+    closeOptionsMenu() {
+      this.showOptionsFor = null;
+    }
   },
   computed: {
     asideStyles() {
@@ -110,7 +208,15 @@ export default {
   mounted() {
     this.applyTheme("default");
     this.listenForThemeChange();
+    this.fetchChatHistory();
+    
+    // Add event listener to close options menu when clicking outside
+    document.addEventListener('click', this.closeOptionsMenu);
   },
+  beforeUnmount() {
+    // Remove event listener
+    document.removeEventListener('click', this.closeOptionsMenu);
+  }
 };
 </script>
 
@@ -178,13 +284,6 @@ export default {
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.08);
 }
 
-.chat-item-container {
-  display: flex;
-  align-items: center;
-  margin: 10px 0;
-  position: relative;
-}
-
 .chat-item {
   width: 100%;
   padding: 14px;
@@ -228,30 +327,31 @@ export default {
   background-color: var(--primary-color);
 }
 
-/* 3 dots Option */
-.chat-options {
-  position: absolute;
-  right: 5px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
+/* Three dots button styles */
+.chat-item-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
 }
 
-.options-btn {
+/* Three dots button styles */
+.three-dots-btn {
   background: transparent;
   border: none;
-  cursor: pointer;
-  font-size: 22px; 
-  padding: 5px;
   color: var(--text-color);
-  font-weight: bold; 
-  opacity: 0.8; 
+  cursor: pointer;
+  padding: 5px;
+  margin-left: 5px;
+  opacity: 0.6;
+  transition: opacity 0.3s;
 }
 
-.options-btn:hover {
-  opacity: 1; 
+.three-dots-btn:hover {
+  opacity: 1;
 }
 
+/* Options menu styles */
 .options-menu {
   position: absolute;
   right: 0;
@@ -265,16 +365,22 @@ export default {
 }
 
 .options-menu button {
+  display: block;
   width: 100%;
   text-align: left;
   padding: 8px 12px;
-  background: transparent;
+  background: none;
   border: none;
   cursor: pointer;
   color: var(--text-color);
+  transition: background-color 0.2s;
 }
 
 .options-menu button:hover {
   background-color: var(--accent-color);
+}
+
+.options-menu button i {
+  margin-right: 8px;
 }
 </style>

@@ -130,7 +130,7 @@ The backend is based on Spring Boot (an open-source Java framework).
 Data will be stored in a SQLite database.
 User prompts for the chatbot will be sent using API requests from the Spring Boot backend to the OpenAI language model.
 
-![architecture_diagram](/docs/architecture_diagram.png)
+![architecture_diagram](/docs/Diagrams/architecture_diagram.png)
 
 ## User Instructions:
 
@@ -178,7 +178,7 @@ User prompts for the chatbot will be sent using API requests from the Spring Boo
 
 This flowchart outlines the interaction pathways within the chatbot, guiding users through key topics such as SkillsBuild courses, university life questions, and IBM SkillsBuild platform information. Each pathway details the chatbot's prompts, and user responses, providing an overview of the chatbot’s functionality.
 
-![watson_flow](/docs/watson_flow.png)
+![watson_flow](/docs/Diagrams/watson_flow.png)
 
 ## Developer Instructions:
 To get started with developing or contributing to this project, follow the steps below:

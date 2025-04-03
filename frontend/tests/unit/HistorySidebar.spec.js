@@ -18,7 +18,25 @@ jest.mock('@/assets/color.js', () => ({
 }))
 
 describe('HistorySidebar.vue', () => {
-  it('renders correctly when expanded', async () => {
+  beforeEach(() => {
+    // Mock localStorage with a valid sessionID to prevent errors
+    Object.defineProperty(window, 'localStorage', {
+      value: {
+        getItem: jest.fn(() => 'test-session-id'),
+        setItem: jest.fn()
+      }
+    })
+    
+    // Mock fetch to prevent actual API calls
+    global.fetch = jest.fn(() => 
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ chatIDs: [] })
+      })
+    )
+  })
+  
+  it('renders correctly when expanded', async () => { 
     const wrapper = mount(HistorySidebar, {
       props: {
         chats: [
@@ -108,7 +126,7 @@ describe('HistorySidebar.vue', () => {
     expect(wrapper.emitted().chatSelected[0]).toEqual(['2'])
   })
   
-  it('has a new chat button', async () => {
+  it('has a new chat button', async () => { 
     const wrapper = mount(HistorySidebar, {
       props: {
         chats: [

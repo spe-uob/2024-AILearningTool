@@ -12,8 +12,8 @@
             <h4>1) {{getTranslation(currentLanguage, "LANGUAGE")}}</h4>
             <div class="language-buttons">
               <button @click="changeLanguage('en')">English</button>
-              <button @click="changeLanguage('zh')">Chinese</button>
-              <button @click="changeLanguage('ru')">Russian</button>
+              <button @click="changeLanguage('zh')">简体中文</button>
+              <button @click="changeLanguage('ru')">Русский</button>
             </div>
           </li>
           <li>
@@ -71,7 +71,7 @@ export default {
     Logout() {
       localStorage.removeItem("chats");
       localStorage.removeItem("token");
-      localStorage.removeItem("userId");
+      localStorage.removeItem("sessionID");
 
       document.cookie.split(";").forEach((cookie) => {
         const name = cookie.split("=")[0].trim();

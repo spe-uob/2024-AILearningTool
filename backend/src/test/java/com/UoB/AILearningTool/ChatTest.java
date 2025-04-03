@@ -1,125 +1,134 @@
 package com.UoB.AILearningTool;
 
+import com.UoB.AILearningTool.model.ChatEntity;
+import com.UoB.AILearningTool.model.UserEntity;
+import com.UoB.AILearningTool.repository.ChatRepository;
+import com.UoB.AILearningTool.repository.UserRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+@SpringBootTest
+@Transactional
+@TestPropertySource(locations = "classpath:application-test.yml")
 public class ChatTest {
+
+    private final String mockThreadId = "test-thread-id";
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ChatRepository chatRepository;
+
+
+
     @Test
     @DisplayName("Check if checkOwner method compares owners correctly.")
     public void checkOwnerTest() {
-        OpenAIAPIController OAIC = new OpenAIAPIController();
-        User user = new User(true);
-        Chat chat = new Chat(user, "This is a first message.", OAIC.createThread());
+        UserEntity user = new UserEntity("testUserLogin", "testUserPassword");
+        ChatEntity chat = new ChatEntity(user, "This is a first message.", mockThreadId);
 
-        Assertions.assertTrue(chat.checkOwner(user));
+        assertEquals(user, chat.getOwner());
     }
 
     @Test
     @DisplayName("Check if initial message history is saved correctly.")
     public void initialMessageHistoryTest() {
         String initialMessage = "This is a first message.";
-        OpenAIAPIController OAIC = new OpenAIAPIController();
-        User user = new User(true);
-        Chat chat = new Chat(user, initialMessage, OAIC.createThread());
+        UserEntity user = new UserEntity("testUserLogin2", "testUserPassword2");
+        ChatEntity chat = new ChatEntity(user, initialMessage, mockThreadId);
 
-        JSONArray expectedMessageHistory = new JSONArray();
-        JSONObject onlyMessage = new JSONObject();
-        onlyMessage.put("role", "user");
-        onlyMessage.put("content", initialMessage);
-        expectedMessageHistory.put(onlyMessage);
+        JSONArray expected = new JSONArray().put(new JSONObject()
+                .put("role", "user")
+                .put("content", initialMessage));
 
-        JSONArray actualMessageHistory = chat.getMessageHistory(user);
-        Assertions.assertEquals(expectedMessageHistory.toString(), actualMessageHistory.toString());
+        JSONArray actual = chat.getMessageHistory(user);
+        assertEquals(expected.toString(), actual.toString());
     }
 
     @Test
-    @DisplayName("Check if messages are added to message history correctly.")
+    @DisplayName("Check if user messages are added correctly.")
     public void addUserMessageTest() {
         String initialMessage = "This is a first message.";
-        String extraUserMessage = "Tell me a joke.";
+        String newMessage = "Tell me a joke.";
+        UserEntity user = new UserEntity("testUserLogin3", "testUserPassword3");
+        ChatEntity chat = new ChatEntity(user, initialMessage, mockThreadId);
 
-        // Create a chat and add 2 user messages.
-        User user = new User(true);
-        OpenAIAPIController OAIC = new OpenAIAPIController();
-        Chat chat = new Chat(user, initialMessage, OAIC.createThread());
+        chat.addUserMessage(user, newMessage);
+        JSONArray history = chat.getMessageHistory(user);
 
-        // Create expected message history.
-        JSONArray expectedMessageHistory = new JSONArray();
-        JSONObject onlyMessage = new JSONObject();
-        onlyMessage.put("role", "user");
-        onlyMessage.put("content", initialMessage);
-        expectedMessageHistory.put(onlyMessage);
-        onlyMessage = new JSONObject();
-        onlyMessage.put("role", "user");
-        onlyMessage.put("content", extraUserMessage);
-        expectedMessageHistory.put(onlyMessage);
-
-        // Add a new user message to the chat
-        chat.addUserMessage(user.getID(), extraUserMessage);
-
-        JSONArray actualMessageHistory = chat.getMessageHistory(user);
-        Assertions.assertEquals(2, expectedMessageHistory.length());
-        Assertions.assertEquals("user", actualMessageHistory.getJSONObject(0).getString("role"));
-        Assertions.assertEquals(initialMessage, actualMessageHistory.getJSONObject(0).getString("content"));
-        Assertions.assertEquals("user", actualMessageHistory.getJSONObject(1).getString("role"));
-        Assertions.assertEquals(extraUserMessage, actualMessageHistory.getJSONObject(1).getString("content"));
+        assertEquals(2, history.length());
+        assertEquals("user", history.getJSONObject(0).getString("role"));
+        assertEquals(initialMessage, history.getJSONObject(0).getString("content"));
+        assertEquals("user", history.getJSONObject(1).getString("role"));
+        assertEquals(newMessage, history.getJSONObject(1).getString("content"));
     }
 
     @Test
-    @DisplayName("Check if AI messages are added to message history correctly.")
+    @DisplayName("Check if AI messages are added correctly.")
     public void addAIMessageTest() {
-        OpenAIAPIController OAIC = new OpenAIAPIController();
-        String initialMessage = "I need some assistance with finding courses on IBM SkillsBuild platform.";
-        String extraUserMessage = "Tell me a joke.";
+        String initialMessage = "Need help finding courses.";
+        String aiResponse = "Here is a suggestion";
+        UserEntity user = new UserEntity("testUserLogin4", "testUserPassword4");
+        ChatEntity chat = new ChatEntity(user, initialMessage, mockThreadId);
 
-        // Create a chat
-        User user = new User(true);
-        Chat chat = new Chat(user, initialMessage, OAIC.createThread());
+        chat.addAIMessage(user, aiResponse);
+        JSONArray history = chat.getMessageHistory(user);
 
-        // Add a new user message to the chat
-        OAIC.runThread(chat.getThreadID());
-        chat.addAIMessage(user.getID(), extraUserMessage);
-
-        JSONArray actualMessageHistory = chat.getMessageHistory(user);
-        Assertions.assertEquals(2, actualMessageHistory.length());
-        Assertions.assertEquals("user", actualMessageHistory.getJSONObject(0).getString("role"));
-        Assertions.assertEquals("assistant", actualMessageHistory.getJSONObject(1).getString("role"));
-        Assertions.assertNotNull(actualMessageHistory.getJSONObject(0).getString("content"));
-        Assertions.assertNotNull(actualMessageHistory.getJSONObject(1).getString("content"));
+        assertEquals(2, history.length());
+        assertEquals("user", history.getJSONObject(0).getString("role"));
+        assertEquals("assistant", history.getJSONObject(1).getString("role"));
+        assertEquals(aiResponse, history.getJSONObject(1).getString("content"));
     }
 
+
+
     @Test
-    @DisplayName("Check if message history in a chat can only be accessed by its owner.")
+    @DisplayName("Only the chat owner can access its message history (via database)")
     public void chatMessageHistoryPermissionTest() {
         final String initialMessage = "This is a first message.";
-        User currentUser;
-        Chat currentChat;
-        ArrayList<User> users = new ArrayList<>();
-        ArrayList<Chat> chats = new ArrayList<>();
 
-        // Creating chats and checking whether their owners can access their message histories.
-        for (int i = 0; i < 20; i++) {
-            currentUser = new User(true);
-            users.add(currentUser);
-            currentChat = new Chat(currentUser, initialMessage, "TEST");
-            chats.add(currentChat);
-            // Message history has to be returned to its owner
-            Assertions.assertNotNull(currentChat.getMessageHistory(currentUser));
+        // Ensure that the database is cleared before testing to prevent interference from old data
+        chatRepository.deleteAll();
+        userRepository.deleteAll();
+
+// Create and save users and their chats
+        for (int i = 0; i < 10; i++) {
+            UserEntity user = new UserEntity("dbUser" + i, "password" + i);
+            userRepository.save(user);
+            ChatEntity chat = new ChatEntity(user, initialMessage, "thread" + i);
+            chatRepository.save(chat);
         }
 
-        for (int i = 0; i < 20; i++) {
-            currentChat = chats.get(i);
-            // Users that aren't owners of the chat will receive null instead of message history.
-            for (int j = 0; j < 20; j++) {
-                if (i == j) {continue;}
-                currentUser = users.get(j);
-                JSONArray actualMessageHistory  = currentChat.getMessageHistory(currentUser);
-                Assertions.assertNull(actualMessageHistory);
+        List<UserEntity> users = userRepository.findAll();
+        List<ChatEntity> chats = chatRepository.findAll();
+
+        for (ChatEntity chat : chats) {
+            UserEntity owner = chat.getOwner();
+
+
+            JSONArray ownerHistory = chat.getMessageHistory(owner);
+            assertNotNull(ownerHistory, "Owner should be able to access their chat");
+
+
+            assertTrue(ownerHistory.length() >= 1);
+            assertEquals(initialMessage, ownerHistory.getJSONObject(0).getString("content"));
+
+
+            for (UserEntity user : users) {
+                if (!user.getUsername().equals(owner.getUsername())) {
+                    JSONArray otherHistory = chat.getMessageHistory(user);
+                    assertNull(otherHistory, user.getUsername() + " 不应能访问 " + owner.getUsername() + " 的聊天");
+                }
             }
         }
     }

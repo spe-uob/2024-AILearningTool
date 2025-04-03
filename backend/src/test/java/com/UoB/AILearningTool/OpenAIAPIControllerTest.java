@@ -1,43 +1,85 @@
 package com.UoB.AILearningTool;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
+import com.UoB.AILearningTool.model.ChatEntity;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
-import java.util.ArrayList;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
-@DisplayName("Testing OpenAI API Controller for response handling")
-public class OpenAIAPIControllerTest {
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-    @Test
-    @DisplayName("OpenAI API should be able to generate some response for initial chat.")
-    public void createThreadTest() {
-        OpenAIAPIController OAIC = new OpenAIAPIController();
-        Assertions.assertNotNull(OAIC.createThread(), "Thread IDs must not be null");
+class OpenAIAPIControllerTest {
+
+    private OpenAIAPIController controller;
+
+    @BeforeEach
+    void setup() {
+        controller = new OpenAIAPIController(); 
     }
 
+    @SuppressWarnings("unchecked")
     @Test
-    @DisplayName("OpenAI API should be able to generate some response for initial chat.")
-    public void initialMessageHistoryRequestTest() {
-        String newMessage = "I need help with finding online courses SkillsBuild.";
-        OpenAIAPIController OAIC = new OpenAIAPIController();
-        DatabaseController DBC = new DatabaseController();
-        User user = DBC.getUser(DBC.addUser(true));
-        Chat chat = DBC.getChat(user, DBC.createChat(user, newMessage, OAIC.createThread()));
+    void createThreadTest() throws Exception {
+        // mock static HttpClient.newBuilder().build() and send()
+        HttpClient mockHttpClient = mock(HttpClient.class);
+        HttpResponse<String> mockResponse = mock(HttpResponse.class);
 
-        Integer response = OAIC.sendUserMessage(chat, newMessage);
-        Assertions.assertEquals(200, response);
-        response = OAIC.runThread(chat.getThreadID());
-        Assertions.assertEquals(200, response);
-        // Wait until any runs for a thread are completed
-        while (OAIC.isLocked(chat)) {
-            continue;
+        when(mockResponse.statusCode()).thenReturn(200);
+        when(mockResponse.body()).thenReturn("{\"id\": \"thread_abc123\"}");
+
+        try (MockedStatic<HttpClient> mockedHttpClientStatic = mockStatic(HttpClient.class)) {
+            HttpClient.Builder builder = mock(HttpClient.Builder.class);
+            when(builder.build()).thenReturn(mockHttpClient);
+            when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn(mockResponse);
+            mockedHttpClientStatic.when(HttpClient::newBuilder).thenReturn(builder);
+
+            String threadId = controller.createThread();
+            assertNotNull(threadId, "Thread ID should not be null");
+            assertEquals("thread_abc123", threadId);
         }
-        WatsonxResponse AIResponse = OAIC.getLastThreadMessage(chat.getThreadID());
+    }
 
+    @SuppressWarnings("unchecked")
+    @Test
+    void initialMessageHistoryRequestTest() throws Exception {
+       
+        ChatEntity mockChat = new ChatEntity();
+        mockChat.setThreadID("thread_test");
 
-        Assertions.assertNotNull(AIResponse.responseText, "The message content should not be null.");
-        Assertions.assertNotEquals(AIResponse.responseText, newMessage);
-        Assertions.assertEquals(200, AIResponse.statusCode, "The status code should be 200 for a successful response.");
+        HttpClient mockHttpClient = mock(HttpClient.class);
+        HttpResponse<String> mockResponse = mock(HttpResponse.class);
+        String jsonResponse = """
+            {
+              "data": [
+                {
+                  "content": [
+                    {
+                      "text": {
+                        "value": "Hello from OpenAI!"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+        """;
+
+        when(mockResponse.statusCode()).thenReturn(200);
+        when(mockResponse.body()).thenReturn(jsonResponse);
+
+        try (MockedStatic<HttpClient> mockedHttpClientStatic = mockStatic(HttpClient.class)) {
+            HttpClient.Builder builder = mock(HttpClient.Builder.class);
+            when(builder.build()).thenReturn(mockHttpClient);
+            when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn(mockResponse);
+            mockedHttpClientStatic.when(HttpClient::newBuilder).thenReturn(builder);
+
+            WatsonxResponse response = controller.getLastThreadMessage(mockChat.getThreadID());
+            assertEquals(200, response.status());
+            assertEquals("Hello from OpenAI!", response.message());
+        }
     }
 }

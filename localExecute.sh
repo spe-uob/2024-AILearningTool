@@ -63,7 +63,13 @@ spring.web.resources.static-locations=classpath:/static/
 server.port=$PORT
 server.servlet.encoding.charset=UTF-8
 server.servlet.encoding.enabled=true
-server.servlet.encoding.force=true" > backend/src/main/resources/application.properties
+server.servlet.encoding.force=true
+spring.datasource.url=jdbc:sqlite:database.db
+spring.datasource.driver-class-name=org.sqlite.JDBC
+spring.jpa.database-platform=org.hibernate.community.dialect.SQLiteDialect
+spring.jpa.hibernate.ddl-auto=update
+spring.datasource.username=
+spring.datasource.password=" > backend/src/main/resources/application.properties
 
 # Overwrites the port used in the frontend code
 echo "const BACKEND_URL = 'http://localhost:$PORT';

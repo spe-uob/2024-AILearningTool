@@ -16,23 +16,11 @@
 <script>
 import SettingSidebar from "./components/SettingSidebar.vue";
 import { getTheme } from "./assets/color.js";
-import { useRouter } from "vue-router";
 
 export default {
   name: "App",
   components: {
     SettingSidebar,
-  },
-  setup() {
-    const router = useRouter();
-    router.beforeEach((to, from, next) => {
-      const isAuthenticated = localStorage.getItem("token"); 
-      if (to.path !== "/login" && !isAuthenticated) {
-        next("/login"); 
-      } else {
-        next(); 
-      }
-    });
   },
   data() {
     return {
