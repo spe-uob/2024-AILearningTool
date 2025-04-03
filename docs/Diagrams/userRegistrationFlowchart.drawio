@@ -1,0 +1,86 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64; rv:132.0) Gecko/20100101 Firefox/132.0" version="24.8.4">
+  <diagram name="Page-1" id="oXbI0W0cz17EY1wspH7x">
+    <mxGraphModel dx="1468" dy="892" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="zoKNT5jTFOSPRhCnj2ld-5" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=3;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="zoKNT5jTFOSPRhCnj2ld-21" target="zoKNT5jTFOSPRhCnj2ld-22">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="408" y="248.9999999999999" as="sourcePoint" />
+            <mxPoint x="408" y="329" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zoKNT5jTFOSPRhCnj2ld-10" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=3;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="zoKNT5jTFOSPRhCnj2ld-22" target="zoKNT5jTFOSPRhCnj2ld-12">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="408" y="659" as="sourcePoint" />
+            <mxPoint x="338" y="739" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zoKNT5jTFOSPRhCnj2ld-13" value="&lt;font style=&quot;font-size: 15px;&quot;&gt;Yes&lt;/font&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="zoKNT5jTFOSPRhCnj2ld-10">
+          <mxGeometry x="0.2308" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zoKNT5jTFOSPRhCnj2ld-11" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=3;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="zoKNT5jTFOSPRhCnj2ld-22" target="zoKNT5jTFOSPRhCnj2ld-15">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="408" y="659" as="sourcePoint" />
+            <mxPoint x="478" y="739" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zoKNT5jTFOSPRhCnj2ld-14" value="&lt;font style=&quot;font-size: 15px;&quot;&gt;No&lt;/font&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="zoKNT5jTFOSPRhCnj2ld-11">
+          <mxGeometry x="0.2938" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zoKNT5jTFOSPRhCnj2ld-12" value="Set optionalConsent cookie to true" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#E6E6E6;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="188" y="609" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="zoKNT5jTFOSPRhCnj2ld-15" value="Set optionalConsent cookie to false" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#E6E6E6;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="428" y="609" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="zoKNT5jTFOSPRhCnj2ld-16" value="Send GET /signup request to backend" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#E6E6E6;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="308" y="769" width="206" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="zoKNT5jTFOSPRhCnj2ld-17" value="Save userID cookie received from response" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#E6E6E6;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="308" y="1045" width="206" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="zoKNT5jTFOSPRhCnj2ld-19" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=3;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="zoKNT5jTFOSPRhCnj2ld-12" target="zoKNT5jTFOSPRhCnj2ld-16">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="328" y="689" as="sourcePoint" />
+            <mxPoint x="328" y="769" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zoKNT5jTFOSPRhCnj2ld-20" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=3;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="zoKNT5jTFOSPRhCnj2ld-15" target="zoKNT5jTFOSPRhCnj2ld-16">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="298" y="699" as="sourcePoint" />
+            <mxPoint x="418" y="779" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zoKNT5jTFOSPRhCnj2ld-21" value="&lt;div style=&quot;font-size: 15px;&quot;&gt;&lt;font style=&quot;font-size: 15px;&quot;&gt;User opens the webapp for&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 15px;&quot;&gt;&lt;font style=&quot;font-size: 15px;&quot;&gt;the first time&lt;/font&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#E6E6E6;" vertex="1" parent="1">
+          <mxGeometry x="308" y="169" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="zoKNT5jTFOSPRhCnj2ld-22" value="&lt;div&gt;&lt;font style=&quot;font-size: 15px;&quot;&gt;Does the user consent to optional cookies?&lt;/font&gt;&lt;/div&gt;" style="rhombus;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#E6E6E6;" vertex="1" parent="1">
+          <mxGeometry x="248" y="329" width="320" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="zoKNT5jTFOSPRhCnj2ld-27" value="Backend generates userID and returns it with a cookie in the response" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=3;fillColor=#E6E6E6;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="308" y="905" width="206" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="zoKNT5jTFOSPRhCnj2ld-28" value="&lt;font style=&quot;font-size: 32px;&quot;&gt;User registration process&lt;font style=&quot;font-size: 32px;&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="168" y="45" width="480" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="zoKNT5jTFOSPRhCnj2ld-29" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=3;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="zoKNT5jTFOSPRhCnj2ld-16" target="zoKNT5jTFOSPRhCnj2ld-27">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="394" y="875" as="sourcePoint" />
+            <mxPoint x="274" y="955" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zoKNT5jTFOSPRhCnj2ld-30" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=3;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="zoKNT5jTFOSPRhCnj2ld-27" target="zoKNT5jTFOSPRhCnj2ld-17">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="548" y="709" as="sourcePoint" />
+            <mxPoint x="428" y="789" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

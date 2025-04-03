@@ -1,103 +1,157 @@
 package com.UoB.AILearningTool;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
+import com.UoB.AILearningTool.model.ChatEntity;
+import com.UoB.AILearningTool.model.UserEntity;
+import com.UoB.AILearningTool.repository.ChatRepository;
+import com.UoB.AILearningTool.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
+
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 public class DatabaseControllerTest {
-    @Test
-    @DisplayName("Check whether users can be created.")
-    public void createUsers() {
-        DatabaseController DBC = new DatabaseController();
-        ArrayList<String> usernames = new ArrayList<>();
-        for (int i = 0; i < 20; i++) {
-            usernames.add(DBC.addUser(true));
-        }
 
-        for (String username : usernames) {
-            User user = DBC.getUser(username);
-            Assertions.assertEquals(username, user.getID());
-        }
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private ChatRepository chatRepository;
+
+    @InjectMocks
+    private DatabaseController databaseController;
+
+    private UserEntity testUser;
+    private ChatEntity testChat;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        testUser = new UserEntity("testUser", "password123");
+        testChat = new ChatEntity(testUser, "Hello, this is a test message.", "thread123");
     }
 
     @Test
-    @DisplayName("Check whether users can be deleted.")
-    public void deleteUsers() {
-        DatabaseController DBC = new DatabaseController();
-        ArrayList<String> usernames = new ArrayList<>();
-        for (int i = 0; i < 20; i++) {
-            usernames.add(DBC.addUser(true));
-        }
+    void testGetUser_UserExists() {
+        // Given
+        when(userRepository.findById("testUser")).thenReturn(Optional.of(testUser));
 
-        // Deleting all users
-        for (String username : usernames) {
-            DBC.removeUser(username);
-        }
+        // When
+        UserEntity result = databaseController.getUser("testUser");
 
-        // Search for non-existing user must return null
-        for (String username : usernames) {
-            Assertions.assertNull(DBC.getUser(username));
-        }
+        // Then
+        assertNotNull(result);
+        assertEquals("testUser", result.getUsername());
+        verify(userRepository, times(1)).findById("testUser");
     }
 
     @Test
-    @DisplayName("Check whether chats can be created and accessed.")
-    public void createChats() {
-        DatabaseController DBC = new DatabaseController();
-        ArrayList<User> users = new ArrayList<>();
-        ArrayList<String> chatIDs = new ArrayList<>();
+    void testGetUser_UserDoesNotExist() {
+        // Given
+        when(userRepository.findById("nonExistentUser")).thenReturn(Optional.empty());
 
-        // Create users.
-        for (int i = 0; i < 20; i++) {
-            users.add(DBC.getUser(DBC.addUser(true)));
-        }
+        // When
+        UserEntity result = databaseController.getUser("nonExistentUser");
 
-        // Create chats.
-        for (User user : users) {
-            chatIDs.add(DBC.createChat(user, "This is a first message."));
-        }
-
-        // DBC.getChat() must return a non-null element.
-        for (int i = 0; i < 20; i++) {
-            Chat actualChat = DBC.getChat(users.get(i), chatIDs.get(i));
-            Assertions.assertNotNull(actualChat);
-        }
+        // Then
+        assertNull(result);
+        verify(userRepository, times(1)).findById("nonExistentUser");
     }
 
     @Test
-    @DisplayName("Check whether chats can only be accessed by their owners.")
-    public void accessChatPermissionTest() {
-        Chat currentChat;
-        User currentUser;
-        DatabaseController DBC = new DatabaseController();
-        ArrayList<User> users = new ArrayList<>();
-        ArrayList<String> chatIDs = new ArrayList<>();
+    void testAddUser_UserAlreadyExists() {
+        // Given
+        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(testUser));
 
-        // Create users.
-        for (int i = 0; i < 20; i++) {
-            users.add(DBC.getUser(DBC.addUser(true)));
-        }
+        // When
+        boolean result = databaseController.addUser("testUser", "newPassword");
 
-        // Create chats.
-        for (User user : users) {
-            chatIDs.add(DBC.createChat(user, "This is a first message."));
-        }
-
-        for (int i = 0; i < 20; i++) {
-            // If currentUser is the chat owner, Chat object is returned.
-            currentUser = users.get(i);
-            currentChat = DBC.getChat(currentUser, chatIDs.get(i));
-            Assertions.assertNotNull(currentChat);
-            for (int j = 0; j < 20; j++) {
-                if (i == j) {continue;}
-                // If currentUser isn't the chat owner, null object is returned.
-                currentUser = users.get(j);
-                currentChat = DBC.getChat(currentUser, chatIDs.get(i));
-                Assertions.assertNull(currentChat);
-            }
-        }
+        // Then
+        assertFalse(result);
+        verify(userRepository, times(1)).findByUsername("testUser");
     }
 
+
+    @Test
+    void testAddUser_UserDoesNotExist() {
+        // Given
+        when(userRepository.findByUsername("newUser")).thenReturn(Optional.empty());
+
+        // When
+        boolean result = databaseController.addUser("newUser", "newPassword");
+
+        // Then
+        assertTrue(result);
+        verify(userRepository, times(1)).findByUsername("newUser");
+        verify(userRepository, times(1)).save(any(UserEntity.class));
+    }
+
+
+    @Test
+    void testCreateChat_Success() {
+        
+        when(userRepository.findBySessionID("validSessionID")).thenReturn(Optional.of(testUser));
+
+        ChatEntity result = databaseController.createChat("validSessionID", "Initial message");
+
+        assertNotNull(result);
+        assertEquals("Initial message", new org.json.JSONArray(result.getMessageHistory(testUser).toString())
+        .getJSONObject(0)
+        .getString("content"));
+
+        verify(chatRepository, times(1)).save(any(ChatEntity.class));
+    }
+
+    @Test
+    void testCreateChat_Failure_UserNotFound() {
+        
+        when(userRepository.findBySessionID("invalidSessionID")).thenReturn(Optional.empty());
+       
+        ChatEntity result = databaseController.createChat("invalidSessionID", "Initial message");
+
+        assertNull(result);
+        verify(chatRepository, times(0)).save(any(ChatEntity.class));
+    }
+
+    @Test
+    void testDeleteChat_Success() {
+        
+        when(chatRepository.findById("chat123")).thenReturn(Optional.of(testChat));
+        
+        boolean result = databaseController.deleteChat(testUser, "chat123");
+        
+        assertTrue(result);
+        verify(chatRepository, times(1)).deleteById("chat123");
+    }
+
+    @Test
+    void testDeleteChat_Failure_ChatNotFound() {
+        
+        when(chatRepository.findById("nonExistentChat")).thenReturn(Optional.empty());
+
+        
+        boolean result = databaseController.deleteChat(testUser, "nonExistentChat");
+
+               assertFalse(result);
+        verify(chatRepository, times(0)).deleteById("nonExistentChat");
+    }
+
+    @Test
+    void testDeleteChat_Failure_NotOwner() {
+
+        UserEntity anotherUser = new UserEntity("anotherUser", "password123");
+        ChatEntity anotherChat = new ChatEntity(anotherUser, "Another user's message", "thread123");
+        when(chatRepository.findById("chat123")).thenReturn(Optional.of(anotherChat));
+
+        boolean result = databaseController.deleteChat(testUser, "chat123");
+
+        assertFalse(result);
+        verify(chatRepository, times(0)).deleteById("chat123");
+    }
 }

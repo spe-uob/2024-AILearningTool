@@ -1,72 +1,102 @@
 package com.UoB.AILearningTool;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import com.UoB.AILearningTool.model.ChatEntity;
+import com.UoB.AILearningTool.model.UserEntity;
+import com.UoB.AILearningTool.repository.ChatRepository;
+import com.UoB.AILearningTool.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 
-// Communication with SQL database.
 @Service
 public class DatabaseController {
-    private Map<String, User> users = new HashMap<>();
-    private Map<String, Chat> chats = new HashMap<>();
+    private final UserRepository userRepository;
+    private final ChatRepository chatRepository;
 
-    public User getUser(String userID) {
-        return users.get(userID);
+    @Autowired
+    public DatabaseController(UserRepository userRepository, ChatRepository chatRepository) {
+        this.userRepository = userRepository;
+        this.chatRepository = chatRepository;
     }
 
-    public DatabaseController() {
-        // TODO: Connect to a MariaDB database.
+    public UserEntity getUser(String username) {
+        return userRepository.findById(username).orElse(null);
     }
 
-    // Create a new user and return their ID for cookie assignment
-    public String addUser(boolean optionalConsent) {
-        User user = new User(optionalConsent);
-        String id = user.getID();
-        // TODO: Add a user profile record to the MariaDB database.
-        users.put(id, user);
-        return id;
+    // Create a new account
+    public boolean addUser(String username, String password) {
+        if (userRepository.findByUsername(username).isPresent()) {
+            return false;
+        }
+
+        UserEntity user = new UserEntity(username, password);
+        userRepository.save(user);
+        return true;
     }
 
-    // Remove all data stored about the user (profile, chat, etc.)
-    public boolean removeUser(String id) {
-        // TODO: Remove a user profile record from the MariaDB database.
-        if (users.containsKey(id)) {
-            users.remove(id);
+    // Delete existing user account
+    public boolean removeUser(String sessionID) {
+        Optional<UserEntity> user = userRepository.findBySessionID(sessionID);
+
+        // TODO: Delete chats as well
+
+        if (user.isPresent()) {
+            userRepository.delete(user.get());
             return true;
-        } else {return false;}
+        } else {
+            return false;
+        }
     }
 
     // Creates a new chat
-    public String createChat(User user, String initialMessage) {
+    public String createChat(UserEntity user, String initialMessage, String threadID) {
         String id = StringTools.RandomString(20);
-        chats.put(id, new Chat(user, initialMessage));
-        return id;
+        ChatEntity chat = new ChatEntity(user, initialMessage, threadID);
+        chatRepository.save(chat);
+        return chat.getChatID();
     }
 
+
     // Deletes an existing chat
-    public Boolean deleteChat(User user, String chatID) {
-        Boolean success;
-        Chat chat = chats.get(chatID);
-        if (chat != null) {
-            if (chat.checkOwner(user)) {
-                chats.remove(chatID);
-                return true;
-            }
+    public boolean deleteChat(UserEntity user, String chatID) {
+        Optional<ChatEntity> chatOpt = chatRepository.findById(chatID);
+        if (chatOpt.isPresent() && chatOpt.get().getOwner().getUsername().equals(user.getUsername())) {
+            chatRepository.deleteById(chatID);
+            return true;
         }
         return false;
     }
 
-    public Chat getChat(User user, String chatID) {
-        Chat chat = chats.get(chatID);
-        if (chat != null) {
-            if (chat.checkOwner(user)) {
-                return chat;
-            } else {return null;}
-        } else {
+    public ChatEntity createChat(String sessionID, String initialMessage) {
+        Optional<UserEntity> userOpt = userRepository.findBySessionID(sessionID);
+        if (userOpt.isEmpty()) {
             return null;
         }
+
+        UserEntity user = userOpt.get();
+        ChatEntity chat = new ChatEntity(user, initialMessage, sessionID);
+        chatRepository.save(chat);
+
+        return chat;
     }
 
+    public ChatEntity getChat(String username, String chatID) {
+        Optional<UserEntity> userOpt = userRepository.findById(username);
+        if (userOpt.isEmpty()) {
+            return null;
+        }
+
+        Optional<ChatEntity> chatOpt = chatRepository.findById(chatID);
+        return chatOpt.filter(chat -> chat.getOwner().getUsername().equals(username)).orElse(null);
+    }
+
+    public boolean deleteChat(String username, String chatID) {
+        Optional<ChatEntity> chatOpt = chatRepository.findById(chatID);
+        if (chatOpt.isPresent() && chatOpt.get().getOwner().getUsername().equals(username)) {
+            chatRepository.deleteById(chatID);
+            return true;
+        }
+        return false;
+    }
 }

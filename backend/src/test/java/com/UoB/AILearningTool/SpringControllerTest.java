@@ -1,140 +1,181 @@
 package com.UoB.AILearningTool;
 
-import org.junit.jupiter.api.extension.ExtendWith;
+import com.UoB.AILearningTool.model.ChatEntity;
+import com.UoB.AILearningTool.model.UserEntity;
+import com.UoB.AILearningTool.repository.ChatRepository;
+import com.UoB.AILearningTool.repository.UserRepository;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
-import org.mockito.*;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.Cookie;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-// integrates Mockito with JUnit
-@ExtendWith(MockitoExtension.class)
-class SpringControllerTest {
-    @Mock
-    private DatabaseController mockDBController;
+@SpringBootTest
+@AutoConfigureMockMvc
+public class SpringControllerTest {
 
-    @Mock
-    private OpenAIAPIController mockWXC;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @Mock
-    private HttpServletResponse mockResponse;
+    @MockBean
+    private UserRepository userRepository;
 
-    @Mock
-    private PrintWriter mockWriter;
+    @MockBean
+    private ChatRepository chatRepository;
 
-    // This Tells Mockito to inject the @Mock fields into SpringController's constructor
-    @InjectMocks
-    private SpringController springController;
+    @MockBean
+    private DatabaseController databaseController;
 
-    @Captor
-    private ArgumentCaptor<Cookie> cookieCaptor;
+    @MockBean
+    private OpenAIAPIController openAIAPIController;
 
-    @BeforeEach
-    public void setUp() throws IOException {
-        Mockito.lenient().when(mockResponse.getWriter()).thenReturn(mockWriter);
+    // regeister
+    @Test
+    void testRegisterUser_Success() throws Exception {
+        Mockito.when(databaseController.addUser("testuser", "testpass")).thenReturn(true);
+
+        String json = "{\"username\": \"testuser\", \"password\": \"testpass\"}";
+
+        mockMvc.perform(post("/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk());
     }
 
     @Test
-    public void testNewUserCreated() {
+    void testRegisterUser_Fail_UserExists() throws Exception {
+        Mockito.when(databaseController.addUser("testuser", "testpass")).thenReturn(false);
 
-        // mock addUser to return a specific ID "user123" when called wit optional consent = true
-        boolean optionalConsent = true;
-        String generatedUserID = "user123";
-        when(mockDBController.addUser(optionalConsent)).thenReturn(generatedUserID);
+        String json = "{\"username\": \"testuser\", \"password\": \"testpass\"}";
 
-        // call the signup method with the arranged parameters
-        springController.signup(optionalConsent, mockResponse);
+        mockMvc.perform(post("/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isForbidden());
+    }
 
-        // verify that addUser was called with optionalConsent = true
-        verify(mockDBController, times(1)).addUser(optionalConsent);
+    // login
+    @Test
+    void testLoginUser_Success() throws Exception {
+        UserEntity user = new UserEntity("testuser", "testpass");
+        Mockito.when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+        Mockito.when(chatRepository.findByOwner(user)).thenReturn(Collections.emptyList());
 
-        // capture the cookie added to the response
-        verify(mockResponse, times(1)).addCookie(cookieCaptor.capture());
-        Cookie capturedCookie = cookieCaptor.getValue();
+        String json = "{\"username\": \"testuser\", \"password\": \"testpass\"}";
 
-
-        // assertions on the captured cookie
-        assertEquals("userID", capturedCookie.getName(), "Cookie name should be userID");
-        assertEquals(generatedUserID, capturedCookie.getValue(), "Cookie value should match generated userID");
-        assertEquals(30 * 24 * 60 * 60, capturedCookie.getMaxAge(), "Cookie max age should be 30 days");
+        mockMvc.perform(post("/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sessionID").exists())
+                .andExpect(jsonPath("$.chatIDs").isArray());
     }
 
     @Test
-    public void testRevokeConsent() {
+    void testLoginUser_Fail_WrongPassword() throws Exception {
+        UserEntity user = new UserEntity("testuser", "correctpass");
+        Mockito.when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
 
-        // define a userID "user123" to revoke consent for
-        String userID = "user123";
+        String json = "{\"username\": \"testuser\", \"password\": \"wrongpass\"}";
 
-        // mock removeUser to return true
-        when(mockDBController.removeUser(userID)).thenReturn(true);
+        mockMvc.perform(post("/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isUnauthorized());
+    }
 
-        springController.revokeConsent(userID, mockResponse);
+    //session id check
+    @Test
+    void testCheckSession_Valid() throws Exception {
+        Mockito.when(userRepository.findBySessionID("validSession")).thenReturn(Optional.of(new UserEntity()));
 
-        // verify that removeUser was called with the correct userID
-        verify(mockDBController, times(1)).removeUser(userID);
-
-        // verify that the status was set to 200 when user was removed
-        verify(mockResponse, times(1)).setStatus(HttpServletResponse.SC_OK);
-
-        // capture the cookie added to the response
-        verify(mockResponse, times(1)).addCookie(cookieCaptor.capture());
-        Cookie capturedCookie = cookieCaptor.getValue();
-
-        // assertions on captured cookie
-        assertEquals("userID", capturedCookie.getName(), "Cookie name should be userID");
-        assertEquals("", capturedCookie.getValue(), "Cookie value should be empty");
-        assertEquals(0, capturedCookie.getMaxAge(), "Cookie max age should be 0");
+        mockMvc.perform(get("/checkSession")
+                        .param("sessionID", "validSession"))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void testCreateChat() {
-        // Given
-        String userID = "user123";
-        String initialMessage = "Hello chatbot!";
-        String generatedChatID = "abc123";
-        User mockUser = new User(true);
-        Chat mockChat = mock(Chat.class);
+    void testCheckSession_Invalid() throws Exception {
+        Mockito.when(userRepository.findBySessionID("invalidSession")).thenReturn(Optional.empty());
 
-        // Mock out DB calls
-        when(mockDBController.getUser(userID)).thenReturn(mockUser);
-        when(mockDBController.createChat(mockUser, initialMessage)).thenReturn(generatedChatID);
-        when(mockDBController.getChat(mockUser, generatedChatID)).thenReturn(mockChat);
-
-        // Mock chat & AI calls
-        String messageHistory = "System prompt\nHello chatbot!";
-        when(mockChat.getMessageHistory(mockUser)).thenReturn(messageHistory);
-
-        WatsonxResponse aiResponse = new WatsonxResponse(200, "AI says hi");
-        when(mockWXC.sendUserMessage(messageHistory)).thenReturn(aiResponse);
-
-        // When
-        springController.createChat(userID, initialMessage, mockResponse);
-
-        // Then
-        verify(mockDBController).getUser(userID);
-        verify(mockDBController).createChat(mockUser, initialMessage);
-        verify(mockDBController).getChat(mockUser, generatedChatID);
-
-        verify(mockChat).getMessageHistory(mockUser);
-        verify(mockWXC).sendUserMessage(messageHistory);
-
-        // AI responded with status 200, so we expect addAIMessage to be called:
-        verify(mockChat).addAIMessage(userID, "AI says hi");
-
-        // Finally, verify response
-        verify(mockResponse).setContentType("text/plain");
-        verify(mockResponse).setStatus(200);
-        verify(mockWriter).write(generatedChatID);
+        mockMvc.perform(get("/checkSession")
+                        .param("sessionID", "invalidSession"))
+                .andExpect(status().isUnauthorized());
     }
 
+    // revoke consent 
+    @Test
+    void testRevokeConsent_Success() throws Exception {
+        Mockito.when(databaseController.removeUser("validSession")).thenReturn(true);
+
+        String json = "{\"sessionID\": \"validSession\"}";
+        mockMvc.perform(delete("/revokeConsent")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testRevokeConsent_Fail() throws Exception {
+        Mockito.when(databaseController.removeUser("invalidSession")).thenReturn(false);
+
+        String json = "{\"sessionID\": \"validSession\"}";
+        mockMvc.perform(delete("/revokeConsent")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isNotFound());
+    }
+
+    // creat chat
+    @Test
+    void testCreateChat_Success() throws Exception {
+        UserEntity user = new UserEntity("testuser", "testpass");
+        user.setSessionID("session123");
+        ChatEntity chat = new ChatEntity(user, "hi", "thread123");
+
+        Mockito.when(userRepository.findBySessionID("session123")).thenReturn(Optional.of(user));
+        Mockito.when(openAIAPIController.createThread()).thenReturn("thread123");
+        Mockito.when(openAIAPIController.sendUserMessage(any(), eq("hi"))).thenReturn(200);
+        Mockito.when(openAIAPIController.runThread("thread123")).thenReturn(200);
+        Mockito.when(openAIAPIController.isLocked(chat)).thenReturn(false);
+        Mockito.when(openAIAPIController.getLastThreadMessage("thread123"))
+                .thenReturn(new WatsonxResponse(200, "Hello there!"));
+
+        String json = "{\"sessionID\": \"session123\", \"initialMessage\": \"hi\"}";
+
+        mockMvc.perform(post("/createChat")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.chatID").exists());
+    }
+
+    // get chat history
+    @Test
+    void testGetChatHistory_Success() throws Exception {
+        UserEntity user = new UserEntity("testuser", "testpass");
+        user.setSessionID("session123");
+        JSONArray history = new JSONArray().put(new JSONObject().put("role", "user").put("content", "hello"));
+        ChatEntity chat = new ChatEntity(user, "hello", "thread123");
+
+        Mockito.when(userRepository.findBySessionID("session123")).thenReturn(Optional.of(user));
+        Mockito.when(chatRepository.findById("chat123")).thenReturn(Optional.of(chat));
+
+        mockMvc.perform(post("/getChatHistory")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"sessionID\": \"session123\", \"chatID\": \"chat123\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.history").exists());
+    }
 }
-
-
-

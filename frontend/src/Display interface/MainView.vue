@@ -1,71 +1,76 @@
 <template>
-  <div class="main-view">
-    <div class="left-sidebar-container">
+  <div className="main-view">
+    <div className="left-sidebar-container">
       <HistorySidebar
-          @resetMainContent="this.resetMainContent"
-          @chatSelected="(id) => this.loadChat(id)"
+          @resetMainContent="resetMainContent"
+          @chatSelected="(id) => loadChat(id)"
           :currentChatID="this.currentChatID"
-          :chats="this.chats"
+          :chats="chats"
           :currentLanguage="currentLanguage"
-          :chatInitButtonsDisabled="this.chatInitButtonsDisabled"
+          @updateChats="updateChatList"
       />
-      <SettingSidebar/>
+      <SettingSidebar @toggleSettings="toggleSettings"/>
     </div>
     <MainContent
-        :messages="this.messages"
-        :chats="this.chats"
+        :messages="messages"
+        :chats="chats"
         :currentChatID="this.currentChatID"
+        @addMessage="(a, b) => addMessage(a, b)"
+        @addChat="(a, b) => addChat(a, b)"
+        @chatSelected="(id) => loadChat(id)"
         :currentLanguage="currentLanguage"
-        :chatInitButtonsDisabled="this.chatInitButtonsDisabled"
-        @addMessage="(a, b) => this.addMessage(a, b)"
-        @addChat="(a, b) => this.addChat(a, b)"
-        @updateChatID="(id) => this.currentChatID = id"
         @setButtonLock="(status) => this.chatInitButtonsDisabled = status"
     />
   </div>
 </template>
 
 <script>
-import HistorySidebar from '../components/HistorySidebar.vue';
-import MainContent from '../components/MainContent.vue';
-import SettingSidebar from '../components/SettingSidebar.vue';
+import HistorySidebar from "../components/HistorySidebar.vue";
+import MainContent from "../components/MainContent.vue";
+import SettingSidebar from "../components/SettingSidebar.vue";
+
 export default {
-  name: 'MainView',
+  name: "MainView",
   data() {
     return {
       messages: [],
       isSettingsOpen: false,
-      chats: JSON.parse(localStorage.getItem("chats")) || [], // Stores id-title pair for every chat
+      chats: [], // Stores id-title pair for every chat
       currentChatID: "",
-      chatInitButtonsDisabled: false
     };
   },
   props: ["currentLanguage"],
   methods: {
-    // Used to reset MainContent component (e.g. when "Add chat" button is clicked)
+    updateChatList(newChats) {
+        this.chats = newChats;
+    },
+  
     resetMainContent() {
       this.currentChatID = "";
       this.messages = [];
     },
-    // Load existing chat
-    loadChat(id) {
+
+    loadChat(chatID) {
       this.resetMainContent()
-      this.currentChatID = id
+      this.currentChatID = chatID
     },
-    // Add message to "message" variable in MainView
+
     addMessage(senderArg, contentArg) {
       this.messages.push({
         sender: senderArg,
-        content: contentArg
-      })
+        content: contentArg,
+      });
     },
-    // Add a new chat to chat list (used in HistorySidebar) + save to localStorage
+
     addChat(chatID, title) {
       this.chats.push({
         chatID: chatID,
         title: title
       })
-      localStorage.setItem("chats", JSON.stringify(this.chats))
+    },
+
+    toggleSettings(isOpen) {
+      this.isSettingsOpen = isOpen;
     },
   },
   components: {

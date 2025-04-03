@@ -7,4 +7,12 @@ public class WatsonxResponse {
         this.statusCode = statusCode;
         this.responseText = responseText;
     }
+    public int status() {
+        return statusCode;
+    }
+
+    public String message() {
+        return responseText;
+    }
+
 }

@@ -2,6 +2,7 @@ import {colorSchemes} from "@/assets/color";
 
 const translations = {
     en: {
+        EXPORT: "Export",
         UNDEFINED: "Undefined",
         SETTINGS: "Settings",
         LANGUAGE: "Language",
@@ -36,9 +37,19 @@ const translations = {
         COOKIE_DISCLAIMER: "Watsonx AI uses cookies. If you continue to use this site, you consent to the their storage in your browser.",
         I_UNDERSTAND: "I understand",
         PLEASE_ENTER_A_MESSAGE: "Please enter a message!",
-        FAILED_TO_SEND_MESSAGE: "Failed to send message. Please try again."
+        FAILED_TO_SEND_MESSAGE: "Failed to send message. Please try again.",
+        SPEECH_RECOGNITION_NOT_SUPPORTED: "Speech recognition is not supported in your browser.",
+        START_VOICE_INPUT: "Start voice input",
+        STOP_VOICE_INPUT: "Stop voice input",
+        LISTENING: "Listening...",
+        VOICE_RECOGNITION_ERROR: "Voice recognition error. Please try again.",
+        DELETE_ACCOUNT: "Delete the account",
+        DELETE_ACCOUNT_CONFIRMATION: "Are you sure that you want to delete your account?",
+        ACCOUNT_DELETED: "Account has been deleted",
+        ACCOUNT_NOT_DELETED: "Unable to delete the account"
     },
     zh: {
+        EXPORT: "导出",
         UNDEFINED: "未定义",
         SETTINGS: "设置",
         LANGUAGE: "语言",
@@ -73,9 +84,19 @@ const translations = {
         COOKIE_DISCLAIMER: "Watsonx AI 使用 cookie。如果您继续使用本网站，即表示您同意将其存储在您的浏览器中。",
         I_UNDERSTAND: "我了解",
         PLEASE_ENTER_A_MESSAGE: "请输入信息！",
-        FAILED_TO_SEND_MESSAGE: "发送信息失败！请重试。"
+        FAILED_TO_SEND_MESSAGE: "发送信息失败！请重试。",
+        SPEECH_RECOGNITION_NOT_SUPPORTED: "您的浏览器不支持语音识别功能。",
+        START_VOICE_INPUT: "开始语音输入",
+        STOP_VOICE_INPUT: "停止语音输入",
+        LISTENING: "正在聆听...",
+        VOICE_RECOGNITION_ERROR: "语音识别出错，请重试。",
+        DELETE_ACCOUNT: "删除账户",
+        DELETE_ACCOUNT_CONFIRMATION: "您确定要删除您的账户吗？",
+        ACCOUNT_DELETED: "账户已删除",
+        ACCOUNT_NOT_DELETED: "无法删除账户",
     },
     ru: {
+        EXPORT: "экспорт",
         UNDEFINED: "Перевод недоступен",
         SETTINGS: "Настройки",
         LANGUAGE: "Язык",
@@ -88,6 +109,7 @@ const translations = {
         CLOSE: "Закрыть",
         NEW_CONVERSATION: "Новый чат",
         I_NEED_HELP_WITH_CHOOSING_A_COURSE: "Мне нужна помощь с выбором онлайн-курса",
+        I_NEED_HELP_WITH_PLATFORM: "Мне нужна помощь с платформой IBM SkillsBuild",
         I_HAVE_QUESTIONS_ABOUT_UNI_LIFE: "У меня есть вопросы про университетскую жизнь",
         USER: "Пользователь",
         AI: "ИИ",
@@ -109,7 +131,16 @@ const translations = {
         COOKIE_DISCLAIMER: "ИИ Watsonx использует файлы куки. Продолжая использовать наше веб-приложение, вы соглашаетесь на хранение куки-файлов в вашем браузере.",
         I_UNDERSTAND: "Согласен",
         PLEASE_ENTER_A_MESSAGE: "Пожалуйста введите сообщение!",
-        FAILED_TO_SEND_MESSAGE: "Не удалось отправить сообщение. Пожалуйста, попробуйте ещё раз."
+        FAILED_TO_SEND_MESSAGE: "Не удалось отправить сообщение. Пожалуйста, попробуйте ещё раз.",
+        SPEECH_RECOGNITION_NOT_SUPPORTED: "Ваш браузер не поддерживает распознавание речи.",
+        START_VOICE_INPUT: "Начать голосовой ввод",
+        STOP_VOICE_INPUT: "Остановить голосовой ввод",
+        LISTENING: "Слушаю...",
+        VOICE_RECOGNITION_ERROR: "Ошибка распознавания речи. Пожалуйста, попробуйте еще раз.",
+        DELETE_ACCOUNT: "Удалить аккаунт",
+        DELETE_ACCOUNT_CONFIRMATION: "Вы уверены, что хотите удалить ваш аккаунт?",
+        ACCOUNT_DELETED: "Аккаунт удалён",
+        ACCOUNT_NOT_DELETED: "Не удалось удалить аккаунт",
     }
 };
 

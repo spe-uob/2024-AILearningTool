@@ -11,6 +11,7 @@
         }}
       </h2>
 
+
       <form @submit.prevent="handleSubmit">
         <div class="form-group">
           <label for="username">
@@ -20,7 +21,6 @@
           </label>
           <input v-model="form.username" id="username" type="text" required />
         </div>
-
         <div class="form-group">
           <label for="password">
             {{
@@ -29,7 +29,6 @@
           </label>
           <input v-model="form.password" id="password" type="password" required />
         </div>
-
         <div v-if="!isLoginMode" class="form-group">
           <label for="confirmPassword">
             {{
@@ -38,7 +37,6 @@
           </label>
           <input v-model="form.confirmPassword" id="confirmPassword" type="password" required />
         </div>
-
         <button type="submit" :disabled="showCookiePopup">
           {{
             isLoginMode ?
@@ -47,7 +45,6 @@
           }}
         </button>
       </form>
-
       <p class="toggle-text">
         {{
           isLoginMode ?
@@ -61,59 +58,61 @@
                 getTranslation(currentLanguage, "LOG_IN")
           }}
         </span>
-      </p>
+      </p >
     </div>
   </div>
 </template>
 
 <script>
+import { useRouter } from "vue-router";
 import Cookie from '../Display interface/Cookie.vue';
 import {getTranslation} from "../assets/language";
+import { BACKEND_URL } from "@/assets/globalConstants"
 
 export default {
   components: { Cookie },
+  setup() {
+    const router = useRouter();
+    return { router };
+  },
   props: ["currentLanguage"],
+
   data() {
     return {
       isLoginMode: true,
       form: {
-        username: '',
-        password: '',
-        confirmPassword: '',
+        username: "",
+        password: "",
+        confirmPassword: "",
+        sessionID: localStorage.getItem("sessionID") || "",
       },
       showCookiePopup: true,
     };
   },
-  mounted() {
-    this.checkUserSession();
-  },
   methods: {
     getTranslation,
     checkUserSession() {
-      const userID = localStorage.getItem("userId");
-      if (userID) {
-        console.log("UserID found, redirecting to /main...");
+      const sessionID = localStorage.getItem("sessionID");
+      if (sessionID) {
+        console.log("SessionID found, redirecting to /main...");
         this.$router.push("/main");
       }
     },
-
     toggleMode() {
       this.isLoginMode = !this.isLoginMode;
-      this.form.password = '';
-      this.form.confirmPassword = '';
+      this.form.password = "";
+      this.form.confirmPassword = "";
+    },
+
+
+    async handleConsent(consent) {
+      console.log("User consented:", consent);
+      this.showCookiePopup = false;
     },
 
     async handleSubmit() {
-      if (this.showCookiePopup) {
-        alert(
-            getTranslation(this.currentLanguage, "PLEASE_ACCEPT_COOKIES")
-        );
-        return;
-      }
-
       if (this.isLoginMode) {
         this.login();
-        this.signUp();
       } else {
         if (this.form.password !== this.form.confirmPassword) {
           alert(
@@ -125,117 +124,90 @@ export default {
       }
     },
 
-    async signUp() {
+    async login() {
       try {
-        const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
-          const [key, value] = cookie.split("=");
-          acc[key] = value;
-          return acc;
-        }, {});
+        const response = await fetch(BACKEND_URL + "/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: this.form.username,
+            password: this.form.password,
+          }),
+        });
 
-        if (!cookies.userID) {
-          console.log("No userID found in cookies. Signing up...");
+        const data = await response.json();
 
-          const response = await fetch("http://localhost:8080/signup", {
-            method: "GET",
-            credentials: "include",
-          });
-
-          if (!response.ok) {
-            throw new Error(`Signup failed: ${response.status}`);
-          }
-
-          console.log("Signup successful! Checking cookies again...");
-          this.storeUserID();
+        if (response.ok) {
+          console.log("Login successful. Redirecting to /main...");
+          localStorage.setItem("sessionID", data.sessionID);
+          this.router.push(`/main?sessionID=${data.sessionID}`);
         } else {
-          console.log("User already signed up, skipping signup.");
+          // Handle different HTTP error codes
+          switch (response.status) {
+            case 401:
+              alert(getTranslation(this.currentLanguage, "INVALID_CREDENTIALS"));
+              break;
+            case 404:
+              alert(getTranslation(this.currentLanguage, "USER_NOT_FOUND"));
+              break;
+            case 429:
+              alert(getTranslation(this.currentLanguage, "TOO_MANY_ATTEMPTS"));
+              break;
+            case 500:
+              alert(getTranslation(this.currentLanguage, "SERVER_ERROR"));
+              break;
+            default:
+              alert(getTranslation(this.currentLanguage, "LOGIN_FAILED"));
+          }
         }
       } catch (error) {
-        console.error("Signup error:", error);
+        console.error("Login error:", error);
+        alert("An error occurred while trying to log in.");
       }
     },
 
-    storeUserID() {
-      const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
-        const [key, value] = cookie.split("=");
-        acc[key] = value;
-        return acc;
-      }, {});
 
-      if (cookies.userID) {
-        localStorage.setItem("userId", cookies.userID);
-        console.log("UserID stored in localStorage:", cookies.userID);
-        this.$router.push("/main");
+       async register() {
+      try {
+        const response = await fetch(BACKEND_URL + "/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: this.form.username,
+            password: this.form.password,
+          }),
+        });
+        sessionStorage.setItem("username", this.form.username);
+
+        if (response.ok) {
+          alert(getTranslation(this.currentLanguage, "REGISTRATION_SUCCESS"));
+          this.router.push("/login");
+        } else {
+          // Handle different HTTP error codes
+          switch (response.status) {
+            case 409:
+              alert(getTranslation(this.currentLanguage, "USERNAME_TAKEN"));
+              break;
+            case 400:
+              alert(getTranslation(this.currentLanguage, "INVALID_INPUT"));
+              break;
+            case 500:
+              alert(getTranslation(this.currentLanguage, "SERVER_ERROR"));
+              break;
+            default:
+              alert(getTranslation(this.currentLanguage, "REGISTRATION_ERROR"));
+          }
+        }
+      } catch (error) {
+        console.error(getTranslation(this.currentLanguage, "REGISTRATION_FAILED"), error);
+        alert(getTranslation(this.currentLanguage, "REGISTRATION_ERROR"));
       }
-    },
-
-    login() {
-      fetch('/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: this.form.username,
-          password: this.form.password,
-        }),
-      })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.success) {
-              localStorage.setItem('token', data.token);
-              this.$router.push('/main');
-            } else {
-              alert(
-                  getTranslation(this.currentLanguage, "LOGIN_FAILED")
-              );
-            }
-          })
-          .catch((err) => {
-            console.error('Login error:', err);
-            alert(
-                getTranslation(this.currentLanguage, "LOGIN_FAILED")
-            );
-          });
-    },
-
-    register() {
-      fetch('/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: this.form.username,
-          password: this.form.password,
-        }),
-      })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.success) {
-              alert(
-                  getTranslation(this.currentLanguage, "REGISTRATION_SUCCESS")
-              );
-              this.toggleMode();
-            } else {
-              alert(
-                  getTranslation(this.currentLanguage, "REGISTRATION_FAILED")
-              );
-            }
-          })
-          .catch((err) => {
-            console.error('Registration error:', err);
-            alert(
-                getTranslation(this.currentLanguage, "REGISTRATION_FAILED")
-            );
-          });
-    },
-
-    handleConsent(consent) {
-      this.showCookiePopup = false;
     },
   },
 };
 </script>
 
 <style scoped>
-/* CSS code unchanged */
 .login-container {
   display: flex;
   justify-content: center;
@@ -280,14 +252,14 @@ button {
   padding: 0.75rem;
   border: none;
   border-radius: 4px;
-  background-color: #5C88DA;
+  background-color: #5c88da;
   color: white;
   font-size: 16px;
   cursor: pointer;
 }
 
 button:hover {
-  background-color: #5C88DA;
+  background-color: #3f70d1;
 }
 
 .toggle-text {
@@ -296,7 +268,7 @@ button:hover {
 }
 
 .toggle-text span {
-  color: #5C88DA;
+  color: #5c88da;
   cursor: pointer;
   font-weight: bold;
 }
